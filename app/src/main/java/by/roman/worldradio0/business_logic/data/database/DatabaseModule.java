@@ -1,0 +1,54 @@
+package by.roman.worldradio0.business_logic.data.database;
+
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
+import javax.inject.Singleton;
+
+import dagger.Module;
+import dagger.Provides;
+import dagger.hilt.InstallIn;
+import dagger.hilt.android.qualifiers.ApplicationContext;
+import dagger.hilt.components.SingletonComponent;
+
+@Module
+@InstallIn(SingletonComponent.class)
+public class DatabaseModule {
+    @Provides
+    @Singleton
+    public SQLiteOpenHelper provideDatabase(@ApplicationContext Context context) {
+        return new SQLiteDatabaseManager(context);
+    }
+    @Provides
+    @Singleton
+    public SQLiteDatabase provideWritableDatabase(SQLiteOpenHelper helper) {
+        return helper.getWritableDatabase();
+    }
+    @Provides
+    @Singleton
+    public RadioStationDao provideRadioStationDao(SQLiteDatabase db) {
+        return new RadioStationDao(db);
+    }
+    @Provides
+    @Singleton
+    public FavoriteDao provideFavoriteDao(SQLiteDatabase db) {
+        return new FavoriteDao(db);
+    }
+    @Provides
+    @Singleton
+    public FilterDao provideFilterDao(SQLiteDatabase db) {
+        return new FilterDao(db);
+    }
+    @Provides
+    @Singleton
+    public UserDao provideUserDao(SQLiteDatabase db) {
+        return new UserDao(db);
+    }
+    @Provides
+    @Singleton
+    public SettingsDao provideSettingsDao(SQLiteDatabase db) {
+        return new SettingsDao(db);
+    }
+}
+

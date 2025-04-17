@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="background">#100E1B</color>
+    <color name="navigateBar">#080613</color>
+    <color name="backgroundCard">#1f1325</color>
+    <color name="buttonBackgroundColor">#664EFF</color>
+    <color name="white">#FFFFFF</color>
+    <color name="gray">#B0BEC5</color>
+    <color name="lightGray">#D1D1D1</color>
+    <color name="red">#7C0000</color>
+    <color name="bottom_player">#281E50</color>
+    <color name="backgroundfilter">#231D30</color>
+    <color name="filterbackground">#7B6C9C</color>
+    <color name="reg_enter_background">#242638</color>
+    <color name="selectedMode">#232537</color>
+    <color name="unselectedMode">#0C0A14</color>
+    <color name="unselectedText">#7A7878</color>
+</resources>
