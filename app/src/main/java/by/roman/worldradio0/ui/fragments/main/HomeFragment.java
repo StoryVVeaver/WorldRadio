@@ -46,8 +46,18 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState){
         super.onViewCreated(view,savedInstanceState);
         findAllId(view);
+        adapter = new RadioAdapter(getContext(), position -> {
+            Toast.makeText(getContext(), "Нажат элемент " + position, Toast.LENGTH_SHORT).show();
+            this.position = position;
+        });
+        timerButton.setOnClickListener(v -> {
+            Log.d("HomeFragment","Start loading");
+            //viewModel.loadFromAPI();
+        });
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(adapter);
         viewModel = new ViewModelProvider(this).get(MainViewModel.class);
-        viewModel.getFavoriteStations().observe(getViewLifecycleOwner(),stations ->{
+        viewModel.getAllStations().observe(getViewLifecycleOwner(),stations ->{
             switch (stations.status) {
                 case LOADING:
                     Log.d("HomeFragment","Loading");
@@ -63,16 +73,6 @@ public class HomeFragment extends Fragment {
                     break;
             }
         });
-        adapter = new RadioAdapter(getContext(), position -> {
-            Toast.makeText(getContext(), "Нажат элемент " + position, Toast.LENGTH_SHORT).show();
-            this.position = position;
-        });
-        timerButton.setOnClickListener(v -> {
-            Log.d("HomeFragment","Start loading");
-            viewModel.loadFromAPI();
-        });
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(adapter);
     }
     private void findAllId(View view){
         timerButton = view.findViewById(R.id.timerButtonView);

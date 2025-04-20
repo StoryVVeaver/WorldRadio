@@ -3,6 +3,7 @@ package by.roman.worldradio0.business_logic.data.dto;
 import androidx.annotation.NonNull;
 
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
+import by.roman.worldradio0.business_logic.network.radioapi.Model;
 
 public class RadioStationDTO {
     private String stationUuid;
@@ -27,7 +28,7 @@ public class RadioStationDTO {
         return new RadioStation(stationUuid,name,url,urlResolved,homepage,favicon,tags,
                 country,countryCode, state,language,languageCode,votes,codec,bitrate,hls,geoLat,geoLong);
     }
-    public RadioStationDTO fromModel(@NonNull RadioStation radioStation){
+    public RadioStationDTO fromModel(@NonNull Model radioStation){
         RadioStationDTO dto = new RadioStationDTO();
         dto.stationUuid = radioStation.getStationUuid();
         dto.name = radioStation.getName();
