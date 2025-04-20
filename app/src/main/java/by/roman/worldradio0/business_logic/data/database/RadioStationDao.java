@@ -206,7 +206,7 @@ public class RadioStationDao {
                 null,
                 orderBy);
 
-        if (cursor != null) {
+        if (cursor != null) { //TODO
             try (cursor){
                 while (cursor.moveToNext()) {
                     RadioStation station = createStationFromCursor(cursor);

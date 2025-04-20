@@ -44,7 +44,13 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
+    implementation(libs.glide)
+    implementation(libs.okhttp)
+    implementation(libs.retrofit)
+    implementation(libs.convertergson)
 
+
+    annotationProcessor(libs.glide.compiler)
     annotationProcessor(libs.hilt.compiler)
 
     testImplementation(libs.junit)

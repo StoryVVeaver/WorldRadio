@@ -1,4 +1,4 @@
-package by.roman.worldradio0.business_logic.data.repositories;
+package by.roman.worldradio0.business_logic.modules;
 
 import javax.inject.Singleton;
 
@@ -7,6 +7,16 @@ import by.roman.worldradio0.business_logic.data.database.FilterDao;
 import by.roman.worldradio0.business_logic.data.database.RadioStationDao;
 import by.roman.worldradio0.business_logic.data.database.SettingsDao;
 import by.roman.worldradio0.business_logic.data.database.UserDao;
+import by.roman.worldradio0.business_logic.data.repositories.FavoriteRepository;
+import by.roman.worldradio0.business_logic.data.repositories.FavoriteRepositoryImpl;
+import by.roman.worldradio0.business_logic.data.repositories.FilterRepository;
+import by.roman.worldradio0.business_logic.data.repositories.FilterRepositoryImpl;
+import by.roman.worldradio0.business_logic.data.repositories.RadioRepository;
+import by.roman.worldradio0.business_logic.data.repositories.RadioRepositoryImpl;
+import by.roman.worldradio0.business_logic.data.repositories.SettingsRepository;
+import by.roman.worldradio0.business_logic.data.repositories.SettingsRepositoryImpl;
+import by.roman.worldradio0.business_logic.data.repositories.UserRepository;
+import by.roman.worldradio0.business_logic.data.repositories.UserRepositoryImpl;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;

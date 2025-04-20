@@ -1,4 +1,4 @@
-package by.roman.worldradio0.business_logic.data.database;
+package by.roman.worldradio0.business_logic.modules;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -6,6 +6,12 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import javax.inject.Singleton;
 
+import by.roman.worldradio0.business_logic.data.database.FavoriteDao;
+import by.roman.worldradio0.business_logic.data.database.FilterDao;
+import by.roman.worldradio0.business_logic.data.database.RadioStationDao;
+import by.roman.worldradio0.business_logic.data.database.SQLiteDatabaseManager;
+import by.roman.worldradio0.business_logic.data.database.SettingsDao;
+import by.roman.worldradio0.business_logic.data.database.UserDao;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;

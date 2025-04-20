@@ -3,6 +3,7 @@ package by.roman.worldradio0.business_logic.data.database;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -66,6 +67,8 @@ public class FavoriteDao {
                     String uuid = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATION_UUID_FAVORITE));
                     favorites.add(uuid);
                 }
+            } catch (Exception e) {
+                Log.e("FavoriteDao","Error reading favorite id");
             }
         }
         return favorites;

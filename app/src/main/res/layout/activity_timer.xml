@@ -28,7 +28,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:srcCompat="@drawable/playbutton" />
 
-        <by.roman.worldradio2.ui.elements.view.CircularTimerView
+        <by.roman.worldradio0.ui.elements.view.CircularTimerView
             android:id="@+id/circularTimerView"
             android:layout_width="350dp"
             android:layout_height="350dp"

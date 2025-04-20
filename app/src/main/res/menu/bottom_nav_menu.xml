@@ -1,0 +1,22 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_globe"
+        android:icon="@drawable/globe_selector"
+        android:title="Globe" />
+    <item
+        android:id="@+id/nav_favorite"
+        android:icon="@drawable/favorite_selector"
+        android:title="Favorite" />
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/home_selector"
+        android:title="Home" />
+    <item
+        android:id="@+id/nav_filter"
+        android:icon="@drawable/filter_selector"
+        android:title="Filter" />
+    <item
+        android:id="@+id/nav_settings"
+        android:icon="@drawable/settings_selector"
+        android:title="Settings" />
+</menu>
