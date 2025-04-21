@@ -166,7 +166,7 @@ public class RadioStationDao {
         }
         return null;
     }
-    public List<RadioStation> getAllStations() {
+    public List<RadioStation> getAllStations(int currentPage, int pageSize) {
         List<RadioStation> stations = new ArrayList<>();
 
         Cursor cursor = db.query(TABLE_RADIO_STATION,
@@ -175,7 +175,8 @@ public class RadioStationDao {
                 null,
                 null,
                 null,
-                null);
+                null,
+                currentPage * pageSize + "," + pageSize);
 
         if (cursor != null) {
             try (cursor) {
@@ -186,7 +187,7 @@ public class RadioStationDao {
         }
         return stations;
     }
-    public List<RadioStation> getFilteredStations(Filter filter) {
+    public List<RadioStation> getFilteredStations(Filter filter,int currentPage, int pageSize) {
         List<RadioStation> stationList = new ArrayList<>();
         StringBuilder selection = new StringBuilder();
         List<String> selectionArgs = getSelectionArgs(filter, selection);
@@ -204,7 +205,8 @@ public class RadioStationDao {
                 selectionArgs.toArray(new String[0]),
                 null,
                 null,
-                orderBy);
+                orderBy,
+                currentPage * pageSize + "," + pageSize);
 
         if (cursor != null) { //TODO
             try (cursor){

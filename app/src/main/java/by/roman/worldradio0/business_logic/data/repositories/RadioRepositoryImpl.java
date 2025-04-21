@@ -25,9 +25,9 @@ public class RadioRepositoryImpl implements RadioRepository{
         this.filterDao = filterDao;
     }
     @Override
-    public List<RadioStation> getFavoriteStations(){
+    public List<RadioStation> getFavoriteStations(int currentPage, int pageSize){
         try {
-            List<String> favoriteUUID = favoriteDao.getFavoritesByUser(userDao.getIdUserInSystem());
+            List<String> favoriteUUID = favoriteDao.getFavoritesByUser(userDao.getIdUserInSystem(), currentPage, pageSize);
             List<RadioStation> stations = new ArrayList<>();
             for(String i : favoriteUUID){
                 stations.add(radioStationDao.getStationById(i));
@@ -39,19 +39,19 @@ public class RadioRepositoryImpl implements RadioRepository{
         }
     }
     @Override
-    public List<RadioStation> getFilteredStations(){
+    public List<RadioStation> getFilteredStations(int currentPage, int pageSize){
         try {
             Filter filter = filterDao.getFilters(userDao.getIdUserInSystem());
-            return radioStationDao.getFilteredStations(filter);
+            return radioStationDao.getFilteredStations(filter, currentPage, pageSize);
         } catch (Exception e) {
             Log.e("RadioRepositoryImp","Failed load filtered stations");
             return null;
         }
     }
     @Override
-    public List<RadioStation> getAllStations(){
+    public List<RadioStation> getAllStations(int currentPage, int pageSize){
         try {
-            return radioStationDao.getAllStations();
+            return radioStationDao.getAllStations(currentPage, pageSize);
         } catch (Exception e) {
             Log.e("RadioRepositoryImp","Failed load all stations");
             return null;

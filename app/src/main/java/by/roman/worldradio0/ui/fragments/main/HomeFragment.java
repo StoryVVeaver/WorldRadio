@@ -3,7 +3,6 @@ package by.roman.worldradio0.ui.fragments.main;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -21,16 +20,18 @@ import java.util.List;
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.adapters.RadioAdapter;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
-import by.roman.worldradio0.business_logic.view_models.MainViewModel;
+import by.roman.worldradio0.business_logic.view_models.HomeViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class HomeFragment extends Fragment {
-    private MainViewModel viewModel;
+    private HomeViewModel viewModel;
     private RadioAdapter adapter;
     private ImageView timerButton;
     private RecyclerView recyclerView;
     private int position;
+    private boolean isLoadingNextPage = false;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -46,9 +47,16 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState){
         super.onViewCreated(view,savedInstanceState);
         findAllId(view);
-        adapter = new RadioAdapter(getContext(), position -> {
-            Toast.makeText(getContext(), "Нажат элемент " + position, Toast.LENGTH_SHORT).show();
-            this.position = position;
+        adapter = new RadioAdapter(getContext(), new RadioAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(int position) {
+                // клик по элементу
+            }
+            @Override
+            public void onDeleteClick(int position) {
+                //RadioStation toDelete = adapter.getItem(position);
+                //viewModel.removeFromFavorites(toDelete);
+            }
         });
         timerButton.setOnClickListener(v -> {
             Log.d("HomeFragment","Start loading");
@@ -56,24 +64,52 @@ public class HomeFragment extends Fragment {
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
-        viewModel = new ViewModelProvider(this).get(MainViewModel.class);
-        viewModel.getAllStations().observe(getViewLifecycleOwner(),stations ->{
-            switch (stations.status) {
-                case LOADING:
-                    Log.d("HomeFragment","Loading");
-                    //showLoadingSpinner();
-                    break;
-                case SUCCESS:
-                    Log.d("HomeFragment","Success");
-                    adapter.setStations(stations.data);
-                    break;
-                case ERROR:
-                    Log.d("HomeFragment","Error");
-                    //showError(stations.message);
-                    break;
+        viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+        observeAndLoad();
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if (layoutManager != null && !isLoadingNextPage && !viewModel.getIsLastPage()) {
+                    int visibleItemCount = layoutManager.getChildCount();
+                    int totalItemCount = layoutManager.getItemCount();
+                    int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+
+                    if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount - 5) {
+                        isLoadingNextPage = true;
+                        adapter.showLoading();
+                        viewModel.loadNextPage();
+                    }
+                }
             }
         });
     }
+    private void observeAndLoad() {
+        viewModel.getAllStations().observe(getViewLifecycleOwner(), stations -> {
+            switch (stations.status) {
+                case LOADING:
+                    if (adapter.getItemCount() > 0) {
+                        adapter.showLoading();
+                    }
+                    break;
+                case SUCCESS:
+                    adapter.hideLoading();
+                    List<RadioStation> allData = stations.data;
+                    adapter.addStations(allData.subList(adapter.getItemCount(), allData.size()));
+                    isLoadingNextPage = false;
+                    break;
+                case ERROR:
+                    adapter.hideLoading();
+                    Toast.makeText(getContext(), stations.message, Toast.LENGTH_SHORT).show();
+                    isLoadingNextPage = false;
+                    break;
+            }
+        });
+
+        viewModel.loadNextPage();
+    }
+
     private void findAllId(View view){
         timerButton = view.findViewById(R.id.timerButtonView);
         recyclerView = view.findViewById(R.id.cardView);

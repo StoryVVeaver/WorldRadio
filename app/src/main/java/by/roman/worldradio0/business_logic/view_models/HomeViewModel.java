@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,36 +22,60 @@ import by.roman.worldradio0.business_logic.network.radioapi.StationsCallback;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
-public class MainViewModel extends ViewModel {
+public class HomeViewModel extends ViewModel {
     private final RadioRepository radioRepository;
     private final LoadDataFromAPI loadDataFromAPI;
-    private final MutableLiveData<UiState<List<RadioStation>>> allStations = new MutableLiveData<>();
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
-    public LiveData<UiState<List<RadioStation>>> getAllStations() {
-        return allStations;
+    private final MutableLiveData<UiState<List<RadioStation>>> stations = new MutableLiveData<>();
+    private final ExecutorService executor = Executors.newFixedThreadPool(4);
+    private int currentPage = 0;
+    private boolean isLastPage = false;
+    private final int pageSize = 50;
+    public boolean getIsLastPage() {
+        return isLastPage;
     }
     @Inject
-    public MainViewModel(RadioRepository radioRepository, LoadDataFromAPI loadDataFromAPI){
+    public HomeViewModel(RadioRepository radioRepository, LoadDataFromAPI loadDataFromAPI){
         this.radioRepository = radioRepository;
         this.loadDataFromAPI = loadDataFromAPI;
         loadAll();
     }
-    public void loadAll(){
-        allStations.setValue(UiState.loading());
+    public LiveData<UiState<List<RadioStation>>> getAllStations() {
+        return stations;
+    }
+    private void loadAll(){
+        stations.setValue(UiState.loading());
         executor.execute(() -> {
             try {
-                List<RadioStation> list = radioRepository.getAllStations();
-                allStations.postValue(UiState.success(list));
+                List<RadioStation> list = radioRepository.getAllStations(currentPage,pageSize);
+                stations.postValue(UiState.success(list));
+                currentPage++;
             } catch (Exception e) {
-                allStations.postValue(UiState.error("Ошибка загрузки: " + e.getMessage()));
+                stations.postValue(UiState.error("Ошибка загрузки: " + e.getMessage()));
             }
         });
     }
-    public List<RadioStation> getAll(){
-        return radioRepository.getAllStations();
+    public void loadNextPage() {
+        if (isLastPage) return;
+        executor.execute(() -> {
+            try {
+                List<RadioStation> list = radioRepository.getAllStations(currentPage, pageSize);
+                if (list.isEmpty()) {
+                    isLastPage = true;
+                } else {
+                    List<RadioStation> currentList = stations.getValue() != null && stations.getValue().data != null
+                            ? new ArrayList<>(stations.getValue().data)
+                            : new ArrayList<>();
+                    currentList.addAll(list);
+                    stations.postValue(UiState.success(currentList));
+                    currentPage++;
+                }
+            } catch (Exception e) {
+                stations.postValue(UiState.error("Ошибка загрузки: " + e.getMessage()));
+            }
+        });
     }
     public void loadFromAPI() {
-        new Thread(() -> {
+        executor.execute(() -> {
             loadDataFromAPI.getStations(new StationsCallback() {
                 @Override
                 public void onSuccess(List<RadioStationDTO> stations) {
@@ -68,7 +93,7 @@ public class MainViewModel extends ViewModel {
                     Log.e("API", "Ошибка загрузки данных", t);
                 }
             });
-        }).start();
+        });
 
     }
     @Override

@@ -26,6 +26,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavigationView;
+    private int currentSelectedItemId = -1;
 
     @SuppressLint("NonConstantResourceId")
     @Override
@@ -36,31 +37,38 @@ public class MainActivity extends AppCompatActivity {
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            findAllId();
-
-            bottomNavigationView.setOnItemSelectedListener(item -> {
-                switch (Objects.requireNonNull(item.getTitle()).toString()) {
-                    case "Globe":
-                        loadFragment(new GlobeFragment());
-                        return true;
-                    case "Favorite":
-                        loadFragment(new FavoriteFragment());
-                        return true;
-                    case "Home":
-                        loadFragment(new HomeFragment());
-                        return true;
-                    case "Filter":
-                        loadFragment(new FilterFragment());
-                        return true;
-                    case "Settings":
-                        loadFragment(new SettingsFragment());
-                        return true;
-                }
-                return false;
-            });
-
             return insets;
         });
+        findAllId();
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == currentSelectedItemId) {
+                return false;
+            }
+            currentSelectedItemId = itemId;
+            switch (Objects.requireNonNull(item.getTitle()).toString()) {
+                case "Globe":
+                    loadFragment(new GlobeFragment());
+                    return true;
+                case "Favorite":
+                    loadFragment(new FavoriteFragment());
+                    return true;
+                case "Home":
+                    loadFragment(new HomeFragment());
+                    return true;
+                case "Filter":
+                    loadFragment(new FilterFragment());
+                    return true;
+                case "Settings":
+                    loadFragment(new SettingsFragment());
+                    return true;
+            }
+            return false;
+        });
+        if (savedInstanceState == null) {
+            bottomNavigationView.setSelectedItemId(R.id.nav_home);
+            loadFragment(new HomeFragment());
+        }
     }
     private void findAllId(){
         bottomNavigationView = findViewById(R.id.bottomNavigationView);

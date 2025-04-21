@@ -1,6 +1,8 @@
 package by.roman.worldradio0.business_logic;
 
 public class UiState<T> {
+
+
     public enum Status {
         SUCCESS, ERROR, LOADING
     }

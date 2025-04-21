@@ -2,6 +2,8 @@ package by.roman.worldradio0.business_logic.data.repositories;
 
 import android.util.Log;
 
+import java.util.List;
+
 import by.roman.worldradio0.business_logic.data.database.FavoriteDao;
 import by.roman.worldradio0.business_logic.data.database.UserDao;
 
@@ -35,6 +37,15 @@ public class FavoriteRepositoryImpl implements FavoriteRepository{
         } catch (Exception e) {
             Log.e("FavoriteRepositoryImp","Failed check favorite");
             return false;
+        }
+    }
+    @Override
+    public List<String> getFavoritesById(int currentPage, int pagSize){
+        try {
+            return favoriteDao.getFavoritesByUser(userDao.getIdUserInSystem(),currentPage,pagSize);
+        } catch (Exception e) {
+            Log.e("FavoriteRepositoryImp","Failed get favorites list");
+            return null;
         }
     }
 }

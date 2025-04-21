@@ -6,9 +6,9 @@ import by.roman.worldradio0.business_logic.data.dto.RadioStationDTO;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
 
 public interface RadioRepository {
-    List<RadioStation> getFavoriteStations();
-    List<RadioStation> getFilteredStations();
-    List<RadioStation> getAllStations();
+    List<RadioStation> getFavoriteStations(int currentPage, int pageSize);
+    List<RadioStation> getFilteredStations(int currentPage, int pageSize);
+    List<RadioStation> getAllStations(int currentPage, int pageSize);
     RadioStation getStationById(String uuid);
     List<String> getContrives();
     List<String> getLanguage();

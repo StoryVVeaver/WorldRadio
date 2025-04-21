@@ -55,7 +55,7 @@ public class FavoriteDao {
         }
         return isFavorite;
     }
-    public List<String> getFavoritesByUser(int id) {
+    public List<String> getFavoritesByUser(int id, int currentPage, int pageSize) {
         List<String> favorites = new ArrayList<>();
         String query = "SELECT " + COLUMN_STATION_UUID_FAVORITE + " FROM " + TABLE_FAVORITE +
                 " WHERE " + COLUMN_USER_ID_FAVORITE + " = ?";
