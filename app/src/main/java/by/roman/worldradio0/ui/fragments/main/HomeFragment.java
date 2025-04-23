@@ -21,11 +21,13 @@ import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.adapters.RadioAdapter;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.view_models.HomeViewModel;
+import by.roman.worldradio0.business_logic.view_models.PlayerViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class HomeFragment extends Fragment {
     private HomeViewModel viewModel;
+    private PlayerViewModel playerViewModel;
     private RadioAdapter adapter;
     private ImageView timerButton;
     private RecyclerView recyclerView;
@@ -50,7 +52,8 @@ public class HomeFragment extends Fragment {
         adapter = new RadioAdapter(getContext(), new RadioAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position) {
-                // клик по элементу
+                viewModel.setPlaying(adapter.getUUID(position));
+                playerViewModel.play();
             }
             @Override
             public void onDeleteClick(int position) {
@@ -65,6 +68,7 @@ public class HomeFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
         viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+        playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
         observeAndLoad();
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override

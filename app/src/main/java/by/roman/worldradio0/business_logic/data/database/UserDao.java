@@ -68,5 +68,26 @@ public class UserDao {
     public User getUserData(int id){
         return null; //TODO
     }
-    //todo
+    public String getColumnPlayingUUID(int id){
+        String uuid = null;
+        String Query = "SELECT " + COLUMN_UUID_PLAYING_STATION + " FROM " + TABLE_USER +
+                " WHERE " + COLUMN_ID_USER + " =?";
+        Cursor cursor = db.rawQuery(Query,new String[]{String.valueOf(id)});
+        if(cursor != null && cursor.moveToNext()){
+            try (cursor){
+                int uuidIndex = cursor.getColumnIndex(COLUMN_UUID_PLAYING_STATION);
+                if (uuidIndex != -1) {
+                    uuid = cursor.getString(uuidIndex);
+                }
+            }
+        }
+        return uuid;
+    }
+    public void setColumnPlayingUUID(int id, String UUID){
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_UUID_PLAYING_STATION, UUID);
+        String selection = COLUMN_ID_USER + " = ?";
+        String[] selectionArgs = {String.valueOf(id)};
+        db.update(TABLE_USER, values, selection, selectionArgs);
+    }
 }

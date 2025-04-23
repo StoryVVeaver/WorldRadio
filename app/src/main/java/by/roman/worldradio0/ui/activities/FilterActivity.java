@@ -42,14 +42,14 @@ public class FilterActivity extends AppCompatActivity {
         });
     }
     private void findAllId(){
-        actvCountry = findViewById(R.id.actvCountry);
-        actvTags = findViewById(R.id.actvStyle);
-        actvLang = findViewById(R.id.actvLang);
-        backButton = findViewById(R.id.backButtonFilterView);
-        count = findViewById(R.id.countStation);
-        deleteCountry = findViewById(R.id.deleteCountryFilter);
-        deleteTags = findViewById(R.id.deleteStyleFilter);
-        deleteLang = findViewById(R.id.deleteLangFilter);
-        spinnerSortBy = findViewById(R.id.sortType);
+//        actvCountry = findViewById(R.id.actvCountry);
+//        actvTags = findViewById(R.id.actvStyle);
+//        actvLang = findViewById(R.id.actvLang);
+//        backButton = findViewById(R.id.backButtonFilterView);
+//        count = findViewById(R.id.countStation);
+//        deleteCountry = findViewById(R.id.deleteCountryFilter);
+//        deleteTags = findViewById(R.id.deleteStyleFilter);
+//        deleteLang = findViewById(R.id.deleteLangFilter);
+//        spinnerSortBy = findViewById(R.id.sortType);
     }
 }

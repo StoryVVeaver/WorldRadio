@@ -75,6 +75,15 @@ public class RadioRepositoryImpl implements RadioRepository{
         }
     }
     @Override
+    public RadioStation getPlayingStation(){
+        try {
+            return radioStationDao.getStationById(userDao.getColumnPlayingUUID(userDao.getIdUserInSystem()));
+        } catch (Exception e) {
+            Log.e("RadioRepositoryImp","Failed load playing station");
+            return null;
+        }
+    }
+    @Override
     public List<String> getContrives(){
         try {
             return radioStationDao.getCountryList();

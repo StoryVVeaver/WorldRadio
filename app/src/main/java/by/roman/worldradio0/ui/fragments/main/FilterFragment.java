@@ -1,5 +1,6 @@
 package by.roman.worldradio0.ui.fragments.main;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -21,6 +22,7 @@ import by.roman.worldradio0.business_logic.adapters.RadioAdapter;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.view_models.FilterViewModel;
 import by.roman.worldradio0.business_logic.view_models.HomeViewModel;
+import by.roman.worldradio0.ui.activities.FilterActivity;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -34,9 +36,14 @@ public class FilterFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
+    @Override
+    public void onResume(){
+        super.onResume();
+        filter.setEnabled(true);
+    }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_filter, container, false);
     }
@@ -45,7 +52,9 @@ public class FilterFragment extends Fragment {
         super.onViewCreated(view,savedInstanceState);
         findAllId(view);
         filter.setOnClickListener(v -> {
-
+            filter.setEnabled(false);
+            Intent intent = new Intent(getContext(), FilterActivity.class);
+            startActivity(intent);
         });
         adapter = new RadioAdapter(getContext(), new RadioAdapter.OnItemClickListener() {
             @Override

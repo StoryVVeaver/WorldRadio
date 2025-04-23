@@ -48,6 +48,10 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.retrofit)
     implementation(libs.convertergson)
+    implementation(libs.media3exoplayer)
+    implementation(libs.media3session)
+    implementation(libs.media3ui)
+    implementation(libs.media)
 
 
     annotationProcessor(libs.glide.compiler)

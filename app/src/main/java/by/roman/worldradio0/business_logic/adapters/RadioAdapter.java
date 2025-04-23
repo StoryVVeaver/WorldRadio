@@ -4,6 +4,7 @@ import static android.app.AppOpsManager.MODE_DEFAULT;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -81,6 +82,13 @@ public class RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     @Override
     public int getItemCount() {
         return stations.size() + (isLoading ? 1 : 0);
+    }
+    public String getUUID(int position){
+        if(stations != null){
+            return stations.get(position).getStationUuid();
+        }
+        Log.e("RadioAdapter","null");
+        return "db93a00f-9191-46ab-9e87-ec9b373b3eee";
     }
 
     @Override

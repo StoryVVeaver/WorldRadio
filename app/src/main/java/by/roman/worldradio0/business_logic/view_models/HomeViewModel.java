@@ -15,8 +15,11 @@ import javax.inject.Inject;
 
 import by.roman.worldradio0.business_logic.UiState;
 import by.roman.worldradio0.business_logic.data.dto.RadioStationDTO;
+import by.roman.worldradio0.business_logic.data.dto.UserDTO;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
+import by.roman.worldradio0.business_logic.data.models.User;
 import by.roman.worldradio0.business_logic.data.repositories.RadioRepository;
+import by.roman.worldradio0.business_logic.data.repositories.UserRepository;
 import by.roman.worldradio0.business_logic.network.radioapi.LoadDataFromAPI;
 import by.roman.worldradio0.business_logic.network.radioapi.StationsCallback;
 import dagger.hilt.android.lifecycle.HiltViewModel;
@@ -24,6 +27,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 @HiltViewModel
 public class HomeViewModel extends ViewModel {
     private final RadioRepository radioRepository;
+    private final UserRepository userRepository;
     private final LoadDataFromAPI loadDataFromAPI;
     private final MutableLiveData<UiState<List<RadioStation>>> stations = new MutableLiveData<>();
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
@@ -34,8 +38,9 @@ public class HomeViewModel extends ViewModel {
         return isLastPage;
     }
     @Inject
-    public HomeViewModel(RadioRepository radioRepository, LoadDataFromAPI loadDataFromAPI){
+    public HomeViewModel(RadioRepository radioRepository, LoadDataFromAPI loadDataFromAPI, UserRepository userRepository){
         this.radioRepository = radioRepository;
+        this.userRepository = userRepository;
         this.loadDataFromAPI = loadDataFromAPI;
         loadAll();
     }
@@ -47,6 +52,7 @@ public class HomeViewModel extends ViewModel {
         executor.execute(() -> {
             try {
                 List<RadioStation> list = radioRepository.getAllStations(currentPage,pageSize);
+                list.isEmpty(); // вызов ошибки
                 stations.postValue(UiState.success(list));
                 currentPage++;
             } catch (Exception e) {
@@ -74,6 +80,13 @@ public class HomeViewModel extends ViewModel {
             }
         });
     }
+    public void setPlaying(String UUID){
+        try {
+            userRepository.setPlayingUUID(UUID);
+        } catch (Exception e){
+            Log.e("DB", "Ошибка при установке: " + UUID, e);
+        }
+    }
     public void loadFromAPI() {
         executor.execute(() -> {
             loadDataFromAPI.getStations(new StationsCallback() {
@@ -95,6 +108,11 @@ public class HomeViewModel extends ViewModel {
             });
         });
 
+    }
+    public void useradd(){
+        UserDTO dto = new UserDTO();
+        dto.fromModel(new User(1,"user","user",null,1));
+        userRepository.useradd(dto);
     }
     @Override
     protected void onCleared() {

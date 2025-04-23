@@ -43,6 +43,7 @@ public class FilterViewModel extends ViewModel {
         executor.execute(() -> {
             try {
                 List<RadioStation> list = radioRepository.getFilteredStations(currentPage,pageSize);
+                list.isEmpty(); // вызов ошибки
                 stations.postValue(UiState.success(list));
                 currentPage++;
             } catch (Exception e) {
