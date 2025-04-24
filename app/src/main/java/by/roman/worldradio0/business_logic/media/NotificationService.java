@@ -99,11 +99,12 @@ public class NotificationService extends Service {
         remoteViews.setTextViewText(R.id.station_name_notification, radioStation.getName());
         remoteViews.setTextViewText(R.id.track_notification, currentTrack);
 
-        int buttonIcon = isPlaying ? R.drawable.pause : R.drawable.play; // Убедимся, что состояние кнопки правильно установлено
+        int buttonIcon = isPlaying ? R.drawable.pause : R.drawable.play;
         remoteViews.setImageViewResource(R.id.play_pause_notification, buttonIcon);
 
-        String action = isPlaying ? ACTION_PAUSE : ACTION_PLAY; // Действие для кнопки Play/Pause
+        String action = isPlaying ? ACTION_PAUSE : ACTION_PLAY;
         remoteViews.setOnClickPendingIntent(R.id.play_pause_notification, createActionIntent(action));
+        remoteViews.setOnClickPendingIntent(R.id.stop_notification, createActionIntent(PlayerService.ACTION_STOP));
     }
 
     private Notification buildNotification() {
@@ -113,7 +114,7 @@ public class NotificationService extends Service {
                 .setOngoing(true)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+                .setStyle(null)
                 .build();
     }
 

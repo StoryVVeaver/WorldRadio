@@ -48,28 +48,18 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState){
         super.onViewCreated(view,savedInstanceState);
+
+        long startTime = System.nanoTime();
+        Log.v("Performance", "onViewCreated started");
         findAllId(view);
-        adapter = new RadioAdapter(getContext(), new RadioAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(int position) {
-                viewModel.setPlaying(adapter.getUUID(position));
-                playerViewModel.play();
-            }
-            @Override
-            public void onDeleteClick(int position) {
-                //RadioStation toDelete = adapter.getItem(position);
-                //viewModel.removeFromFavorites(toDelete);
-            }
-        });
+        initAll();
+        observeAndLoad();
+        Log.v("Performance", "onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
+
         timerButton.setOnClickListener(v -> {
             Log.d("HomeFragment","Start loading");
             //viewModel.loadFromAPI();
         });
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(adapter);
-        viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
-        playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
-        observeAndLoad();
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -113,9 +103,24 @@ public class HomeFragment extends Fragment {
 
         viewModel.loadNextPage();
     }
-
     private void findAllId(View view){
         timerButton = view.findViewById(R.id.timerButtonView);
         recyclerView = view.findViewById(R.id.cardView);
+    }
+    private void initAll(){
+        adapter = new RadioAdapter(getContext(), new RadioAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(int position) {
+                playerViewModel.setPlaying(adapter.getUUID(position));
+                playerViewModel.start();
+            }
+            @Override
+            public void onDeleteClick(int position) {
+            }
+        });
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(adapter);
+        viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+        playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
     }
 }

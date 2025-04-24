@@ -4,7 +4,6 @@
     android:layout_height="64dp"
     android:padding="8dp">
 
-    <!-- Иконка радиостанции -->
     <ImageView
         android:id="@+id/image_view_station_notification"
         android:layout_width="48dp"
@@ -12,7 +11,6 @@
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true" />
 
-    <!-- Название станции -->
     <TextView
         android:id="@+id/station_name_notification"
         android:layout_width="wrap_content"
@@ -20,13 +18,11 @@
         android:layout_toEndOf="@id/image_view_station_notification"
         android:layout_marginStart="8dp"
         android:layout_alignTop="@id/image_view_station_notification"
-        android:textColor="@android:color/white"
         android:textStyle="bold"
         android:textSize="14sp"
         android:maxLines="1"
         android:ellipsize="end" />
 
-    <!-- Название трека -->
     <TextView
         android:id="@+id/track_notification"
         android:layout_width="wrap_content"
@@ -35,18 +31,26 @@
         android:layout_below="@id/station_name_notification"
         android:layout_marginStart="8dp"
         android:layout_marginTop="2dp"
-        android:textColor="@android:color/white"
         android:textSize="12sp"
         android:maxLines="1"
         android:ellipsize="end" />
 
-    <!-- Кнопка Play/Pause -->
     <ImageView
         android:id="@+id/play_pause_notification"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginEnd="50dp"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:padding="4dp"
+        android:padding="10dp"
         android:src="@drawable/pause" />
+
+    <ImageView
+        android:id="@+id/stop_notification"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:padding="10dp"
+        android:src="@drawable/delete" />
 </RelativeLayout>

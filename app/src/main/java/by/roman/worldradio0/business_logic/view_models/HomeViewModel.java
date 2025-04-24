@@ -80,33 +80,24 @@ public class HomeViewModel extends ViewModel {
             }
         });
     }
-    public void setPlaying(String UUID){
-        try {
-            userRepository.setPlayingUUID(UUID);
-        } catch (Exception e){
-            Log.e("DB", "Ошибка при установке: " + UUID, e);
-        }
-    }
     public void loadFromAPI() {
-        executor.execute(() -> {
-            loadDataFromAPI.getStations(new StationsCallback() {
-                @Override
-                public void onSuccess(List<RadioStationDTO> stations) {
-                    for (RadioStationDTO dto : stations) {
-                        try {
-                            radioRepository.addRadioStation(dto);
-                        } catch (Exception e) {
-                            Log.e("DB", "Ошибка при добавлении: " + dto.getName(), e);
-                        }
+        executor.execute(() -> loadDataFromAPI.getStations(new StationsCallback() {
+            @Override
+            public void onSuccess(List<RadioStationDTO> stations) {
+                for (RadioStationDTO dto : stations) {
+                    try {
+                        radioRepository.addRadioStation(dto);
+                    } catch (Exception e) {
+                        Log.e("DB", "Ошибка при добавлении: " + dto.getName(), e);
                     }
                 }
+            }
 
-                @Override
-                public void onFailure(Throwable t) {
-                    Log.e("API", "Ошибка загрузки данных", t);
-                }
-            });
-        });
+            @Override
+            public void onFailure(Throwable t) {
+                Log.e("API", "Ошибка загрузки данных", t);
+            }
+        }));
 
     }
     public void useradd(){
