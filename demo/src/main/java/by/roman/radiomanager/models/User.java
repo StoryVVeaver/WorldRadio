@@ -1,4 +1,4 @@
-package by.roman.demo.models;
+package by.roman.radiomanager.models;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,13 +16,15 @@ public class User {
     private String login;
     private String password;
     private String station;
+    private int inSystem;
 
+    public User() {}
 
-    public User(Long id, String login, String password, String station) {
-        this.id = id;
+    public User(String login, String password, String station, int inSystem) {
         this.login = login;
         this.password = password;
         this.station = station;
+        this.inSystem = inSystem;
 
     }
 
@@ -41,5 +43,8 @@ public class User {
     public String getStation() {
         return station;
     }
-    
+
+    public int getInSystem() {
+        return inSystem;
+    }
 }
