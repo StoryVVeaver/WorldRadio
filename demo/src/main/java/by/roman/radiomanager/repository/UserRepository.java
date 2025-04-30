@@ -8,5 +8,5 @@ import by.roman.radiomanager.models.User;
 @Component
 public interface UserRepository extends JpaRepository<User, Long>{
     User findByLogin(String login);
-    User findByPassword(String password);
+    User findByLoginAndPassword(String login, String password);
 }

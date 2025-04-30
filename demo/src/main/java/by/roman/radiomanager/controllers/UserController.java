@@ -2,21 +2,17 @@ package by.roman.radiomanager.controllers;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import by.roman.radiomanager.UserRequest;
 import by.roman.radiomanager.models.User;
 import by.roman.radiomanager.service.UserService;
 import lombok.AllArgsConstructor;
-
-import org.springframework.web.bind.annotation.GetMapping;
-
 
 
 @RequestMapping("/api/v1/user")
@@ -27,36 +23,39 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/check")
-    public String authenticateUser(@RequestBody UserRequest authRequest) {
+    @PostMapping("/reg")
+    public ResponseEntity<?> regUser(@RequestBody UserRequest userRequest) {
         try{
-            if(authRequest.getLogin().isEmpty() || authRequest.getPassword().isEmpty()){
-                return "null";
+            if(userRequest.getLogin().isEmpty() || userRequest.getPassword().isEmpty()){
+                return ResponseEntity.badRequest().body("Empty request");
             }
-            if (userService.findRegistredUser(authRequest.getLogin(), authRequest.getPassword())) {
-                return "Authentication successful";
-            } else {
-                return "Invalid credentials";
-            }
+            User user = userService.findRegistredUser(userRequest.getLogin(), userRequest.getPassword());
+            if(user == null){
+                return ResponseEntity.badRequest().body("Already exists");
+            } else return ResponseEntity.ok(user);
         } catch(Exception e){
-            return e.toString();
+            return ResponseEntity.internalServerError().body(e.getMessage());
         }
-        
     }
 
     @PostMapping("/enter")
-    public String entranceUser(@RequestBody User user) {
-        return userService.entranceUser(user);
+    public ResponseEntity<?> entranceUser(@RequestBody UserRequest userRequest) {
+        try {
+            if(userRequest.getLogin().isEmpty() || userRequest.getPassword().isEmpty()){
+                return ResponseEntity.badRequest().body("Empty request");
+            }
+            User user = userService.entranceUser(userRequest);
+            if(user == null){
+                return ResponseEntity.badRequest().body("Invalid login data");
+            } else return ResponseEntity.ok(user);
+           
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
     }
 
-    @GetMapping("/isCorrect")
+    @GetMapping
     public String isCorrect(){
         return "Correct";
     }
-
-    @PostMapping("/post")
-    public String postMethodName() {
-        return "entity";
-    }
-    
 }
