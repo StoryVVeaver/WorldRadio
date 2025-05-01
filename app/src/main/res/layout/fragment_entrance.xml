@@ -12,7 +12,7 @@
         android:background="@color/background">
 
         <androidx.cardview.widget.CardView
-            android:id="@+id/cardView3"
+            android:id="@+id/loginCardView_Entrance"
             android:layout_width="0dp"
             android:layout_height="60dp"
             android:layout_marginStart="34dp"
@@ -57,7 +57,7 @@
         </androidx.cardview.widget.CardView>
 
         <androidx.cardview.widget.CardView
-            android:id="@+id/cardView4"
+            android:id="@+id/passwordCardView_Entrance"
             android:layout_width="0dp"
             android:layout_height="60dp"
             android:layout_marginStart="34dp"
@@ -66,7 +66,7 @@
             app:cardCornerRadius="15dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/cardView3">
+            app:layout_constraintTop_toBottomOf="@+id/loginCardView_Entrance">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -121,7 +121,7 @@
             android:src="@drawable/textfield_background"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/cardView4" />
+            app:layout_constraintTop_toBottomOf="@+id/passwordCardView_Entrance" />
 
         <TextView
             android:id="@+id/textView"
@@ -144,7 +144,7 @@
             android:text="TextView"
             app:layout_constraintBottom_toTopOf="@+id/enterButton"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/cardView4" />
+            app:layout_constraintTop_toBottomOf="@+id/passwordCardView_Entrance" />
 
         <TextView
             android:id="@+id/forgotPass_Entrance"
@@ -156,7 +156,7 @@
             android:text="TextView"
             app:layout_constraintBottom_toTopOf="@+id/enterButton"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/cardView4" />
+            app:layout_constraintTop_toBottomOf="@+id/passwordCardView_Entrance" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

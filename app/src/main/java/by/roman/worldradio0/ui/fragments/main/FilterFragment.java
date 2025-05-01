@@ -22,12 +22,14 @@ import by.roman.worldradio0.business_logic.adapters.RadioAdapter;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.view_models.FilterViewModel;
 import by.roman.worldradio0.business_logic.view_models.HomeViewModel;
+import by.roman.worldradio0.business_logic.view_models.PlayerViewModel;
 import by.roman.worldradio0.ui.activities.FilterActivity;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class FilterFragment extends Fragment {
     private FilterViewModel viewModel;
+    private PlayerViewModel playerViewModel;
     private RadioAdapter adapter;
     private RecyclerView recyclerView;
     private ImageView filter;
@@ -59,7 +61,8 @@ public class FilterFragment extends Fragment {
         adapter = new RadioAdapter(getContext(), new RadioAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position) {
-                // клик по элементу
+                playerViewModel.setPlaying(adapter.getUUID(position));
+                playerViewModel.start();
             }
             @Override
             public void onDeleteClick(int position) {
@@ -68,6 +71,7 @@ public class FilterFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
         viewModel = new ViewModelProvider(this).get(FilterViewModel.class);
+        playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
         observeAndLoad();
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override

@@ -6,6 +6,7 @@ import by.roman.worldradio0.business_logic.data.database.SettingsDao;
 import by.roman.worldradio0.business_logic.data.database.UserDao;
 import by.roman.worldradio0.business_logic.data.dto.SettingsDTO;
 import by.roman.worldradio0.business_logic.data.models.Settings;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.SettingsRepository;
 
 public class SettingsRepositoryImpl implements SettingsRepository {
    private final SettingsDao settingsDao;

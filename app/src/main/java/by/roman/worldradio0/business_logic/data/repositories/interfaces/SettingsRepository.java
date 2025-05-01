@@ -1,4 +1,4 @@
-package by.roman.worldradio0.business_logic.data.repositories;
+package by.roman.worldradio0.business_logic.data.repositories.interfaces;
 
 import by.roman.worldradio0.business_logic.data.dto.SettingsDTO;
 import by.roman.worldradio0.business_logic.data.models.Settings;

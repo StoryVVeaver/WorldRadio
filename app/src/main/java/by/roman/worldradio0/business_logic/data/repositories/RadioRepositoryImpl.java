@@ -2,6 +2,9 @@ package by.roman.worldradio0.business_logic.data.repositories;
 
 import android.util.Log;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,17 +15,27 @@ import by.roman.worldradio0.business_logic.data.database.UserDao;
 import by.roman.worldradio0.business_logic.data.dto.RadioStationDTO;
 import by.roman.worldradio0.business_logic.data.models.Filter;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRepository;
 
-public class RadioRepositoryImpl implements RadioRepository{
+public class RadioRepositoryImpl implements RadioRepository {
     private final RadioStationDao radioStationDao;
     private final FavoriteDao favoriteDao;
     private final UserDao userDao;
     private final FilterDao filterDao;
+    private final MutableLiveData<Boolean> showPlayer = new MutableLiveData<>();
     public RadioRepositoryImpl(RadioStationDao radioStationDao, FavoriteDao favoriteDao, UserDao userDao, FilterDao filterDao) {
         this.radioStationDao = radioStationDao;
         this.favoriteDao = favoriteDao;
         this.userDao = userDao;
         this.filterDao = filterDao;
+    }
+    @Override
+    public LiveData<Boolean> getShowPlayer() {
+        return showPlayer;
+    }
+    @Override
+    public void setStatePlayer(boolean state) {
+        showPlayer.postValue(state);
     }
     @Override
     public List<RadioStation> getFavoriteStations(int currentPage, int pageSize){

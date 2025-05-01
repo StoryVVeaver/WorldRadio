@@ -5,6 +5,7 @@ import android.util.Log;
 import by.roman.worldradio0.business_logic.data.database.UserDao;
 import by.roman.worldradio0.business_logic.data.dto.UserDTO;
 import by.roman.worldradio0.business_logic.data.models.User;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.UserRepository;
 
 public class UserRepositoryImpl implements UserRepository {
     private final UserDao userDao;

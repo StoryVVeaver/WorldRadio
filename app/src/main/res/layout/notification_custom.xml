@@ -13,27 +13,31 @@
 
     <TextView
         android:id="@+id/station_name_notification"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/image_view_station_notification"
-        android:layout_marginStart="8dp"
         android:layout_alignTop="@id/image_view_station_notification"
-        android:textStyle="bold"
-        android:textSize="14sp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_toStartOf="@+id/play_pause_notification"
+        android:layout_toEndOf="@id/image_view_station_notification"
+        android:ellipsize="end"
         android:maxLines="1"
-        android:ellipsize="end" />
+        android:textSize="14sp"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/track_notification"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/image_view_station_notification"
         android:layout_below="@id/station_name_notification"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="2dp"
-        android:textSize="12sp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="10dp"
+        android:layout_toStartOf="@+id/play_pause_notification"
+        android:layout_toEndOf="@id/image_view_station_notification"
+        android:ellipsize="end"
         android:maxLines="1"
-        android:ellipsize="end" />
+        android:textSize="12sp" />
 
     <ImageView
         android:id="@+id/play_pause_notification"

@@ -18,8 +18,8 @@ import by.roman.worldradio0.business_logic.data.dto.RadioStationDTO;
 import by.roman.worldradio0.business_logic.data.dto.UserDTO;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.data.models.User;
-import by.roman.worldradio0.business_logic.data.repositories.RadioRepository;
-import by.roman.worldradio0.business_logic.data.repositories.UserRepository;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRepository;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.UserRepository;
 import by.roman.worldradio0.business_logic.network.radioapi.LoadDataFromAPI;
 import by.roman.worldradio0.business_logic.network.radioapi.StationsCallback;
 import dagger.hilt.android.lifecycle.HiltViewModel;
@@ -104,6 +104,8 @@ public class HomeViewModel extends ViewModel {
         UserDTO dto = new UserDTO();
         dto.fromModel(new User(1,"user","user",null,1));
         userRepository.useradd(dto);
+    }
+    public void filteradd(){
     }
     @Override
     protected void onCleared() {

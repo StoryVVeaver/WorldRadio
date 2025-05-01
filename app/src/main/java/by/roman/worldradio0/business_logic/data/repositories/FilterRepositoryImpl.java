@@ -6,8 +6,9 @@ import by.roman.worldradio0.business_logic.data.database.FilterDao;
 import by.roman.worldradio0.business_logic.data.database.UserDao;
 import by.roman.worldradio0.business_logic.data.dto.FilterDTO;
 import by.roman.worldradio0.business_logic.data.models.Filter;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.FilterRepository;
 
-public class FilterRepositoryImpl implements FilterRepository{
+public class FilterRepositoryImpl implements FilterRepository {
     private final FilterDao filterDao;
     private final UserDao userDao;
     public FilterRepositoryImpl(FilterDao filterDao, UserDao userDao){

@@ -12,9 +12,11 @@ import java.util.concurrent.Executors;
 import javax.inject.Inject;
 
 import by.roman.worldradio0.business_logic.UiState;
+import by.roman.worldradio0.business_logic.data.dto.FilterDTO;
+import by.roman.worldradio0.business_logic.data.models.Filter;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
-import by.roman.worldradio0.business_logic.data.repositories.FilterRepository;
-import by.roman.worldradio0.business_logic.data.repositories.RadioRepository;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.FilterRepository;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRepository;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
@@ -82,6 +84,9 @@ public class FilterViewModel extends ViewModel {
     }
     public int getCountStations(){
         return radioRepository.getCountFilteredStations();
+    }
+    public void filteradd(){
+        filterRepository.addFilters(new FilterDTO().fromModel(new Filter(1,null,null,null,0)));
     }
     @Override
     protected void onCleared() {

@@ -1,26 +1,21 @@
 package by.roman.worldradio0.business_logic.player;
 
 import android.annotation.SuppressLint;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
-import androidx.core.app.NotificationCompat;
 import androidx.lifecycle.Observer;
 import androidx.media3.common.util.UnstableApi;
 
 import javax.inject.Inject;
 
-import by.roman.worldradio0.R;
-import by.roman.worldradio0.business_logic.data.repositories.RadioRepository;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRepository;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.UserRepository;
 import by.roman.worldradio0.business_logic.media.NotificationService;
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -40,14 +35,17 @@ public class PlayerService extends Service {
     @Inject
     protected RadioRepository radioRepository;
     @Inject
+    protected UserRepository userRepository;
+    @Inject
     protected RadioManager radioManager;
     @Inject
     protected NotificationService notificationService;
 
+
     private final Observer<String> trackObserver = new Observer<>() {
         @Override
         public void onChanged(String newTrack) {
-            if (newTrack != null) {
+            if (newTrack != null && notificationService != null) {
                 notificationService.updateTrack(newTrack);
             }
         }
@@ -79,14 +77,12 @@ public class PlayerService extends Service {
                 Log.d("RadioService", currentStreamUrl);
                 if (currentStreamUrl != null) {
                     radioManager.play(currentStreamUrl);
-                    if (radioManager.getCurrentTrack().getValue() != null) {
-                        currentTrack = radioManager.getCurrentTrack().getValue();
-                        Log.d("RadioService", "CurrentTrack: " + currentTrack);
-                    }
+                    currentTrack = null;
                     Log.d("RadioService", "Station: " + radioRepository.getPlayingStation().getName());
                     stopForeground(true);
                     startForeground(NOTIFICATION_ID, notificationService.startNotification(currentTrack, radioManager.getIsPlaying(), radioRepository.getPlayingStation()));
                     notificationService.updatePlaybackState(true);
+                    radioRepository.setStatePlayer(true);
                 }
                 break;
             case ACTION_PAUSE:
@@ -98,8 +94,10 @@ public class PlayerService extends Service {
                 Log.d("RadioService", "stop");
                 notificationService.stopNotification();
                 radioManager.stop();
+                userRepository.setPlayingUUID(null);
                 stopForeground(true);
-                stopSelf();
+                radioRepository.setStatePlayer(false);
+                //stopSelf();
                 break;
         }
         return START_STICKY;

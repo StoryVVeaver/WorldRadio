@@ -6,8 +6,9 @@ import java.util.List;
 
 import by.roman.worldradio0.business_logic.data.database.FavoriteDao;
 import by.roman.worldradio0.business_logic.data.database.UserDao;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteRepository;
 
-public class FavoriteRepositoryImpl implements FavoriteRepository{
+public class FavoriteRepositoryImpl implements FavoriteRepository {
     private final FavoriteDao favoriteDao;
     private final UserDao userDao;
     public FavoriteRepositoryImpl(FavoriteDao favoriteDao, UserDao userDao) {

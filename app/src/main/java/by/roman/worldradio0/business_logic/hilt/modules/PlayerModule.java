@@ -1,4 +1,4 @@
-package by.roman.worldradio0.business_logic.modules;
+package by.roman.worldradio0.business_logic.hilt.modules;
 
 import android.app.NotificationManager;
 import android.content.Context;

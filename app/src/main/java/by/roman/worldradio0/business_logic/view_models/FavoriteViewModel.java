@@ -1,8 +1,5 @@
 package by.roman.worldradio0.business_logic.view_models;
 
-import android.util.Log;
-
-import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -16,9 +13,8 @@ import javax.inject.Inject;
 
 import by.roman.worldradio0.business_logic.UiState;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
-import by.roman.worldradio0.business_logic.data.repositories.FavoriteRepository;
-import by.roman.worldradio0.business_logic.data.repositories.RadioRepository;
-import by.roman.worldradio0.business_logic.data.repositories.UserRepository;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteRepository;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRepository;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel

@@ -16,9 +16,11 @@ import androidx.media3.common.util.UnstableApi;
 
 import javax.inject.Inject;
 
-import by.roman.worldradio0.business_logic.data.repositories.FavoriteRepository;
-import by.roman.worldradio0.business_logic.data.repositories.RadioRepository;
-import by.roman.worldradio0.business_logic.data.repositories.UserRepository;
+import by.roman.worldradio0.business_logic.UiState;
+import by.roman.worldradio0.business_logic.data.models.RadioStation;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteRepository;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRepository;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.UserRepository;
 import by.roman.worldradio0.business_logic.player.PlayerService;
 import by.roman.worldradio0.business_logic.player.RadioManager;
 import dagger.hilt.android.lifecycle.HiltViewModel;
@@ -31,6 +33,7 @@ public class PlayerViewModel extends ViewModel {
     private final Context context;
     private final RadioRepository radioRepository;
     private final FavoriteRepository favoriteRepository;
+    private final RadioManager radioManager;
     private final UserRepository userRepository;
     private final MutableLiveData<String> currentTrack = new MutableLiveData<>();
     @Inject
@@ -39,6 +42,7 @@ public class PlayerViewModel extends ViewModel {
         this.radioRepository = radioRepository;
         this.userRepository = userRepository;
         this.favoriteRepository = favoriteRepository;
+        this.radioManager = radioManager;
         radioManager.getCurrentTrack().observeForever(track -> {
             if (track != null) {
                 currentTrack.setValue(track);
@@ -91,6 +95,12 @@ public class PlayerViewModel extends ViewModel {
         } catch (Exception e){
             Log.e("DB", "Ошибка при установке: " + UUID, e);
         }
+    }
+    public RadioStation getCurrentStation(){
+        return radioRepository.getPlayingStation();
+    }
+    public boolean getIsPlaying(){
+        return radioManager.getIsPlaying();
     }
 }
 //возможно нужно как-то сигналить ui о успехе операции
