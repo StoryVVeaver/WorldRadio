@@ -9,8 +9,8 @@ import by.roman.radiomanager.models.Filters;
 import by.roman.radiomanager.models.Settings;
 
 @Component
-public interface UserGetRepository {
-    List<Favorites> findFavoritesByUserId(Long id);
-    Settings findSettingsById(Long id);
-    Filters findFiltersById(Long id);
+public interface UserPutRepository {
+    String saveFilters(Filters filt);
+    String saveSettings(Settings sett);
+    String saveFavorites(List<Favorites> list);
 }

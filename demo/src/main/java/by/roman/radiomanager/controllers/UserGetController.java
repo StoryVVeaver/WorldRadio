@@ -1,12 +1,10 @@
 package by.roman.radiomanager.controllers;
 
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import by.roman.radiomanager.models.Favorites;
 import by.roman.radiomanager.models.Filters;
 import by.roman.radiomanager.models.Settings;
@@ -14,9 +12,6 @@ import by.roman.radiomanager.service.UserGetService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-
-
 
 @RequestMapping("/api/v1/user/get")
 @RestController
@@ -61,8 +56,4 @@ public class UserGetController {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }
-    
-    
-
-        
 }
