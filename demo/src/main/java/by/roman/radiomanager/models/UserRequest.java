@@ -1,4 +1,4 @@
-package by.roman.radiomanager;
+package by.roman.radiomanager.models;
 
 import org.springframework.stereotype.Component;
 

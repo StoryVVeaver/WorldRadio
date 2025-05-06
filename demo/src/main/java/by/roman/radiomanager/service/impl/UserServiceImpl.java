@@ -2,8 +2,8 @@ package by.roman.radiomanager.service.impl;
 
 import org.springframework.stereotype.Service;
 
-import by.roman.radiomanager.UserRequest;
 import by.roman.radiomanager.models.User;
+import by.roman.radiomanager.models.UserRequest;
 import by.roman.radiomanager.repository.UserRepository;
 import by.roman.radiomanager.service.UserService;
 import lombok.AllArgsConstructor;

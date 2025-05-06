@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 import by.roman.radiomanager.models.Favorites;
 import by.roman.radiomanager.models.Filters;
 import by.roman.radiomanager.models.Settings;
-import by.roman.radiomanager.repository.UserGetRepository;
+import by.roman.radiomanager.repository.FavoriteRepository;
+import by.roman.radiomanager.repository.FilterRepository;
+import by.roman.radiomanager.repository.SettingsRepository;
 import by.roman.radiomanager.service.UserGetService;
 import lombok.AllArgsConstructor;
 
@@ -17,12 +19,16 @@ import lombok.AllArgsConstructor;
 public class UserGetServiceImpl implements UserGetService{
     
     @Autowired
-    private final UserGetRepository userGetRepository;
+    private final FavoriteRepository favoriteRepository;
+    @Autowired
+    private final FilterRepository filterRepository;
+    @Autowired
+    private final SettingsRepository settingsRepository;
 
     @Override
     public List<Favorites> getFavorites(Long id){
         try {
-            List<Favorites> list = userGetRepository.findFavoritesByUserId(id);
+            List<Favorites> list = favoriteRepository.findByUserId(id);
             if(list == null){
                 return null;
             } else return list;
@@ -34,7 +40,7 @@ public class UserGetServiceImpl implements UserGetService{
     @Override
     public Settings getSettings(Long id){
         try {
-            Settings sett = userGetRepository.findSettingsById(id);
+            Settings sett = settingsRepository.findSettingsById(id);
             if(sett == null){
                 return null;
             } else return sett;
@@ -46,7 +52,7 @@ public class UserGetServiceImpl implements UserGetService{
     @Override
     public Filters getFilter(Long id){
         try {
-            Filters filt = userGetRepository.findFiltersById(id);
+            Filters filt = filterRepository.findFiltersById(id);
             if(filt == null){
                 return null;
             } else return filt;

@@ -33,12 +33,12 @@ public class UserGetController {
         }
     }
 
-    @GetMapping("/settinds/{id}")
+    @GetMapping("/settings/{id}")
     public ResponseEntity<?> getSettings(@PathVariable Long id) {
         try {
             Settings sett = userGetService.getSettings(id);
             if(sett == null){
-                return ResponseEntity.badRequest().body("Settings is empty");
+                return ResponseEntity.ok().body("Settings is empty");
             } else return ResponseEntity.ok(sett);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(e.getMessage());
@@ -50,7 +50,7 @@ public class UserGetController {
         try {
             Filters filt = userGetService.getFilter(id);
             if(filt == null){
-                return ResponseEntity.badRequest().body("Filters is empty");
+                return ResponseEntity.ok().body("Filters is empty");
             } else return ResponseEntity.ok(filt);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(e.getMessage());

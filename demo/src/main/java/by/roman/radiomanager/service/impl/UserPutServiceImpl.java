@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 import by.roman.radiomanager.models.Favorites;
 import by.roman.radiomanager.models.Filters;
 import by.roman.radiomanager.models.Settings;
-import by.roman.radiomanager.repository.UserPutRepository;
+import by.roman.radiomanager.repository.FavoriteRepository;
+import by.roman.radiomanager.repository.FilterRepository;
+import by.roman.radiomanager.repository.SettingsRepository;
 import by.roman.radiomanager.service.UserPutService;
 import lombok.AllArgsConstructor;
 
@@ -17,7 +19,11 @@ import lombok.AllArgsConstructor;
 public class UserPutServiceImpl implements UserPutService{
     
     @Autowired
-    private final UserPutRepository userPutRepository;
+    private final FavoriteRepository favoriteRepository;
+    @Autowired
+    private final FilterRepository filterRepository;
+    @Autowired
+    private final SettingsRepository settingsRepository;
 
     @Override
     public String saveFilters(Filters filt){
@@ -25,7 +31,7 @@ public class UserPutServiceImpl implements UserPutService{
             if(filt == null){
                 return "filt is null";
             } else {
-                userPutRepository.saveFilters(filt);
+                filterRepository.save(filt);
                 return "saved";
             }
         } catch (Exception e) {
@@ -39,7 +45,7 @@ public class UserPutServiceImpl implements UserPutService{
             if(sett == null){
                 return "sett is null";
             } else {
-                userPutRepository.saveSettings(sett);
+                settingsRepository.save(sett);
                 return "saved";
             }
         } catch (Exception e) {
@@ -53,7 +59,7 @@ public class UserPutServiceImpl implements UserPutService{
             if(favorites == null){
                 return "favorites is null";
             } else {
-                userPutRepository.saveFavorites(favorites);
+                favoriteRepository.saveAll(favorites);
                 return "saved";
             }
         } catch (Exception e) {

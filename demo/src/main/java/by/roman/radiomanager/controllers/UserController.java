@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import by.roman.radiomanager.UserRequest;
 import by.roman.radiomanager.models.User;
+import by.roman.radiomanager.models.UserRequest;
 import by.roman.radiomanager.service.UserService;
 import lombok.AllArgsConstructor;
 
@@ -42,11 +42,11 @@ public class UserController {
     public ResponseEntity<?> entranceUser(@RequestBody UserRequest userRequest) {
         try {
             if(userRequest.getLogin().isEmpty() || userRequest.getPassword().isEmpty()){
-                return ResponseEntity.badRequest().body("Empty request");
+                return ResponseEntity.ok().body("Empty request");
             }
             User user = userService.entranceUser(userRequest);
             if(user == null){
-                return ResponseEntity.badRequest().body("Invalid login data");
+                return ResponseEntity.ok().body("Invalid login data");
             } else return ResponseEntity.ok(user);
            
         } catch (Exception e) {
