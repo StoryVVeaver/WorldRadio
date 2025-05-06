@@ -7,6 +7,7 @@ public interface UserRepository {
     User getUserData();
     boolean entrance(User user);
     int getUserInSystem();
+    void setUserInSystem(int id);
     String getPlayingUUID();
     void setPlayingUUID(String UUID);
     void useradd(UserDTO dto);

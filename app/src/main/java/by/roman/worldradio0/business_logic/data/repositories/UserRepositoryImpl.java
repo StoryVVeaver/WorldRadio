@@ -26,6 +26,14 @@ public class UserRepositoryImpl implements UserRepository {
         return false; //TODO
     }
     @Override
+    public void setUserInSystem(int id){
+        try {
+            userDao.setUserInSystem(id);
+        } catch (Exception e) {
+            Log.e("UserRepositoryImp","Failed set user id in system");
+        }
+    }
+    @Override
     public int getUserInSystem(){
         try {
             return userDao.getIdUserInSystem();

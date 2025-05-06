@@ -2,7 +2,8 @@ package by.roman.worldradio0.business_logic.hilt.modules;
 
 import javax.inject.Singleton;
 
-import by.roman.worldradio0.business_logic.network.radioapi.LoadDataFromAPI;
+import by.roman.worldradio0.business_logic.network.radio.DataFromRadio;
+import by.roman.worldradio0.business_logic.network.userAPI.DataFromUserAPI;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
@@ -13,8 +14,12 @@ import dagger.hilt.components.SingletonComponent;
 public class NetworkModule {
     @Provides
     @Singleton
-    public static LoadDataFromAPI provideLoadDataFromAPI() {
-        return new LoadDataFromAPI();
+    public static DataFromRadio provideLoadDataFromAPI() {
+        return new DataFromRadio();
     }
-
+    @Provides
+    @Singleton
+    public static DataFromUserAPI provideDataFromUserAPI(){
+        return new DataFromUserAPI();
+    }
 }

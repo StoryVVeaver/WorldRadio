@@ -1,23 +1,21 @@
-package by.roman.worldradio0.business_logic.network.radioapi;
+package by.roman.worldradio0.business_logic.network.radio;
 
 import java.util.List;
 
 import by.roman.worldradio0.business_logic.data.dto.RadioStationDTO;
 
-public class LoadDataFromAPI {
-    private final RemoteDataSource remoteDataSource;
+public class DataFromRadio {
+    private final radio radio;
 
-    public LoadDataFromAPI() {
-        this.remoteDataSource = new RemoteDataSource();
+    public DataFromRadio() {
+        this.radio = new radio();
     }
-
     public void getStations(StationsCallback callback) {
-        remoteDataSource.fetchStations(new StationsCallback() {
+        radio.fetchStations(new StationsCallback() {
             @Override
             public void onSuccess(List<RadioStationDTO> stations) {
                 callback.onSuccess(stations);
             }
-
             @Override
             public void onFailure(Throwable t) {
                 callback.onFailure(t);

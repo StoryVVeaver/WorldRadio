@@ -1,4 +1,4 @@
-package by.roman.worldradio0.business_logic.network.radioapi;
+package by.roman.worldradio0.business_logic.network.radio;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;

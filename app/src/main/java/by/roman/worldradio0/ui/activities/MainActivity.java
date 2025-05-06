@@ -1,6 +1,7 @@
 package by.roman.worldradio0.ui.activities;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -72,7 +73,9 @@ public class MainActivity extends AppCompatActivity {
                     loadFragment(new FilterFragment());
                     return true;
                 case "Settings":
-                    loadFragment(new SettingsFragment());
+                    Intent intent = new Intent(getApplicationContext(), AccountActivity.class);
+                    startActivity(intent);
+                    //loadFragment(new SettingsFragment());
                     return true;
             }
             return false;

@@ -20,7 +20,7 @@
             android:src="@drawable/textfield_background"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/cardView7" />
+            app:layout_constraintTop_toBottomOf="@+id/password2CardView_Registration" />
 
         <TextView
             android:id="@+id/textView3"
@@ -33,17 +33,18 @@
             app:layout_constraintStart_toStartOf="@+id/regButton"
             app:layout_constraintTop_toTopOf="@+id/regButton" />
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardView7"
+        <by.roman.worldradio0.ui.elements.view.InnerGlowMaterialCardView
+            android:id="@+id/password2CardView_Registration"
             android:layout_width="0dp"
             android:layout_height="60dp"
+            app:strokeWidth="0dp"
             android:layout_marginStart="34dp"
             android:layout_marginTop="15dp"
             android:layout_marginEnd="34dp"
             app:cardCornerRadius="15dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/cardView6">
+            app:layout_constraintTop_toBottomOf="@+id/password1CardView_Registration">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -86,12 +87,13 @@
                     app:layout_constraintStart_toEndOf="@+id/password2Input_Registration"
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.cardview.widget.CardView>
+        </by.roman.worldradio0.ui.elements.view.InnerGlowMaterialCardView>
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardView5"
+        <by.roman.worldradio0.ui.elements.view.InnerGlowMaterialCardView
+            android:id="@+id/loginCardView_Registration"
             android:layout_width="0dp"
             android:layout_height="60dp"
+            app:strokeWidth="0dp"
             android:layout_marginStart="34dp"
             android:layout_marginEnd="34dp"
             app:cardCornerRadius="15dp"
@@ -129,19 +131,20 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.cardview.widget.CardView>
+        </by.roman.worldradio0.ui.elements.view.InnerGlowMaterialCardView>
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardView6"
+        <by.roman.worldradio0.ui.elements.view.InnerGlowMaterialCardView
+            android:id="@+id/password1CardView_Registration"
             android:layout_width="0dp"
             android:layout_height="60dp"
+            app:strokeWidth="0dp"
             android:layout_marginStart="34dp"
             android:layout_marginTop="15dp"
             android:layout_marginEnd="34dp"
             app:cardCornerRadius="15dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/cardView5">
+            app:layout_constraintTop_toBottomOf="@+id/loginCardView_Registration">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -184,6 +187,6 @@
                     app:layout_constraintStart_toEndOf="@+id/password1Input_Registration"
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.cardview.widget.CardView>
+        </by.roman.worldradio0.ui.elements.view.InnerGlowMaterialCardView>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

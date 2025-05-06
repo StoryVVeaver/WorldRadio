@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.media3session)
     implementation(libs.media3ui)
     implementation(libs.media)
+    implementation(libs.ui.graphics.android)
 
 
     annotationProcessor(libs.glide.compiler)

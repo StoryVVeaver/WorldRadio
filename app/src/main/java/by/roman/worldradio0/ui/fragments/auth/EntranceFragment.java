@@ -1,5 +1,7 @@
 package by.roman.worldradio0.ui.fragments.auth;
 
+import android.annotation.SuppressLint;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -11,15 +13,23 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.text.InputType;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
+
+import com.google.android.material.card.MaterialCardView;
 
 import by.roman.worldradio0.R;
+import by.roman.worldradio0.business_logic.data.models.UserRequest;
 import by.roman.worldradio0.business_logic.view_models.AccountViewModel;
+import by.roman.worldradio0.ui.elements.view.InnerGlowMaterialCardView;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -29,8 +39,8 @@ public class EntranceFragment extends Fragment {
     private EditText passwordText;
     private ImageView passButton;
     private ImageView enterButton;
-    private CardView loginCard;
-    private CardView passwordCard;
+    private InnerGlowMaterialCardView loginCard;
+    private InnerGlowMaterialCardView passwordCard;
     private boolean passVisibility;
     private String login;
     private String password;
@@ -53,6 +63,7 @@ public class EntranceFragment extends Fragment {
         findAll(view);
         initAll();
         buttons();
+        observeResult();
         Log.v("EntranceFragment","Performance - onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
     }
     private void findAll(@NonNull View view){
@@ -65,35 +76,74 @@ public class EntranceFragment extends Fragment {
     }
     private void initAll(){
         viewModel = new ViewModelProvider(this).get(AccountViewModel.class);
-        showError();
     }
     private void buttons(){
         passButton.setOnClickListener(v -> {
-            if(passVisibility){
-                passwordText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                passButton.setImageDrawable(AppCompatResources.getDrawable(requireContext(),R.drawable.eye_closed));
+            if (passwordText.getTransformationMethod() instanceof PasswordTransformationMethod) {
+                passwordText.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                passButton.setImageResource(R.drawable.eye);
             } else {
-                passwordText.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-                passButton.setImageDrawable(AppCompatResources.getDrawable(requireContext(),R.drawable.eye));
+                passwordText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                passButton.setImageResource(R.drawable.eye_closed);
             }
-            passVisibility = !passVisibility;
+            passwordText.setSelection(passwordText.getText().length());
         });
         enterButton.setOnClickListener(v -> {
             enterButton.setEnabled(false);
             login = loginText.getText().toString();
             password = passwordText.getText().toString();
-            if(viewModel.enter()){
-                requireActivity().finish();
-            } else {
-                enterButton.setEnabled(true);
-                showError();
+            viewModel.enter(new UserRequest(login,password));
+        });
+    }
+    private void observeResult(){
+        viewModel.getUser().observe(getViewLifecycleOwner(),result ->{
+            switch (result.status){
+                case LOADING:
+                    showLoading();
+                    break;
+                case SUCCESS:
+                    requireActivity().finish();
+                    break;
+                case ERROR:
+                    Toast.makeText(getContext(), result.message, Toast.LENGTH_SHORT).show();
+                    showError();
+                    enterButton.setEnabled(true);
+                    break;
             }
         });
     }
-    private void showError(){
+    private void showLoading(){
+        //TODO
+    }
+    private void showError() {
+        int errorColor = ContextCompat.getColor(requireContext(), R.color.red);
+        int lightErrorColor = ContextCompat.getColor(requireContext(), R.color.lightRed);
+
         loginText.setText("");
         passwordText.setText("");
-        loginCard.setBackground(ContextCompat.getDrawable(requireContext(),R.drawable.glow_red_border));
-        loginCard.setCardElevation(16f);
+        Toast.makeText(requireContext(), "Ошибка ввода", Toast.LENGTH_SHORT).show();
+
+        float elevationPx = dpToPx(30);
+        int strokePx     = (int) dpToPx(2);
+        loginCard.setInnerGlowEnabled(true);
+        passwordCard.setInnerGlowEnabled(true);
+        applyErrorStyle(loginCard, elevationPx, strokePx, errorColor,lightErrorColor);
+        applyErrorStyle(passwordCard, elevationPx, strokePx, errorColor,lightErrorColor);
+    }
+    private void applyErrorStyle(@NonNull InnerGlowMaterialCardView card, float elevationPx, int strokePx, int color,int lightColor) {
+        card.setCardElevation(elevationPx);
+
+        card.setStrokeWidth(strokePx);
+        card.setStrokeColor(color);
+
+        card.setOutlineAmbientShadowColor(color);
+        card.setOutlineSpotShadowColor(lightColor);
+    }
+    private float dpToPx(int dp) {
+        return TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                dp,
+                getResources().getDisplayMetrics()
+        );
     }
 }

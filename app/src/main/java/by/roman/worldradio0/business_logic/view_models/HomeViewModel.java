@@ -20,15 +20,15 @@ import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.data.models.User;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.UserRepository;
-import by.roman.worldradio0.business_logic.network.radioapi.LoadDataFromAPI;
-import by.roman.worldradio0.business_logic.network.radioapi.StationsCallback;
+import by.roman.worldradio0.business_logic.network.radio.DataFromRadio;
+import by.roman.worldradio0.business_logic.network.radio.StationsCallback;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
 public class HomeViewModel extends ViewModel {
     private final RadioRepository radioRepository;
     private final UserRepository userRepository;
-    private final LoadDataFromAPI loadDataFromAPI;
+    private final DataFromRadio dataFromRadio;
     private final MutableLiveData<UiState<List<RadioStation>>> stations = new MutableLiveData<>();
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
     private int currentPage = 0;
@@ -38,10 +38,10 @@ public class HomeViewModel extends ViewModel {
         return isLastPage;
     }
     @Inject
-    public HomeViewModel(RadioRepository radioRepository, LoadDataFromAPI loadDataFromAPI, UserRepository userRepository){
+    public HomeViewModel(RadioRepository radioRepository, DataFromRadio loadDataFromRadio, UserRepository userRepository){
         this.radioRepository = radioRepository;
         this.userRepository = userRepository;
-        this.loadDataFromAPI = loadDataFromAPI;
+        this.dataFromRadio = loadDataFromRadio;
         loadAll();
     }
     public LiveData<UiState<List<RadioStation>>> getAllStations() {
@@ -81,7 +81,7 @@ public class HomeViewModel extends ViewModel {
         });
     }
     public void loadFromAPI() {
-        executor.execute(() -> loadDataFromAPI.getStations(new StationsCallback() {
+        executor.execute(() -> dataFromRadio.getStations(new StationsCallback() {
             @Override
             public void onSuccess(List<RadioStationDTO> stations) {
                 for (RadioStationDTO dto : stations) {
@@ -104,8 +104,6 @@ public class HomeViewModel extends ViewModel {
         UserDTO dto = new UserDTO();
         dto.fromModel(new User(1,"user","user",null,1));
         userRepository.useradd(dto);
-    }
-    public void filteradd(){
     }
     @Override
     protected void onCleared() {

@@ -15,7 +15,9 @@ import androidx.fragment.app.FragmentTransaction;
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.ui.fragments.auth.EntranceFragment;
 import by.roman.worldradio0.ui.fragments.auth.RegistrationFragment;
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class AccountActivity extends AppCompatActivity {
 
     private ConstraintLayout entrance;

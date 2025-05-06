@@ -3,7 +3,7 @@ package by.roman.worldradio0.business_logic.data.dto;
 import androidx.annotation.NonNull;
 
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
-import by.roman.worldradio0.business_logic.network.radioapi.Model;
+import by.roman.worldradio0.business_logic.network.radio.Model;
 
 public class RadioStationDTO {
     private String stationUuid;

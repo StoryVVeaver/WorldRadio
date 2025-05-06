@@ -13,7 +13,7 @@ public class SettingsDTO {
     public Settings toModel(){
         return  new Settings(userId,theme,mapEnabled,timerSeconds,timerDots,filterEnabled);
     }
-    public static SettingsDTO fromModel(Settings settings){
+    public SettingsDTO fromModel(Settings settings){
         SettingsDTO dto = new SettingsDTO();
         dto.userId = settings.getUserId();
         dto.theme = settings.getTheme();
@@ -21,7 +21,7 @@ public class SettingsDTO {
         dto.timerSeconds = settings.getTimerSeconds();
         dto.timerDots = settings.getTimerDots();
         dto.filterEnabled = settings.getFilterEnabled();
-        return  dto;
+        return dto;
     }
     public int getId() {
         return userId;

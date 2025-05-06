@@ -39,6 +39,13 @@ public class UserDao {
         }
         return id;
     }
+    public void setUserInSystem(int id){
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_IN_SYSTEM_USER, 1);
+        String selection = COLUMN_ID_USER + " = ?";
+        String[] selectionArgs = {String.valueOf(id)};
+        db.update(TABLE_USER, values, selection, selectionArgs);
+    }
     public void addUser(@NonNull UserDTO dto){
         ContentValues values = new ContentValues();
         values.put(COLUMN_ID_USER, dto.getId());

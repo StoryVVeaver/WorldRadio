@@ -1,4 +1,4 @@
-package by.roman.worldradio0.business_logic.network.radioapi;
+package by.roman.worldradio0.business_logic.network.radio;
 
 import android.util.Log;
 
@@ -11,23 +11,24 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Singleton;
 
 import by.roman.worldradio0.business_logic.data.dto.RadioStationDTO;
+import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
 @Singleton
-public class RemoteDataSource {
+public class radio {
     private static final String API_URL = "http://at1.api.radio-browser.info/json/stations";
 
 
-    public RemoteDataSource() {
+    public radio() {
+
     }
 
     public void fetchStations (StationsCallback callback) {
@@ -39,7 +40,7 @@ public class RemoteDataSource {
 
         client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onResponse(@NonNull okhttp3.Call call, @NonNull Response response) {
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
                 if (response.isSuccessful()) {
                     try (response) {
                         assert response.body() != null;
@@ -47,7 +48,7 @@ public class RemoteDataSource {
                         Log.d("RadioAPI", "Response: " + jsonResponse);
 
                         if (response.code() != 200) {
-                            Log.e("RadioAPI", "Response code isn't 200");
+                            Log.e("RadioAPI", "Response code: " + response.code());
                             return;
                         }
                         if (jsonResponse.isEmpty()) {
@@ -61,12 +62,9 @@ public class RemoteDataSource {
                                 }.getType(), new TagsAdapter())
                                 .create();
 
-                        List<Model> stationList = new ArrayList<>();
-
                         try {
                             if (jsonResponse.startsWith("[")) {
                                 Model[] stations = gson.fromJson(jsonResponse, Model[].class);
-                                stationList.addAll(Arrays.asList(stations));
                                 List<RadioStationDTO> dto = new ArrayList<>();
                                 for (Model i : stations) {
                                     dto.add(new RadioStationDTO().fromModel(i));
@@ -92,7 +90,7 @@ public class RemoteDataSource {
             }
 
             @Override
-            public void onFailure(@NonNull okhttp3.Call call, @NonNull IOException e) {
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 e.printStackTrace();
                 callback.onFailure(e);
             }
