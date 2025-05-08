@@ -18,6 +18,8 @@ public interface RadioRepository {
     List<String> getContrives();
     List<String> getLanguage();
     List<String> getTags();
+    List<String> getNames();
+    List<String> getCodecs();
     void addRadioStation(RadioStationDTO radioStationDTO);
     int getCountFilteredStations();
 }

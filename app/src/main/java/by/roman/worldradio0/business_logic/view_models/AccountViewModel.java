@@ -60,7 +60,7 @@ public class AccountViewModel extends ViewModel {
                     userRepository.useradd(dto);
                     userRepository.setUserInSystem(dto.getId());
                     settingsRepository.addSettings(new SettingsDTO().fromModel(new Settings(dto.getId(),0,0,0,0,0)));
-                    filterRepository.addFilters(new FilterDTO().fromModel(new Filter(dto.getId(),null,null,null,0)));
+                    filterRepository.addFilters(new FilterDTO().fromModel(new Filter(dto.getId(),null,null,null,null,null,0)));
                     result.postValue(UiState.success(true));
                 } catch (Exception e) {
                     result.postValue(UiState.error(e.getMessage()));
@@ -84,7 +84,7 @@ public class AccountViewModel extends ViewModel {
                     userRepository.useradd(dto);
                     userRepository.setUserInSystem(dto.getId());
                     settingsRepository.addSettings(new SettingsDTO().fromModel(new Settings(dto.getId(),0,0,0,0,0)));
-                    filterRepository.addFilters(new FilterDTO().fromModel(new Filter(dto.getId(),null,null,null,0)));
+                    filterRepository.addFilters(new FilterDTO().fromModel(new Filter(dto.getId(),null,null,null,null,null,0)));
                     result.postValue(UiState.success(true));
                 } catch (Exception e) {
                     result.postValue(UiState.error(e.getMessage()));

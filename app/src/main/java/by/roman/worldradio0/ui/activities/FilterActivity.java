@@ -7,6 +7,7 @@ import static android.view.View.VISIBLE;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
@@ -28,6 +29,7 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.UiState;
@@ -40,10 +42,14 @@ public class FilterActivity extends AppCompatActivity {
     private MaterialAutoCompleteTextView actvCountry;
     private MaterialAutoCompleteTextView actvTags;
     private MaterialAutoCompleteTextView actvLang;
+    private MaterialAutoCompleteTextView actvName;
+    private MaterialAutoCompleteTextView actvCodec;
     private ImageView backButton;
     private TextView deleteCountry;
     private TextView deleteTags;
     private TextView deleteLang;
+    private TextView deleteCodec;
+    private TextView deleteName;
     private TextView countText;
     private FilterViewModel viewModel;
     private Filter filter;
@@ -65,62 +71,104 @@ public class FilterActivity extends AppCompatActivity {
         fillFields();
     }
     private void fillFields(){
-        if(filter.getLang() != null){
-            actvLang.setText(filter.getLang());
-            deleteLang.setVisibility(VISIBLE);
-        }
-        if (filter.getCountry() != null){
-            actvCountry.setText(filter.getCountry());
-            deleteCountry.setVisibility(VISIBLE);
-        }
-        if (filter.getTag() != null){
-            actvTags.setText(filter.getTag());
-            deleteTags.setVisibility(VISIBLE);
+        try{
+            if(filter.getLang() != null){
+                actvLang.setText(filter.getLang());
+                deleteLang.setVisibility(VISIBLE);
+            }
+            if (filter.getCountry() != null){
+                actvCountry.setText(filter.getCountry());
+                deleteCountry.setVisibility(VISIBLE);
+            }
+            if (filter.getTag() != null){
+                actvTags.setText(filter.getTag());
+                deleteTags.setVisibility(VISIBLE);
+            }
+            if(filter.getName() != null){
+                actvName.setText(filter.getName());
+                deleteName.setVisibility(VISIBLE);
+            }
+            if(filter.getCodec() != null){
+                actvCodec.setText(filter.getCodec());
+                deleteCodec.setVisibility(VISIBLE);
+            }
+        } catch (Exception e){
+            Log.e("FilterActivity", Objects.requireNonNull(e.getMessage()));
         }
     }
     private void buttons(){
-        backButton.setOnClickListener(v -> {
-            finish();
-        });
-        deleteCountry.setOnClickListener(v -> {
-            filter.setCountry(null);
-            viewModel.setFilters(filter);
-            viewModel.loadCount();
-            actvCountry.setText("");
-            deleteCountry.setVisibility(INVISIBLE);
-        });
-        deleteLang.setOnClickListener(v -> {
-            filter.setLang(null);
-            viewModel.setFilters(filter);
-            viewModel.loadCount();
-            actvLang.setText("");
-            deleteLang.setVisibility(INVISIBLE);
-        });
-        deleteTags.setOnClickListener(v -> {
-            filter.setTag(null);
-            viewModel.setFilters(filter);
-            viewModel.loadCount();
-            actvTags.setText("");
-            deleteTags.setVisibility(INVISIBLE);
-        });
+        try {
+            backButton.setOnClickListener(v -> {
+                finish();
+            });
+            deleteCountry.setOnClickListener(v -> {
+                filter.setCountry(null);
+                viewModel.setFilters(filter);
+                viewModel.loadCount();
+                actvCountry.setText("");
+                deleteCountry.setVisibility(INVISIBLE);
+            });
+            deleteLang.setOnClickListener(v -> {
+                filter.setLang(null);
+                viewModel.setFilters(filter);
+                viewModel.loadCount();
+                actvLang.setText("");
+                deleteLang.setVisibility(INVISIBLE);
+            });
+            deleteTags.setOnClickListener(v -> {
+                filter.setTag(null);
+                viewModel.setFilters(filter);
+                viewModel.loadCount();
+                actvTags.setText("");
+                deleteTags.setVisibility(INVISIBLE);
+            });
+            deleteName.setOnClickListener(v -> {
+                filter.setName(null);
+                viewModel.setFilters(filter);
+                viewModel.loadCount();
+                actvName.setText("");
+                deleteName.setVisibility(INVISIBLE);
+            });
+            deleteCodec.setOnClickListener(v -> {
+                filter.setCodec(null);
+                viewModel.setFilters(filter);
+                viewModel.loadCount();
+                actvCodec.setText("");
+                deleteCodec.setVisibility(INVISIBLE);
+            });
+        } catch (Exception e) {
+            Log.e("FilterActivity", Objects.requireNonNull(e.getMessage()));
+        }
     }
     private void handleSelection(int type,  String selectedItem) {
-        switch (type){
-            case 1:
-                filter.setCountry(selectedItem);
-                deleteCountry.setVisibility(VISIBLE);
-                break;
-            case 2:
-                filter.setTag(selectedItem);
-                deleteTags.setVisibility(VISIBLE);
-                break;
-            case 3:
-                filter.setLang(selectedItem);
-                deleteLang.setVisibility(VISIBLE);
-                break;
+        try {
+            switch (type){
+                case 1:
+                    filter.setCountry(selectedItem);
+                    deleteCountry.setVisibility(VISIBLE);
+                    break;
+                case 2:
+                    filter.setTag(selectedItem);
+                    deleteTags.setVisibility(VISIBLE);
+                    break;
+                case 3:
+                    filter.setLang(selectedItem);
+                    deleteLang.setVisibility(VISIBLE);
+                    break;
+                case 4:
+                    filter.setName(selectedItem);
+                    deleteName.setVisibility(VISIBLE);
+                    break;
+                case 5:
+                    filter.setCodec(selectedItem);
+                    deleteCodec.setVisibility(VISIBLE);
+                    break;
+            }
+            viewModel.setFilters(filter);
+            viewModel.loadCount();
+        } catch (Exception e) {
+            Log.e("FilterActivity", Objects.requireNonNull(e.getMessage()));
         }
-        viewModel.setFilters(filter);
-        viewModel.loadCount();
     }
     @SuppressLint("SetTextI18n")
     private void observeAndLoad() {
@@ -151,20 +199,30 @@ public class FilterActivity extends AppCompatActivity {
         });
     }
     private void initAll(){
-        viewModel = new ViewModelProvider(this).get(FilterViewModel.class);
-        filter = viewModel.getFilters();
-        setupAutoComplete(actvCountry,viewModel.getCountries(),1);
-        setupAutoComplete(actvTags,viewModel.getTags(),2);
-        setupAutoComplete(actvLang,viewModel.getLanguage(),3);
+        try {
+            viewModel = new ViewModelProvider(this).get(FilterViewModel.class);
+            filter = viewModel.getFilters();
+            setupAutoComplete(actvCountry,viewModel.getCountries(),1);
+            setupAutoComplete(actvTags,viewModel.getTags(),2);
+            setupAutoComplete(actvLang,viewModel.getLanguage(),3);
+            setupAutoComplete(actvName,viewModel.getNames(),4);
+            setupAutoComplete(actvCodec,viewModel.getCodecs(),5);
+        } catch (Exception e) {
+            Log.e("FilterActivity", Objects.requireNonNull(e.getMessage()));
+        }
     }
     @SuppressLint("SetTextI18n")
     private void findAllId(){
         View filter_countryView = findViewById(R.id.filterCountry);
         View filter_tagsView = findViewById(R.id.filterTags);
         View filter_langView = findViewById(R.id.filterLanguage);
+        View filter_nameView = findViewById(R.id.filterName);
+        View filter_codecView = findViewById(R.id.filterCodec);
         actvCountry = filter_countryView.findViewById(R.id.autoComplete);
         actvTags = filter_tagsView.findViewById(R.id.autoComplete);
         actvLang = filter_langView.findViewById(R.id.autoComplete);
+        actvName = filter_nameView.findViewById(R.id.autoComplete);
+        actvCodec = filter_codecView.findViewById(R.id.autoComplete);
         backButton = findViewById(R.id.btnBack);
         countText = findViewById(R.id.StationCount);
         deleteCountry = filter_countryView.findViewById(R.id.delete);
@@ -173,17 +231,19 @@ public class FilterActivity extends AppCompatActivity {
         deleteTags.setVisibility(INVISIBLE);
         deleteLang = filter_langView.findViewById(R.id.delete);
         deleteLang.setVisibility(INVISIBLE);
+        deleteName = filter_nameView.findViewById(R.id.delete);
+        deleteName.setVisibility(INVISIBLE);
+        deleteCodec = filter_codecView.findViewById(R.id.delete);
+        deleteCodec.setVisibility(INVISIBLE);
         TextView countryFilter = filter_countryView.findViewById(R.id.nameFilter);
         countryFilter.setText("Country");
         TextView tagFilter = filter_tagsView.findViewById(R.id.nameFilter);
         tagFilter.setText("Tags");
         TextView langFilter = filter_langView.findViewById(R.id.nameFilter);
         langFilter.setText("Lang");
-    }
-    private void hideKeyboard(View view){
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (imm != null) {
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        }
+        TextView nameFilter = filter_nameView.findViewById(R.id.nameFilter);
+        nameFilter.setText("Name");
+        TextView codecFilter = filter_codecView.findViewById(R.id.nameFilter);
+        codecFilter.setText("Codec");
     }
 }

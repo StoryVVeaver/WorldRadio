@@ -105,6 +105,12 @@ public class FilterViewModel extends ViewModel {
     public List<String> getTags(){
         return radioRepository.getTags();
     }
+    public List<String> getNames(){
+        return radioRepository.getNames();
+    }
+    public List<String> getCodecs(){
+        return radioRepository.getCodecs();
+    }
     public void setFilters(Filter filter){
         filterRepository.setFilters(new FilterDTO().fromModel(filter));
     }

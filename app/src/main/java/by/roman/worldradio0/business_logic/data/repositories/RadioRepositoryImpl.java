@@ -124,6 +124,24 @@ public class RadioRepositoryImpl implements RadioRepository {
         }
     }
     @Override
+    public List<String> getNames(){
+        try {
+            return radioStationDao.getNamesList();
+        } catch (Exception e) {
+            Log.e("RadioRepositoryImp","Failed load names list");
+            return null;
+        }
+    }
+    @Override
+    public List<String> getCodecs(){
+        try {
+            return radioStationDao.getCodecsList();
+        } catch (Exception e) {
+            Log.e("RadioRepositoryImp","Failed load codecs list");
+            return null;
+        }
+    }
+    @Override
     public int getCountFilteredStations(){
         try {
             Filter filter = filterDao.getFilters(userDao.getIdUserInSystem());

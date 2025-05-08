@@ -58,6 +58,48 @@ public class RadioStationDao {
     public RadioStationDao(SQLiteDatabase db) {
         this.db = db;
     }
+    public List<String> getNamesList() {
+        List<String> names = new ArrayList<>();
+        Cursor cursor = db.query(true,
+                TABLE_RADIO_STATION,
+                new String[]{COLUMN_NAME_STATION},
+                null,null,null,null,null,null);
+        if (cursor != null) {
+            try (cursor) {
+                int nameIndex = cursor.getColumnIndex(COLUMN_NAME_STATION);
+                if (nameIndex != -1) {
+                    while (cursor.moveToNext()) {
+                        String name = cursor.getString(nameIndex);
+                        if (name != null && !name.trim().isEmpty()) {
+                            names.add(name.trim());
+                        }
+                    }
+                }
+            }
+        }
+        return names;
+    }
+    public List<String> getCodecsList() {
+        List<String> codecs = new ArrayList<>();
+        Cursor cursor = db.query(true,
+                TABLE_RADIO_STATION,
+                new String[]{COLUMN_CODEC_STATION},
+                null,null,null,null,null,null);
+        if (cursor != null) {
+            try (cursor) {
+                int codecIndex = cursor.getColumnIndex(COLUMN_CODEC_STATION);
+                if (codecIndex != -1) {
+                    while (cursor.moveToNext()) {
+                        String codec = cursor.getString(codecIndex);
+                        if (codec != null && !codec.trim().isEmpty()) {
+                            codecs.add(codec.trim());
+                        }
+                    }
+                }
+            }
+        }
+        return codecs;
+    }
     public List<String> getCountryList() {
         List<String> countries = new ArrayList<>();
         Cursor cursor = db.query(true,
