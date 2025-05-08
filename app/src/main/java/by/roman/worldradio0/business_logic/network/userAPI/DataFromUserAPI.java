@@ -1,6 +1,5 @@
 package by.roman.worldradio0.business_logic.network.userAPI;
 
-import android.util.Log;
 
 import java.util.List;
 
@@ -8,7 +7,6 @@ import by.roman.worldradio0.business_logic.data.dto.FavoriteStationDTO;
 import by.roman.worldradio0.business_logic.data.dto.FilterDTO;
 import by.roman.worldradio0.business_logic.data.dto.SettingsDTO;
 import by.roman.worldradio0.business_logic.data.dto.UserDTO;
-import by.roman.worldradio0.business_logic.data.models.User;
 import by.roman.worldradio0.business_logic.data.models.UserRequest;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FavoritesCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FiltersCallback;
@@ -65,8 +63,8 @@ public class DataFromUserAPI {
             }
 
             @Override
-            public void onFailure(Throwable t) {
-                callback.onFailure(t);
+            public void onFailure(String text) {
+                callback.onFailure(text);
             }
         });
     }
@@ -78,8 +76,8 @@ public class DataFromUserAPI {
             }
 
             @Override
-            public void onFailure(Throwable t) {
-                callback.onFailure(t);
+            public void onFailure(String text) {
+                callback.onFailure(text);
             }
         });
     }

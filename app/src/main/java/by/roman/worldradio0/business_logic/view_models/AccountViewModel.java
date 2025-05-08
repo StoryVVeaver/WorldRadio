@@ -68,9 +68,8 @@ public class AccountViewModel extends ViewModel {
                 }
             }
             @Override
-            public void onFailure(Throwable t) {
-                result.postValue(UiState.error(t.getMessage()));
-                Log.e("AccountViewModel: reg", "Ошибка загрузки данных", t);
+            public void onFailure(String text) {
+                result.postValue(UiState.error(text));
             }
         }));
     }
@@ -92,9 +91,9 @@ public class AccountViewModel extends ViewModel {
                 }
             }
             @Override
-            public void onFailure(Throwable t) {
-                result.postValue(UiState.error(t.getMessage()));
-                Log.e("AccountViewModel: enter", "Ошибка загрузки данных", t);
+            public void onFailure(String text) {
+                result.postValue(UiState.error(text));
+                Log.e("AccountViewModel: enter", "Ошибка загрузки данных" + text);
             }
         }));
     }

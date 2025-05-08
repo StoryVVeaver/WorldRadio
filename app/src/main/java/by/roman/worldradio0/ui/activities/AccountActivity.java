@@ -33,11 +33,11 @@ public class AccountActivity extends AppCompatActivity {
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            findAllId();
-            entrance.setOnClickListener(v1 -> mode(new EntranceFragment(),0));
-            registration.setOnClickListener(v1 -> mode(new RegistrationFragment(),1));
             return insets;
         });
+        findAllId();
+        entrance.setOnClickListener(v1 -> mode(new EntranceFragment(),0));
+        registration.setOnClickListener(v1 -> mode(new RegistrationFragment(),1));
     }
 
     private void findAllId(){

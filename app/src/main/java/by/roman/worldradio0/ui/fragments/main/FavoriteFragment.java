@@ -29,7 +29,6 @@ public class FavoriteFragment extends Fragment {
     private RadioAdapter adapter;
     private FavoriteViewModel viewModel;
     private PlayerViewModel playerViewModel;
-    private int position;
     private boolean isLoadingNextPage = false;
 
     @Override
@@ -47,11 +46,12 @@ public class FavoriteFragment extends Fragment {
         super.onViewCreated(view,savedInstanceState);
 
         long startTime = System.nanoTime();
-        Log.v("Performance", "onViewCreated started");
+        Log.v("FavoriteFragment: performance", "onViewCreated started");
         findAllId(view);
         initAll();
         observeAndLoad();
-        Log.v("Performance", "onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
+        //TODO drag and drop
+        Log.v("FavoriteFragment: performance", "onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override

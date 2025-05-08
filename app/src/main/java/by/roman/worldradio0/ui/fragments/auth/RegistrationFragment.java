@@ -1,5 +1,9 @@
 package by.roman.worldradio0.ui.fragments.auth;
 
+import static android.view.View.INVISIBLE;
+import static android.view.View.VISIBLE;
+
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -16,6 +20,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import by.roman.worldradio0.R;
@@ -35,6 +41,9 @@ public class RegistrationFragment extends Fragment {
     private ImageView pass1Butt;
     private ImageView pass2Butt;
     private ImageView reg;
+    private TextView textReg;
+    private TextView errorText;
+    private ProgressBar progressBar;
     private AccountViewModel viewModel;
 
     @Override
@@ -67,11 +76,15 @@ public class RegistrationFragment extends Fragment {
         password2Card = view.findViewById(R.id.password2CardView_Registration);
         pass1Butt = view.findViewById(R.id.pass1Status_Registration);
         pass2Butt = view.findViewById(R.id.pass2Status_Registration);
+        textReg = view.findViewById(R.id.textReg_Registration);
+        errorText = view.findViewById(R.id.errorText_Registration);
+        progressBar = view.findViewById(R.id.progressBar_Registration);
         reg = view.findViewById(R.id.regButton);
     }
     private void initAll(){
         viewModel = new ViewModelProvider(this).get(AccountViewModel.class);
     }
+    @SuppressLint("SetTextI18n")
     private void buttons(){
         pass1Butt.setOnClickListener(v -> {
             if (password1Text.getTransformationMethod() instanceof PasswordTransformationMethod) {
@@ -95,6 +108,7 @@ public class RegistrationFragment extends Fragment {
         });
         reg.setOnClickListener(v -> {
             reg.setEnabled(false);
+            hideError();
             String login = loginText.getText().toString();
             String password1 = password1Text.getText().toString();
             String password2 = password2Text.getText().toString();
@@ -103,29 +117,31 @@ public class RegistrationFragment extends Fragment {
                     if(!password1.isEmpty()) {
                         startRegistration(login,password1);
                     } else {
-                        startError();
-                        //TODO пустой пароль
-                        Log.e("1","pass1");
+                        error(password1Text,password1Card);
+                        error(password2Text,password2Card);
+                        reg.setEnabled(true);
+                        errorText.setVisibility(VISIBLE);
+                        errorText.setText("Empty passwords");
                     }
                 } else {
-                    startError();
-                    //TODO пустой логин
-                    Log.e("1","log");
+                    error(loginText,loginCard);
+                    reg.setEnabled(true);
+                    errorText.setVisibility(VISIBLE);
+                    errorText.setText("Empty login");
                 }
             } else {
-                startError();
-                Log.e("1","pass");
-                //TODO несовпадение паролей
+                error(password1Text,password1Card);
+                error(password2Text,password2Card);
+                reg.setEnabled(true);
+                errorText.setVisibility(VISIBLE);
+                errorText.setText("Passwords don't match");
             }
         });
     }
     private void startRegistration(String login, String password1){
         viewModel.reg(new UserRequest(login, password1));
     }
-    private void startError(){
-        reg.setEnabled(true);
-        error();
-    }
+    @SuppressLint("SetTextI18n")
     private void observeResult(){
         viewModel.getUser().observe(getViewLifecycleOwner(),result ->{
             switch (result.status){
@@ -136,32 +152,48 @@ public class RegistrationFragment extends Fragment {
                     requireActivity().finish();
                     break;
                 case ERROR:
-                    Toast.makeText(getContext(), result.message, Toast.LENGTH_SHORT).show();
-                    startError();
+                    hideError();
+                    errorText.setVisibility(VISIBLE);
+                    if(result.message.equals("Already exists")) {
+                        error(loginText,loginCard);
+                        errorText.setText(result.message);
+                    }
+                    if(result.message.startsWith("failed to connect")){
+                        errorText.setText("Check your network connection");
+                    } else {
+                        error(loginText,loginCard);
+                        error(password1Text,password1Card);
+                        error(password2Text,password2Card);
+                        errorText.setText("Something went wrong");
+                    }
+                    hideLoading();
                     break;
             }
         });
     }
-    private void showLoading(){
-        //TODO
+    private void hideError(){
+        loginCard.setInnerGlowEnabled(false);
+        password1Card.setInnerGlowEnabled(false);
+        password2Card.setInnerGlowEnabled(false);
     }
-    private void error() {
+    private void showLoading(){
+        textReg.setVisibility(INVISIBLE);
+        progressBar.setVisibility(VISIBLE);
+    }
+    private void hideLoading(){
+        textReg.setVisibility(VISIBLE);
+        progressBar.setVisibility(INVISIBLE);
+    }
+    private void error(@NonNull EditText text, @NonNull InnerGlowMaterialCardView card) {
         int errorColor = ContextCompat.getColor(requireContext(), R.color.red);
         int lightErrorColor = ContextCompat.getColor(requireContext(), R.color.lightRed);
 
-        loginText.setText("");
-        password1Text.setText("");
-        password2Text.setText("");
-        Toast.makeText(requireContext(), "Ошибка ввода", Toast.LENGTH_SHORT).show();
+        text.setText("");
 
         float elevationPx = dpToPx(30);
         int strokePx     = (int) dpToPx(2);
-        loginCard.setInnerGlowEnabled(true);
-        password1Card.setInnerGlowEnabled(true);
-        password2Card.setInnerGlowEnabled(true);
-        applyErrorStyle(loginCard, elevationPx, strokePx, errorColor,lightErrorColor);
-        applyErrorStyle(password1Card, elevationPx, strokePx, errorColor,lightErrorColor);
-        applyErrorStyle(password2Card, elevationPx, strokePx, errorColor,lightErrorColor);
+        card.setInnerGlowEnabled(true);
+        applyErrorStyle(card, elevationPx, strokePx, errorColor,lightErrorColor);
     }
     private void applyErrorStyle(@NonNull InnerGlowMaterialCardView card, float elevationPx, int strokePx, int color,int lightColor) {
         card.setCardElevation(elevationPx);

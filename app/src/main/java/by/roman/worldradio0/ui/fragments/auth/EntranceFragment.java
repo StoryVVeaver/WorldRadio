@@ -1,5 +1,8 @@
 package by.roman.worldradio0.ui.fragments.auth;
 
+import static android.view.View.INVISIBLE;
+import static android.view.View.VISIBLE;
+
 import android.annotation.SuppressLint;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,6 +25,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.card.MaterialCardView;
@@ -41,6 +46,9 @@ public class EntranceFragment extends Fragment {
     private ImageView enterButton;
     private InnerGlowMaterialCardView loginCard;
     private InnerGlowMaterialCardView passwordCard;
+    private TextView textReg;
+    private TextView errorText;
+    private ProgressBar progressBar;
     private boolean passVisibility;
     private String login;
     private String password;
@@ -73,10 +81,14 @@ public class EntranceFragment extends Fragment {
         enterButton = view.findViewById(R.id.enterButton);
         loginCard = view.findViewById(R.id.loginCardView_Entrance);
         passwordCard = view.findViewById(R.id.passwordCardView_Entrance);
+        textReg = view.findViewById(R.id.textEnter_Entrance);
+        errorText = view.findViewById(R.id.errorText_Entrance);
+        progressBar = view.findViewById(R.id.progressBar_Entrance);
     }
     private void initAll(){
         viewModel = new ViewModelProvider(this).get(AccountViewModel.class);
     }
+    @SuppressLint("SetTextI18n")
     private void buttons(){
         passButton.setOnClickListener(v -> {
             if (passwordText.getTransformationMethod() instanceof PasswordTransformationMethod) {
@@ -90,27 +102,27 @@ public class EntranceFragment extends Fragment {
         });
         enterButton.setOnClickListener(v -> {
             enterButton.setEnabled(false);
+            hideError();
             login = loginText.getText().toString();
             password = passwordText.getText().toString();
             if(!login.isEmpty()){
                 if(!password.isEmpty()) {
                     viewModel.enter(new UserRequest(login,password));
                 } else {
-                    startError();
-                    //TODO пустой пароль
-                    Log.e("1","pass1");
+                    enterButton.setEnabled(true);
+                    error(passwordText,passwordCard);
+                    errorText.setVisibility(VISIBLE);
+                    errorText.setText("Empty password");
                 }
             } else {
-                startError();
-                //TODO пустой логин
-                Log.e("1","log");
+                enterButton.setEnabled(true);
+                error(loginText,loginCard);
+                errorText.setVisibility(VISIBLE);
+                errorText.setText("Empty login");
             }
         });
     }
-    private void startError(){
-        enterButton.setEnabled(true);
-        showError();
-    }
+    @SuppressLint("SetTextI18n")
     private void observeResult(){
         viewModel.getUser().observe(getViewLifecycleOwner(),result ->{
             switch (result.status){
@@ -121,30 +133,48 @@ public class EntranceFragment extends Fragment {
                     requireActivity().finish();
                     break;
                 case ERROR:
-                    Toast.makeText(getContext(), result.message, Toast.LENGTH_SHORT).show();
-                    showError();
+                    hideError();
+                    errorText.setVisibility(VISIBLE);
+                    if(result.message.equals("Invalid login data")){
+                        error(loginText,loginCard);
+                        error(passwordText,passwordCard);
+                        errorText.setText(result.message);
+                    }
+                    if(result.message.startsWith("failed to connect")){
+                        errorText.setText("Check your network connection");
+                    } else {
+                        error(loginText,loginCard);
+                        error(passwordText,passwordCard);
+                        errorText.setText("Something went wrong");
+                    }
+                    hideLoading();
                     enterButton.setEnabled(true);
                     break;
             }
         });
     }
-    private void showLoading(){
-        //TODO
+    private void hideError(){
+        loginCard.setInnerGlowEnabled(false);
+        passwordCard.setInnerGlowEnabled(false);
     }
-    private void showError() {
+    private void showLoading(){
+        textReg.setVisibility(INVISIBLE);
+        progressBar.setVisibility(VISIBLE);
+    }
+    private void hideLoading(){
+        textReg.setVisibility(VISIBLE);
+        progressBar.setVisibility(INVISIBLE);
+    }
+    private void error(EditText text,InnerGlowMaterialCardView card) {
         int errorColor = ContextCompat.getColor(requireContext(), R.color.red);
         int lightErrorColor = ContextCompat.getColor(requireContext(), R.color.lightRed);
 
-        loginText.setText("");
-        passwordText.setText("");
-        Toast.makeText(requireContext(), "Ошибка ввода", Toast.LENGTH_SHORT).show();
+        text.setText("");
 
         float elevationPx = dpToPx(30);
         int strokePx     = (int) dpToPx(2);
-        loginCard.setInnerGlowEnabled(true);
-        passwordCard.setInnerGlowEnabled(true);
-        applyErrorStyle(loginCard, elevationPx, strokePx, errorColor,lightErrorColor);
-        applyErrorStyle(passwordCard, elevationPx, strokePx, errorColor,lightErrorColor);
+        card.setInnerGlowEnabled(true);
+        applyErrorStyle(card, elevationPx, strokePx, errorColor,lightErrorColor);
     }
     private void applyErrorStyle(@NonNull InnerGlowMaterialCardView card, float elevationPx, int strokePx, int color,int lightColor) {
         card.setCardElevation(elevationPx);

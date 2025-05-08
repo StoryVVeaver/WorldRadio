@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -28,6 +29,7 @@ public class CollapsedPlayerFragment extends Fragment {
     private ImageView logo;
     private TextView station;
     private TextView track;
+    private CardView bottomPlayer;
     private PlayerViewModel viewModel;
 
     @Override
@@ -57,6 +59,7 @@ public class CollapsedPlayerFragment extends Fragment {
         logo = view.findViewById(R.id.bottom_player_logo);
         station = view.findViewById(R.id.bottom_player_station);
         track = view.findViewById(R.id.bottom_player_track);
+        bottomPlayer = view.findViewById(R.id.bottomPlayer);
     }
     private void initAll(){
         viewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
@@ -74,11 +77,12 @@ public class CollapsedPlayerFragment extends Fragment {
                 .into(logo);
     }
     private void buttons(){
+        //TODO fix icons
         if (viewModel.getIsPlaying()) {
-            play_pause.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.pause));
+            play_pause.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.play));
         } else {
             play_pause.setImageDrawable(AppCompatResources
-                    .getDrawable(requireContext(), R.drawable.play));
+                    .getDrawable(requireContext(), R.drawable.pause));
         }
         play_pause.setOnClickListener(v -> {
             if(viewModel.getIsPlaying()){
@@ -86,6 +90,9 @@ public class CollapsedPlayerFragment extends Fragment {
             } else {
                 viewModel.play();
             }
+        });
+        bottomPlayer.setOnClickListener(v -> {
+            //TODO expanded
         });
         stop_btn.setOnClickListener(v -> viewModel.stop());
     }

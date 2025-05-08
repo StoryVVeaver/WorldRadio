@@ -1,5 +1,6 @@
 package by.roman.worldradio0.ui.fragments.main;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -22,6 +23,7 @@ import by.roman.worldradio0.business_logic.adapters.RadioAdapter;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.view_models.HomeViewModel;
 import by.roman.worldradio0.business_logic.view_models.PlayerViewModel;
+import by.roman.worldradio0.ui.activities.TimerActivity;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -34,6 +36,11 @@ public class HomeFragment extends Fragment {
     private int position;
     private boolean isLoadingNextPage = false;
 
+    @Override
+    public void onResume(){
+        super.onResume();
+        timerButton.setEnabled(true);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,15 +57,17 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view,savedInstanceState);
 
         long startTime = System.nanoTime();
-        Log.v("Performance", "onViewCreated started");
+        Log.v("HomeFragment: performance", "onViewCreated started");
         findAllId(view);
         initAll();
         observeAndLoad();
-        Log.v("Performance", "onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
+        Log.v("HomeFragment: performance", "onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
 
         timerButton.setOnClickListener(v -> {
-            Log.d("HomeFragment","Start loading");
-            //viewModel.loadFromAPI();
+            timerButton.setEnabled(false);
+            //TODO
+            //Intent intent = new Intent(getContext(), TimerActivity.class);
+            //startActivity(intent);
         });
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {

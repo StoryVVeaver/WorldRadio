@@ -23,7 +23,7 @@
             app:layout_constraintTop_toBottomOf="@+id/password2CardView_Registration" />
 
         <TextView
-            android:id="@+id/textView3"
+            android:id="@+id/textReg_Registration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Регистрация"
@@ -93,13 +93,14 @@
             android:id="@+id/loginCardView_Registration"
             android:layout_width="0dp"
             android:layout_height="60dp"
-            app:strokeWidth="0dp"
             android:layout_marginStart="34dp"
+            android:layout_marginTop="30dp"
             android:layout_marginEnd="34dp"
             app:cardCornerRadius="15dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:strokeWidth="0dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -188,5 +189,28 @@
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </by.roman.worldradio0.ui.elements.view.InnerGlowMaterialCardView>
+
+        <ProgressBar
+            android:id="@+id/progressBar_Registration"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@+id/regButton"
+            app:layout_constraintEnd_toEndOf="@+id/regButton"
+            app:layout_constraintStart_toStartOf="@+id/regButton"
+            app:layout_constraintTop_toTopOf="@+id/regButton" />
+
+        <TextView
+            android:id="@+id/errorText_Registration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TextView"
+            android:textColor="@color/red"
+            android:textSize="14sp"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toTopOf="@+id/loginCardView_Registration"
+            app:layout_constraintStart_toStartOf="@+id/loginCardView_Registration"
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

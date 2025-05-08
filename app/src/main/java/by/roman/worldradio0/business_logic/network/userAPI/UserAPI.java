@@ -227,11 +227,12 @@ public class UserAPI {
 
                         if (response.code() != 200) {
                             Log.e("UserAPI: reg", "Response code: " + response.code());
+                            callback.onFailure("code: " + response.code());
                             return;
                         }
                         if (jsonResponse.isEmpty()) {
                             Log.e("UserAPI: reg", "Empty response body.");
-                            callback.onFailure(new Exception("Empty response body"));
+                            callback.onFailure("Empty response body");
                             return;
                         }
                         Gson gson = new GsonBuilder().create();
@@ -242,14 +243,14 @@ public class UserAPI {
                                 callback.onSuccess(new UserDTO().fromModel(user));
                             } else {
                                 Log.e("UserAPI: reg", "Unexpected response: " + jsonResponse);
-                                callback.onFailure(new Exception("Unexpected response: " + jsonResponse));
+                                callback.onFailure(jsonResponse);
                             }
                         } catch (JsonSyntaxException e) {
                             Log.e("UserAPI: reg", "JSON parsing error", e);
-                            callback.onFailure(e);
+                            callback.onFailure(e.getMessage());
                         }
                     } catch (IOException e) {
-                        callback.onFailure(e);
+                        callback.onFailure(e.getMessage());
                         throw new RuntimeException(e);
                     }
                 }
@@ -257,7 +258,7 @@ public class UserAPI {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 e.printStackTrace();
-                callback.onFailure(e);
+                callback.onFailure(e.getMessage());
             }
         });
     }
@@ -284,12 +285,13 @@ public class UserAPI {
                         Log.d("UserAPI: enter", "Response: " + jsonResponse);
 
                         if (response.code() != 200) {
+                            callback.onFailure("code: " + response.code());
                             Log.e("UserAPI: enter", "Response code: " + response.code());
                             return;
                         }
                         if (jsonResponse.isEmpty()) {
                             Log.e("UserAPI: enter", "Empty response body.");
-                            callback.onFailure(new Exception("Empty response body"));
+                            callback.onFailure("Empty response body");
                             return;
                         }
                         Gson gson = new GsonBuilder().create();
@@ -300,14 +302,14 @@ public class UserAPI {
                                 callback.onSuccess(new UserDTO().fromModel(user));
                             } else {
                                 Log.e("UserAPI: enter", "Unexpected response: " + jsonResponse);
-                                callback.onFailure(new Exception("Unexpected response: " + jsonResponse));
+                                callback.onFailure(jsonResponse);
                             }
                         } catch (JsonSyntaxException e) {
                             Log.e("UserAPI: enter", "JSON parsing error", e);
-                            callback.onFailure(e);
+                            callback.onFailure(e.getMessage());
                         }
                     } catch (IOException e) {
-                        callback.onFailure(e);
+                        callback.onFailure(e.getMessage());
                         throw new RuntimeException(e);
                     }
                 }
@@ -315,7 +317,7 @@ public class UserAPI {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 e.printStackTrace();
-                callback.onFailure(e);
+                callback.onFailure(e.getMessage());
             }
         });
     }

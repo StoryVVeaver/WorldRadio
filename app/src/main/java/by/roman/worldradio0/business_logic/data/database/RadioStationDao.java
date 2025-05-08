@@ -250,7 +250,7 @@ public class RadioStationDao {
                 orderBy,
                 currentPage * pageSize + "," + pageSize);
 
-        if (cursor != null) { //TODO
+        if (cursor != null) {
             try (cursor){
                 while (cursor.moveToNext()) {
                     RadioStation station = createStationFromCursor(cursor);

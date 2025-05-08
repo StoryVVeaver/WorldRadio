@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,29 +61,16 @@ public class FilterFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState){
         super.onViewCreated(view,savedInstanceState);
+
+        long startTime = System.nanoTime();
+        Log.v("FilterFragment: performance", "onViewCreated started");
         findAllId(view);
-        filter.setOnClickListener(v -> {
-            filter.setEnabled(false);
-            Intent intent = new Intent(getContext(), FilterActivity.class);
-            startActivity(intent);
-            activityCalled = true;
-        });
-        adapter = new RadioAdapter(getContext(), new RadioAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(int position) {
-                playerViewModel.setPlaying(adapter.getUUID(position));
-                playerViewModel.start();
-                Toast.makeText(requireContext(),"id: " + position,Toast.LENGTH_SHORT).show();
-            }
-            @Override
-            public void onDeleteClick(int position) {
-            }
-        });
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(adapter);
-        viewModel = new ViewModelProvider(this).get(FilterViewModel.class);
-        playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
+        initAll();
+        buttons();
         observeAndLoad();
+        Log.v("FilterFragment: performance", "onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
+
+
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -101,6 +89,31 @@ public class FilterFragment extends Fragment {
                 }
             }
         });
+    }
+    private void buttons(){
+        filter.setOnClickListener(v -> {
+            filter.setEnabled(false);
+            Intent intent = new Intent(getContext(), FilterActivity.class);
+            startActivity(intent);
+            activityCalled = true;
+        });
+    }
+    private void initAll(){
+        adapter = new RadioAdapter(getContext(), new RadioAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(int position) {
+                playerViewModel.setPlaying(adapter.getUUID(position));
+                playerViewModel.start();
+                Toast.makeText(requireContext(),"id: " + position,Toast.LENGTH_SHORT).show();
+            }
+            @Override
+            public void onDeleteClick(int position) {
+            }
+        });
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(adapter);
+        viewModel = new ViewModelProvider(this).get(FilterViewModel.class);
+        playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
     }
     private void findAllId(View view){
         recyclerView = view.findViewById(R.id.cardTopView);

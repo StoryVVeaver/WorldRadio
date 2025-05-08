@@ -1,19 +1,14 @@
 package by.roman.worldradio0.ui.activities;
 
-import static android.view.View.GONE;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -22,17 +17,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import by.roman.worldradio0.R;
-import by.roman.worldradio0.business_logic.UiState;
 import by.roman.worldradio0.business_logic.data.models.Filter;
 import by.roman.worldradio0.business_logic.view_models.FilterViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
@@ -64,11 +56,16 @@ public class FilterActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        long startTime = System.nanoTime();
+        Log.v("FilterActivity: performance", "onCreated started");
         findAllId();
         initAll();
         observeAndLoad();
         buttons();
         fillFields();
+        Log.v("FilterActivity: performance", "onCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
+        //TODO chips
+        //TODO asynch loading
     }
     private void fillFields(){
         try{
