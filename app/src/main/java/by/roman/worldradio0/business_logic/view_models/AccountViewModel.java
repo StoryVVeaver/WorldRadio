@@ -12,7 +12,11 @@ import java.util.concurrent.Executors;
 import javax.inject.Inject;
 
 import by.roman.worldradio0.business_logic.UiState;
+import by.roman.worldradio0.business_logic.data.dto.FilterDTO;
+import by.roman.worldradio0.business_logic.data.dto.SettingsDTO;
 import by.roman.worldradio0.business_logic.data.dto.UserDTO;
+import by.roman.worldradio0.business_logic.data.models.Filter;
+import by.roman.worldradio0.business_logic.data.models.Settings;
 import by.roman.worldradio0.business_logic.data.models.User;
 import by.roman.worldradio0.business_logic.data.models.UserRequest;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteRepository;
@@ -55,6 +59,8 @@ public class AccountViewModel extends ViewModel {
                 try {
                     userRepository.useradd(dto);
                     userRepository.setUserInSystem(dto.getId());
+                    settingsRepository.addSettings(new SettingsDTO().fromModel(new Settings(dto.getId(),0,0,0,0,0)));
+                    filterRepository.addFilters(new FilterDTO().fromModel(new Filter(dto.getId(),null,null,null,0)));
                     result.postValue(UiState.success(true));
                 } catch (Exception e) {
                     result.postValue(UiState.error(e.getMessage()));
@@ -77,6 +83,8 @@ public class AccountViewModel extends ViewModel {
                 try {
                     userRepository.useradd(dto);
                     userRepository.setUserInSystem(dto.getId());
+                    settingsRepository.addSettings(new SettingsDTO().fromModel(new Settings(dto.getId(),0,0,0,0,0)));
+                    filterRepository.addFilters(new FilterDTO().fromModel(new Filter(dto.getId(),null,null,null,0)));
                     result.postValue(UiState.success(true));
                 } catch (Exception e) {
                     result.postValue(UiState.error(e.getMessage()));

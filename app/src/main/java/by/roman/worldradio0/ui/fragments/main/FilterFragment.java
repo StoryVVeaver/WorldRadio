@@ -34,6 +34,8 @@ public class FilterFragment extends Fragment {
     private RecyclerView recyclerView;
     private ImageView filter;
     private boolean isLoadingNextPage = false;
+    private boolean resume = false;
+    private boolean activityCalled = false;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,7 +43,13 @@ public class FilterFragment extends Fragment {
     @Override
     public void onResume(){
         super.onResume();
-        filter.setEnabled(true);
+        if(activityCalled){
+            filter.setEnabled(true);
+            resume = true;
+            viewModel.setPage(0);
+            viewModel.loadStart();
+            activityCalled = false;
+        }
     }
 
     @Override
@@ -57,12 +65,14 @@ public class FilterFragment extends Fragment {
             filter.setEnabled(false);
             Intent intent = new Intent(getContext(), FilterActivity.class);
             startActivity(intent);
+            activityCalled = true;
         });
         adapter = new RadioAdapter(getContext(), new RadioAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position) {
                 playerViewModel.setPlaying(adapter.getUUID(position));
                 playerViewModel.start();
+                Toast.makeText(requireContext(),"id: " + position,Toast.LENGTH_SHORT).show();
             }
             @Override
             public void onDeleteClick(int position) {
@@ -97,7 +107,7 @@ public class FilterFragment extends Fragment {
         filter = view.findViewById(R.id.filterButtonView);
     }
     private void observeAndLoad() {
-        viewModel.getFilteredStations().observe(getViewLifecycleOwner(), stations -> {
+            viewModel.getFilteredStations().observe(getViewLifecycleOwner(), stations -> {
             switch (stations.status) {
                 case LOADING:
                     if (adapter.getItemCount() > 0) {
@@ -107,7 +117,12 @@ public class FilterFragment extends Fragment {
                 case SUCCESS:
                     adapter.hideLoading();
                     List<RadioStation> Data = stations.data;
-                    adapter.addStations(Data.subList(adapter.getItemCount(), Data.size()));
+                    if(resume){
+                        adapter.replaceAll(Data);
+                        resume = false;
+                    } else {
+                        adapter.addStations(Data.subList(adapter.getItemCount(), Data.size()));
+                    }
                     isLoadingNextPage = false;
                     break;
                 case ERROR:
@@ -117,6 +132,5 @@ public class FilterFragment extends Fragment {
                     break;
             }
         });
-        viewModel.loadNextPage();
     }
 }

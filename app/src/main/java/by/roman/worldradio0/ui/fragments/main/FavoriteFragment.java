@@ -113,7 +113,5 @@ public class FavoriteFragment extends Fragment {
                     break;
             }
         });
-
-        viewModel.loadNextPage();
     }
 }

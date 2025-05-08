@@ -51,10 +51,11 @@ public class HomeViewModel extends ViewModel {
         stations.setValue(UiState.loading());
         executor.execute(() -> {
             try {
+                Log.d("HomeVW", "before_page: " + currentPage);
                 List<RadioStation> list = radioRepository.getAllStations(currentPage,pageSize);
                 list.isEmpty(); // вызов ошибки
                 stations.postValue(UiState.success(list));
-                currentPage++;
+                Log.d("HomeVW", "after_page: " + currentPage);
             } catch (Exception e) {
                 stations.postValue(UiState.error("Ошибка загрузки: " + e.getMessage()));
             }
@@ -64,6 +65,7 @@ public class HomeViewModel extends ViewModel {
         if (isLastPage) return;
         executor.execute(() -> {
             try {
+                Log.d("HomeVW", "before_page: " + currentPage);
                 List<RadioStation> list = radioRepository.getAllStations(currentPage, pageSize);
                 if (list.isEmpty()) {
                     isLastPage = true;
@@ -74,6 +76,7 @@ public class HomeViewModel extends ViewModel {
                     currentList.addAll(list);
                     stations.postValue(UiState.success(currentList));
                     currentPage++;
+                    Log.d("HomeVW", "after_page: " + currentPage);
                 }
             } catch (Exception e) {
                 stations.postValue(UiState.error("Ошибка загрузки: " + e.getMessage()));

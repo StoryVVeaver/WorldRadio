@@ -1,10 +1,13 @@
 package by.roman.worldradio0.business_logic.view_models;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,28 +27,48 @@ public class FilterViewModel extends ViewModel {
     private final RadioRepository radioRepository;
     private final FilterRepository filterRepository;
     private final MutableLiveData<UiState<List<RadioStation>>> stations = new MutableLiveData<>();
+    private final MutableLiveData<UiState<Integer>>  count = new MutableLiveData<>();
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
     private int currentPage = 0;
     private boolean isLastPage = false;
-    private final int pageSize = 50;
+    private final int pageSize = 10;
     public boolean getIsLastPage() {
         return isLastPage;
+    }
+    public void setPage(int page){
+        this.currentPage = page;
     }
     @Inject
     public FilterViewModel(RadioRepository radioRepository, FilterRepository filterRepository){
         this.radioRepository = radioRepository;
         this.filterRepository = filterRepository;
-        loadFiltered();
+        loadStart();
     }
     public LiveData<UiState<List<RadioStation>>> getFilteredStations() {
         return stations;
     }
-    private void loadFiltered(){
+    public LiveData<UiState<Integer>> getCountFilteredStations() {
+        return count;
+    }
+    public void loadCount(){
+        stations.setValue(UiState.loading());
+        executor.execute(() -> {
+            try {
+                int cnt = radioRepository.getCountFilteredStations();
+                count.postValue(UiState.success(cnt));
+            } catch (Exception e) {
+                count.postValue(UiState.error("Ошибка загрузки: " + e.getMessage()));
+            }
+        });
+    }
+    public void loadStart(){
         stations.setValue(UiState.loading());
         executor.execute(() -> {
             try {
                 List<RadioStation> list = radioRepository.getFilteredStations(currentPage,pageSize);
-                list.isEmpty(); // вызов ошибки
+                if(list.isEmpty()){
+                    stations.postValue(UiState.error("Лист пуст"));
+                }
                 stations.postValue(UiState.success(list));
                 currentPage++;
             } catch (Exception e) {
@@ -82,11 +105,11 @@ public class FilterViewModel extends ViewModel {
     public List<String> getTags(){
         return radioRepository.getTags();
     }
-    public int getCountStations(){
-        return radioRepository.getCountFilteredStations();
+    public void setFilters(Filter filter){
+        filterRepository.setFilters(new FilterDTO().fromModel(filter));
     }
-    public void filteradd(){
-        filterRepository.addFilters(new FilterDTO().fromModel(new Filter(1,null,null,null,0)));
+    public Filter getFilters(){
+        return filterRepository.getFilters();
     }
     @Override
     protected void onCleared() {

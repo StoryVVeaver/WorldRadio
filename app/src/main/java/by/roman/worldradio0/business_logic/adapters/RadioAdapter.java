@@ -101,8 +101,18 @@ public class RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         stations.addAll(newStations);
         notifyItemRangeInserted(start, newStations.size());
     }
+    @SuppressLint("NotifyDataSetChanged")
+    public void replaceAll(List<RadioStation> newStations) {
+        stations.clear();
+        stations.addAll(newStations);
+        notifyDataSetChanged();
+    }
 
-
+    @SuppressLint("NotifyDataSetChanged")
+    public void clear() {
+        stations.clear();
+        notifyDataSetChanged();
+    }
     public void showLoading() {
         isLoading = true;
         notifyItemInserted(stations.size());

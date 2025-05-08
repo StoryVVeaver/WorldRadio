@@ -98,11 +98,33 @@ public class RegistrationFragment extends Fragment {
             String login = loginText.getText().toString();
             String password1 = password1Text.getText().toString();
             String password2 = password2Text.getText().toString();
-            Log.d("RegFrag","Start reg");
             if(password1.equals(password2)) {
-                viewModel.reg(new UserRequest(login, password1));
+                if(!login.isEmpty()){
+                    if(!password1.isEmpty()) {
+                        startRegistration(login,password1);
+                    } else {
+                        startError();
+                        //TODO пустой пароль
+                        Log.e("1","pass1");
+                    }
+                } else {
+                    startError();
+                    //TODO пустой логин
+                    Log.e("1","log");
+                }
+            } else {
+                startError();
+                Log.e("1","pass");
+                //TODO несовпадение паролей
             }
         });
+    }
+    private void startRegistration(String login, String password1){
+        viewModel.reg(new UserRequest(login, password1));
+    }
+    private void startError(){
+        reg.setEnabled(true);
+        error();
     }
     private void observeResult(){
         viewModel.getUser().observe(getViewLifecycleOwner(),result ->{
@@ -115,8 +137,7 @@ public class RegistrationFragment extends Fragment {
                     break;
                 case ERROR:
                     Toast.makeText(getContext(), result.message, Toast.LENGTH_SHORT).show();
-                    showError();
-                    reg.setEnabled(true);
+                    startError();
                     break;
             }
         });
@@ -124,8 +145,9 @@ public class RegistrationFragment extends Fragment {
     private void showLoading(){
         //TODO
     }
-    private void showError() {
+    private void error() {
         int errorColor = ContextCompat.getColor(requireContext(), R.color.red);
+        int lightErrorColor = ContextCompat.getColor(requireContext(), R.color.lightRed);
 
         loginText.setText("");
         password1Text.setText("");
@@ -133,22 +155,22 @@ public class RegistrationFragment extends Fragment {
         Toast.makeText(requireContext(), "Ошибка ввода", Toast.LENGTH_SHORT).show();
 
         float elevationPx = dpToPx(30);
-        int strokePx     = (int) dpToPx(1);
+        int strokePx     = (int) dpToPx(2);
         loginCard.setInnerGlowEnabled(true);
         password1Card.setInnerGlowEnabled(true);
         password2Card.setInnerGlowEnabled(true);
-        applyErrorStyle(loginCard, elevationPx, strokePx, errorColor);
-        applyErrorStyle(password1Card, elevationPx, strokePx, errorColor);
-        applyErrorStyle(password2Card, elevationPx, strokePx, errorColor);
+        applyErrorStyle(loginCard, elevationPx, strokePx, errorColor,lightErrorColor);
+        applyErrorStyle(password1Card, elevationPx, strokePx, errorColor,lightErrorColor);
+        applyErrorStyle(password2Card, elevationPx, strokePx, errorColor,lightErrorColor);
     }
-    private void applyErrorStyle(@NonNull InnerGlowMaterialCardView card, float elevationPx, int strokePx, int color) {
+    private void applyErrorStyle(@NonNull InnerGlowMaterialCardView card, float elevationPx, int strokePx, int color,int lightColor) {
         card.setCardElevation(elevationPx);
 
         card.setStrokeWidth(strokePx);
         card.setStrokeColor(color);
 
         card.setOutlineAmbientShadowColor(color);
-        card.setOutlineSpotShadowColor(color);
+        card.setOutlineSpotShadowColor(lightColor);
     }
     private float dpToPx(int dp) {
         return TypedValue.applyDimension(

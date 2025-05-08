@@ -60,6 +60,7 @@ public class HomeFragment extends Fragment {
             Log.d("HomeFragment","Start loading");
             //viewModel.loadFromAPI();
         });
+
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -100,8 +101,6 @@ public class HomeFragment extends Fragment {
                     break;
             }
         });
-
-        viewModel.loadNextPage();
     }
     private void findAllId(View view){
         timerButton = view.findViewById(R.id.timerButtonView);
@@ -113,6 +112,7 @@ public class HomeFragment extends Fragment {
             public void onItemClick(int position) {
                 playerViewModel.setPlaying(adapter.getUUID(position));
                 playerViewModel.start();
+                Toast.makeText(requireContext(),"id: " + position,Toast.LENGTH_SHORT).show();
             }
             @Override
             public void onDeleteClick(int position) {

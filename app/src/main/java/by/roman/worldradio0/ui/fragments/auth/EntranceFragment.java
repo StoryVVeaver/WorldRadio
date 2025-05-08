@@ -92,8 +92,24 @@ public class EntranceFragment extends Fragment {
             enterButton.setEnabled(false);
             login = loginText.getText().toString();
             password = passwordText.getText().toString();
-            viewModel.enter(new UserRequest(login,password));
+            if(!login.isEmpty()){
+                if(!password.isEmpty()) {
+                    viewModel.enter(new UserRequest(login,password));
+                } else {
+                    startError();
+                    //TODO пустой пароль
+                    Log.e("1","pass1");
+                }
+            } else {
+                startError();
+                //TODO пустой логин
+                Log.e("1","log");
+            }
         });
+    }
+    private void startError(){
+        enterButton.setEnabled(true);
+        showError();
     }
     private void observeResult(){
         viewModel.getUser().observe(getViewLifecycleOwner(),result ->{
