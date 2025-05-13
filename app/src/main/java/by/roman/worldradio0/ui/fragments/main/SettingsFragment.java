@@ -33,6 +33,7 @@ public class SettingsFragment extends Fragment {
         long startTime = System.nanoTime();
         Log.v("SettingsFragment: performance", "onViewCreated started");
         findAllId(view);
+        //TODO
         Log.v("SettingsFragment: performance", "onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
     }
     private void findAllId(View view){

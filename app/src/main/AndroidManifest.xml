@@ -40,8 +40,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".business_logic.player.PlayerService"
-            android:exported="false"/>
+        <service android:name=".business_logic.player.PlayerService" android:exported="false"/>
+        <service android:name=".business_logic.media.TimerService" android:exported="false"/>
 
     </application>
 

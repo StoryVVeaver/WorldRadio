@@ -31,7 +31,9 @@ public class ExpandedPlayerFragment extends Fragment {
         super.onViewCreated(view,savedInstanceState);
 
         long startTime = System.nanoTime();
+        Log.v("EntranceFragment","Performance - onViewCreated started");
         findAll(view);
+        //TODO
         Log.v("EntranceFragment","Performance - onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
     }
     private void findAll(View view){

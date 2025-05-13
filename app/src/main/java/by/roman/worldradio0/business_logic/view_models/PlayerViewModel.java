@@ -68,26 +68,34 @@ public class PlayerViewModel extends ViewModel {
     public void stop(){
         Intent intent = new Intent(context, PlayerService.class);
         intent.setAction(PlayerService.ACTION_STOP);
-        context.startService(intent);
+        startForegroundService(context, intent);
     }
 
     @OptIn(markerClass = UnstableApi.class)
     public void play(){
         Intent intent = new Intent(context, PlayerService.class);
         intent.setAction(PlayerService.ACTION_PLAY);
-        context.startService(intent);
+        startForegroundService(context, intent);
     }
     @OptIn(markerClass = UnstableApi.class)
     public void pause(){
         Intent intent = new Intent(context, PlayerService.class);
         intent.setAction(PlayerService.ACTION_PAUSE);
-        context.startService(intent);
+        startForegroundService(context, intent);
     }
     public void addToFavorite(){
-        favoriteRepository.addToFavorite(userRepository.getPlayingUUID());
+        try {
+            favoriteRepository.addToFavorite(userRepository.getPlayingUUID());
+        } catch (Exception e) {
+            Log.e("PlayerVM", "Failed add to favorite");
+        }
     }
     public void removeFromFavorite(){
-        favoriteRepository.removeFromFavorite(userRepository.getPlayingUUID());
+        try {
+            favoriteRepository.removeFromFavorite(userRepository.getPlayingUUID());
+        } catch (Exception e) {
+            Log.e("PlayerVM", "Failed remove from favorite");
+        }
     }
     public void setPlaying(String UUID){
         try {
@@ -103,4 +111,3 @@ public class PlayerViewModel extends ViewModel {
         return radioManager.getIsPlaying();
     }
 }
-//возможно нужно как-то сигналить ui о успехе операции

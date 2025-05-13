@@ -121,7 +121,8 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:contentDescription=""
-                    android:src="@drawable/romb" />
+                    android:src="@drawable/romb"
+                    android:visibility="gone" />
 
                 <!-- Третья колонка (секунды) -->
                 <androidx.recyclerview.widget.RecyclerView
@@ -130,7 +131,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:clipToPadding="false"
-                    android:paddingVertical="50dp" />
+                    android:paddingVertical="50dp"
+                    android:visibility="gone" />
 
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>

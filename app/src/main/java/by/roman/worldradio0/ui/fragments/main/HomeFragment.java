@@ -65,9 +65,8 @@ public class HomeFragment extends Fragment {
 
         timerButton.setOnClickListener(v -> {
             timerButton.setEnabled(false);
-            //TODO
-            //Intent intent = new Intent(getContext(), TimerActivity.class);
-            //startActivity(intent);
+            Intent intent = new Intent(getContext(), TimerActivity.class);
+            startActivity(intent);
         });
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {

@@ -33,6 +33,7 @@ public class GlobeFragment extends Fragment {
         long startTime = System.nanoTime();
         Log.v("GlobeFragment: performance", "onViewCreated started");
         findAllId(view);
+        //TODO
         Log.v("GlobeFragment: performance", "onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
     }
     private void findAllId(View view){

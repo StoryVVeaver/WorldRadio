@@ -25,7 +25,6 @@ public class RadioManager {
     public RadioManager(Context context) {
         this.player = new ExoPlayer.Builder(context).build();
 
-        // Добавляем слушатель для получения метаданных
         player.addAnalyticsListener(new AnalyticsListener() {
             @OptIn(markerClass = UnstableApi.class)
             @Override

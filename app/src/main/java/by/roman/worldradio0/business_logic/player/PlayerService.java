@@ -97,13 +97,10 @@ public class PlayerService extends Service {
                 userRepository.setPlayingUUID(null);
                 stopForeground(true);
                 radioRepository.setStatePlayer(false);
-                //stopSelf();
                 break;
         }
         return START_STICKY;
     }
-
-
 
     @Override
     public void onDestroy() {

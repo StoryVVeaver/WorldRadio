@@ -1,5 +1,6 @@
 package by.roman.worldradio0.ui.elements.view;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -15,8 +16,8 @@ import android.view.View;
 import androidx.annotation.Nullable;
 
 public class CircularTimerView extends View {
-    private long maxTimeMillis = 10 * 60_000L;
-    private long currentTimeMillis = maxTimeMillis;
+    private long maxTimeMillis = 1L;
+    private long currentTimeMillis = 0L;
     private float strokeWidth = 20f;
     private Paint backgroundPaint;
     private Paint progressPaint;
@@ -91,7 +92,7 @@ public class CircularTimerView extends View {
                 centerX, centerY,
                 new int[] {
                         Color.parseColor("#4E9EFF"),
-                        Color.parseColor("#8AC5FF")
+                        Color.parseColor("#4E9EFF")
                 },
                 null
         );
@@ -131,6 +132,7 @@ public class CircularTimerView extends View {
         long mm = (totalSeconds % 3600) / 60;
         long ss = totalSeconds % 60;
 
+        @SuppressLint("DefaultLocale")
         String timeString = String.format("%02d:%02d:%02d", hh, mm, ss);
 
         float textY = centerY - ((textPaint.descent() + textPaint.ascent()) / 2);
