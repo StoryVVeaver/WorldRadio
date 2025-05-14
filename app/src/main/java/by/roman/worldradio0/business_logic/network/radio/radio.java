@@ -24,7 +24,7 @@ import okhttp3.Response;
 
 @Singleton
 public class radio {
-    private static final String API_URL = "http://at1.api.radio-browser.info/json/stations";
+    private static final String API_URL = "http://de2.api.radio-browser.info/json/stations";
 
 
     public radio() {
@@ -43,9 +43,11 @@ public class radio {
             public void onResponse(@NonNull Call call, @NonNull Response response) {
                 if (response.isSuccessful()) {
                     try (response) {
-                        assert response.body() != null;
+                        if(response.body() == null) {
+                            Log.e("RadioAPI", "Response body is empty");
+                            return;
+                        }
                         String jsonResponse = response.body().string();
-                        Log.d("RadioAPI", "Response: " + jsonResponse);
 
                         if (response.code() != 200) {
                             Log.e("RadioAPI", "Response code: " + response.code());

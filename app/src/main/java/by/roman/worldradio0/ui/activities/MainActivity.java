@@ -73,9 +73,7 @@ public class MainActivity extends AppCompatActivity {
                     loadFragment(new FilterFragment());
                     return true;
                 case "Settings":
-                    Intent intent = new Intent(getApplicationContext(), AccountActivity.class);
-                    startActivity(intent);
-                    //loadFragment(new SettingsFragment());
+                    loadFragment(new SettingsFragment());
                     return true;
             }
             return false;
