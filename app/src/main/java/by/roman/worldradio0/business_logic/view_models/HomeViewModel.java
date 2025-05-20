@@ -28,7 +28,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 public class HomeViewModel extends ViewModel {
     private final RadioRepository radioRepository;
     private final UserRepository userRepository;
-    private final DataFromRadio dataFromRadio;
+
     private final MutableLiveData<UiState<List<RadioStation>>> stations = new MutableLiveData<>();
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
     private int currentPage = 0;
@@ -41,7 +41,6 @@ public class HomeViewModel extends ViewModel {
     public HomeViewModel(RadioRepository radioRepository, DataFromRadio loadDataFromRadio, UserRepository userRepository){
         this.radioRepository = radioRepository;
         this.userRepository = userRepository;
-        this.dataFromRadio = loadDataFromRadio;
         loadAll();
     }
     public LiveData<UiState<List<RadioStation>>> getAllStations() {
@@ -82,26 +81,6 @@ public class HomeViewModel extends ViewModel {
                 stations.postValue(UiState.error("Ошибка загрузки: " + e.getMessage()));
             }
         });
-    }
-    public void loadFromAPI() {
-        executor.execute(() -> dataFromRadio.getStations(new StationsCallback() {
-            @Override
-            public void onSuccess(List<RadioStationDTO> stations) {
-                for (RadioStationDTO dto : stations) {
-                    try {
-                        radioRepository.addRadioStation(dto);
-                    } catch (Exception e) {
-                        Log.e("DB", "Ошибка при добавлении: " + dto.getName(), e);
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                Log.e("API", "Ошибка загрузки данных", t);
-            }
-        }));
-
     }
     public void useradd(){
         UserDTO dto = new UserDTO();

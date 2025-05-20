@@ -20,26 +20,30 @@
         android:usesCleartextTraffic="true"
         android:theme="@style/Theme.WorldRadio"
         tools:targetApi="31">
+
         <activity
             android:name=".ui.activities.AccountActivity"
-            android:exported="false" />
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".ui.activities.TimerActivity"
             android:exported="false"
             android:theme="@style/Theme.WorldRadio" />
+
         <activity
             android:name=".ui.activities.FilterActivity"
             android:exported="false" />
+
         <activity
             android:name=".ui.activities.MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.WorldRadio">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+            android:theme="@style/Theme.WorldRadio" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
         <service android:name=".business_logic.player.PlayerService" android:exported="false"/>
         <service android:name=".business_logic.media.TimerService" android:exported="false"/>
 

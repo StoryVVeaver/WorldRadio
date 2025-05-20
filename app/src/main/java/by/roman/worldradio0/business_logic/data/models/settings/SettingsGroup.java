@@ -1,4 +1,4 @@
-package by.roman.worldradio0.business_logic.data.models;
+package by.roman.worldradio0.business_logic.data.models.settings;
 
 import java.util.List;
 

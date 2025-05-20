@@ -4,8 +4,8 @@ import by.roman.worldradio0.business_logic.data.dto.SettingsDTO;
 import by.roman.worldradio0.business_logic.data.models.Settings;
 
 public interface SettingsRepository {
-    Settings getSettings(int id);
+    Settings getSettings();
     void setSettings(SettingsDTO settingsDTO);
-    void removeSettings(int id);
+    void removeSettings();
     void addSettings(SettingsDTO settingsDTO);
 }

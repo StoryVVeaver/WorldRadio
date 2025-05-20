@@ -1,5 +1,6 @@
 package by.roman.worldradio0.business_logic.view_models;
 
+import android.content.Intent;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
@@ -17,7 +18,6 @@ import by.roman.worldradio0.business_logic.data.dto.SettingsDTO;
 import by.roman.worldradio0.business_logic.data.dto.UserDTO;
 import by.roman.worldradio0.business_logic.data.models.Filter;
 import by.roman.worldradio0.business_logic.data.models.Settings;
-import by.roman.worldradio0.business_logic.data.models.User;
 import by.roman.worldradio0.business_logic.data.models.UserRequest;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FilterRepository;
@@ -25,6 +25,7 @@ import by.roman.worldradio0.business_logic.data.repositories.interfaces.Settings
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.UserRepository;
 import by.roman.worldradio0.business_logic.network.userAPI.DataFromUserAPI;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.RequestCallback;
+import by.roman.worldradio0.ui.activities.MainActivity;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
@@ -49,7 +50,9 @@ public class AccountViewModel extends ViewModel {
         return result;
     }
 
-
+    public int isUserHere(){
+        return userRepository.getUserInSystem();
+    }
     public void reg(UserRequest userRequest){
         Log.d("AccountViewModel: reg","Start request");
         result.postValue(UiState.loading());
@@ -59,7 +62,7 @@ public class AccountViewModel extends ViewModel {
                 try {
                     userRepository.useradd(dto);
                     userRepository.setUserInSystem(dto.getId());
-                    settingsRepository.addSettings(new SettingsDTO().fromModel(new Settings(dto.getId(),0,0,0,0,0)));
+                    settingsRepository.addSettings(new SettingsDTO().fromModel(new Settings(dto.getId(),0,0,0,0,0,0,0,0,1,0)));
                     filterRepository.addFilters(new FilterDTO().fromModel(new Filter(dto.getId(),null,null,null,null,null,0)));
                     result.postValue(UiState.success(true));
                 } catch (Exception e) {
@@ -82,7 +85,7 @@ public class AccountViewModel extends ViewModel {
                 try {
                     userRepository.useradd(dto);
                     userRepository.setUserInSystem(dto.getId());
-                    settingsRepository.addSettings(new SettingsDTO().fromModel(new Settings(dto.getId(),0,0,0,0,0)));
+                    settingsRepository.addSettings(new SettingsDTO().fromModel(new Settings(dto.getId(),0,0,0,0,0,0,0,0,1,0)));
                     filterRepository.addFilters(new FilterDTO().fromModel(new Filter(dto.getId(),null,null,null,null,null,0)));
                     result.postValue(UiState.success(true));
                 } catch (Exception e) {

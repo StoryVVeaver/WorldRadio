@@ -19,7 +19,7 @@ public class DataFromUserAPI {
     public DataFromUserAPI(){
         this.userAPI = new UserAPI();
     }
-    public void getFilters(Long id, FiltersCallback callback){
+    public void getFilters(int id, FiltersCallback callback){
         userAPI.fetchFilters(id, new FiltersCallback() {
             @Override
             public void onSuccess(FilterDTO dto) {
@@ -31,7 +31,7 @@ public class DataFromUserAPI {
             }
         });
     }
-    public void getSettings(Long id, SettingsCallback callback){
+    public void getSettings(int id, SettingsCallback callback){
         userAPI.fetchSettings(id, new SettingsCallback() {
             @Override
             public void onSuccess(SettingsDTO settings) {
@@ -43,7 +43,7 @@ public class DataFromUserAPI {
             }
         });
     }
-    public void getFavorites(Long id, FavoritesCallback callback){
+    public void getFavorites(int id, FavoritesCallback callback){
         userAPI.fetchFavorites(id, new FavoritesCallback() {
             @Override
             public void onSuccess(List<FavoriteStationDTO> favoriteStations) {

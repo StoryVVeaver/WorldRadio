@@ -75,6 +75,21 @@ public class UserDao {
     public User getUserData(int id){
         return null; //TODO
     }
+    public boolean isTableEmpty() {
+        Cursor cursor = null;
+        try {
+            cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_USER, null);
+            if (cursor.moveToFirst()) {
+                int count = cursor.getInt(0);
+                return count == 0;
+            }
+            return true;
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
     public String getColumnPlayingUUID(int id){
         String uuid = null;
         String Query = "SELECT " + COLUMN_UUID_PLAYING_STATION + " FROM " + TABLE_USER +

@@ -4,6 +4,7 @@ import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -34,6 +35,7 @@ import com.google.android.material.card.MaterialCardView;
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.data.models.UserRequest;
 import by.roman.worldradio0.business_logic.view_models.AccountViewModel;
+import by.roman.worldradio0.ui.activities.MainActivity;
 import by.roman.worldradio0.ui.elements.view.InnerGlowMaterialCardView;
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -130,6 +132,7 @@ public class EntranceFragment extends Fragment {
                     showLoading();
                     break;
                 case SUCCESS:
+                    startActivity(new Intent(requireActivity(), MainActivity.class));
                     requireActivity().finish();
                     break;
                 case ERROR:

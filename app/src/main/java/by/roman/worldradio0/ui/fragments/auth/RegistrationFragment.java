@@ -4,6 +4,7 @@ import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -27,6 +28,7 @@ import android.widget.Toast;
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.data.models.UserRequest;
 import by.roman.worldradio0.business_logic.view_models.AccountViewModel;
+import by.roman.worldradio0.ui.activities.MainActivity;
 import by.roman.worldradio0.ui.elements.view.InnerGlowMaterialCardView;
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -149,6 +151,7 @@ public class RegistrationFragment extends Fragment {
                     showLoading();
                     break;
                 case SUCCESS:
+                    startActivity(new Intent(requireActivity(), MainActivity.class));
                     requireActivity().finish();
                     break;
                 case ERROR:

@@ -1,5 +1,6 @@
 package by.roman.worldradio0.ui.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
 
@@ -11,8 +12,10 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 
 import by.roman.worldradio0.R;
+import by.roman.worldradio0.business_logic.view_models.AccountViewModel;
 import by.roman.worldradio0.ui.fragments.auth.EntranceFragment;
 import by.roman.worldradio0.ui.fragments.auth.RegistrationFragment;
 import dagger.hilt.android.AndroidEntryPoint;
@@ -28,6 +31,12 @@ public class AccountActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        AccountViewModel viewModel = new ViewModelProvider(this).get(AccountViewModel.class);
+        if(viewModel.isUserHere() != -1){
+            startActivity(new Intent(this, MainActivity.class));
+            finish();
+            return;
+        }
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_account);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {

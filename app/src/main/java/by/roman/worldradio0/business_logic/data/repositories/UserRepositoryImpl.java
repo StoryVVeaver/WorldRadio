@@ -22,6 +22,15 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
     @Override
+    public boolean isTableEmpty(){
+        try {
+            return userDao.isTableEmpty();
+        } catch (Exception e) {
+            Log.e("UserRepositoryImpl","Error scanning table");
+            return true;
+        }
+    }
+    @Override
     public boolean entrance(User user){
         return false; //TODO
     }

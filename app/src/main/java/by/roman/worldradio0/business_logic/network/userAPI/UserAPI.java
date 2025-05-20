@@ -49,7 +49,7 @@ public class UserAPI {
     public UserAPI(){
 
     };
-    public void fetchFilters(Long id, FiltersCallback callback){
+    public void fetchFilters(int id, FiltersCallback callback){
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
                 .url(API_URL + "/get/filters/" + id)
@@ -100,7 +100,7 @@ public class UserAPI {
             }
         });
     }
-    public void fetchFavorites(Long id, FavoritesCallback callback){
+    public void fetchFavorites(int id, FavoritesCallback callback){
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
                 .url(API_URL + "/get/favorites/" + id)
@@ -153,7 +153,7 @@ public class UserAPI {
             }
         });
     }
-    public void fetchSettings(Long id, SettingsCallback callback){
+    public void fetchSettings(int id, SettingsCallback callback){
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
                 .url(API_URL + "/get/settings/" + id)

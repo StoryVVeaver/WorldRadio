@@ -16,7 +16,7 @@ public class SettingsRepositoryImpl implements SettingsRepository {
       this.userDao = userDao;
    }
    @Override
-   public Settings getSettings(int id){
+   public Settings getSettings(){
       try {
          return settingsDao.getSetting(userDao.getIdUserInSystem());
       } catch (Exception e) {
@@ -33,7 +33,7 @@ public class SettingsRepositoryImpl implements SettingsRepository {
       }
    }
    @Override
-   public void removeSettings(int id){
+   public void removeSettings(){
       try {
          settingsDao.removeSettings(userDao.getIdUserInSystem());
       } catch (Exception e) {

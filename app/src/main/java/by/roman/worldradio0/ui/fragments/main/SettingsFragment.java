@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,12 +18,21 @@ import java.util.List;
 
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.adapters.SettingsAdapter;
-import by.roman.worldradio0.business_logic.data.models.SettingsGroup;
-import by.roman.worldradio0.business_logic.data.models.SettingsItem;
+import by.roman.worldradio0.business_logic.data.models.settings.SettingsGroup;
+import by.roman.worldradio0.business_logic.data.models.settings.SettingsItem;
+import by.roman.worldradio0.business_logic.data.models.settings.child.CheckWIthSliderItem;
+import by.roman.worldradio0.business_logic.data.models.settings.child.SliderItem;
+import by.roman.worldradio0.business_logic.data.models.settings.child.CheckItem;
+import by.roman.worldradio0.business_logic.data.models.settings.child.TextButtonItem;
+import by.roman.worldradio0.business_logic.data.models.settings.child.TextItem;
+import by.roman.worldradio0.business_logic.settings.SettingsChangeListener;
+import by.roman.worldradio0.business_logic.view_models.SettingsViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class SettingsFragment extends Fragment {
+    private RecyclerView recyclerView;
+    private SettingsViewModel viewModel;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -41,38 +51,36 @@ public class SettingsFragment extends Fragment {
         long startTime = System.nanoTime();
         Log.v("SettingsFragment: performance", "onViewCreated started");
         findAllId(view);
-        //TODO
-        list(view);
+        initAll();
         Log.v("SettingsFragment: performance", "onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
     }
-    private void findAllId(View view){
-
+    private void findAllId(@NonNull View view){
+        recyclerView = view.findViewById(R.id.recyclerView_Settings);
     }
-    private void list(View view){
-        RecyclerView recyclerView = view.findViewById(R.id.recyclerView_Settings);
+    private void initAll(){
+        viewModel = new ViewModelProvider(this).get(SettingsViewModel.class);
+        SettingsAdapter adapter = new SettingsAdapter(viewModel.getSettingsList(), new SettingsChangeListener() {
+            @Override
+            public void onToggleChanged(@NonNull String key, boolean isChecked) {
+                viewModel.toggleChange(key,isChecked);
+            }
 
-        List<SettingsGroup> groups = new ArrayList<>();
+            @Override
+            public void onSwitchChanged(@NonNull String key, int pos){
+                viewModel.switchChange(key,pos);
+            }
 
-        List<SettingsItem> languageItems = new ArrayList<>();
-        languageItems.add(new SettingsItem("Русский", true));
-        languageItems.add(new SettingsItem("English", false));
-        groups.add(new SettingsGroup("Язык", languageItems));
+            @Override
+            public void onClickChanged(@NonNull String key) {
+                viewModel.clickChange(key);
+            }
 
-        List<SettingsItem> themeItems = new ArrayList<>();
-        themeItems.add(new SettingsItem("Светлая", false));
-        themeItems.add(new SettingsItem("Тёмная", true));
-        themeItems.add(new SettingsItem("Системная", false));
-        groups.add(new SettingsGroup("Тема", themeItems));
-
-        List<SettingsItem> radioItems = new ArrayList<>();
-        radioItems.add(new SettingsItem("Jazz FM", false));
-        radioItems.add(new SettingsItem("Rock Radio", false));
-        groups.add(new SettingsGroup("Избранные радиостанции", radioItems));
-
-
-        SettingsAdapter adapter = new SettingsAdapter(groups);
+            @Override
+            public void onSliderChanged(@NonNull String key, int value) {
+                viewModel.sliderChange(key,value);
+            }
+        });
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
-
     }
 }
