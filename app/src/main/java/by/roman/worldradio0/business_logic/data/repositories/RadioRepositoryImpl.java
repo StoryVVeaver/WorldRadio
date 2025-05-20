@@ -142,12 +142,20 @@ public class RadioRepositoryImpl implements RadioRepository {
         }
     }
     @Override
+    public void clearTable(){
+        try {
+            radioStationDao.clearTable();
+        } catch (Exception e) {
+            Log.e("RadioRepositoryImpl","Failed clear table");
+        }
+    }
+    @Override
     public int getCountFilteredStations(){
         try {
             Filter filter = filterDao.getFilters(userDao.getIdUserInSystem());
             return radioStationDao.getCountFilteredStations(filter);
         } catch (Exception e) {
-            Log.e("RadioRepositoryImp","Failed get count filtered stations");
+            Log.e("RadioRepositoryImpl","Failed get count filtered stations");
             return -1;
         }
     }

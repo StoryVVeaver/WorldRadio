@@ -116,7 +116,7 @@ public class SettingsViewModel extends ViewModel {
             dots_types.add("Круг");
             dots_types.add("Ромб");
             viewItems.add(new SwitchItem(TIMER_DOTS_TYPE,"Вид разделителя:",dots_types,settModel.getTimerDotsType()));
-            groups.add(new SettingsGroup("Офромление", viewItems));
+            groups.add(new SettingsGroup("Оформление", viewItems));
         } catch (Exception e) {
             Log.e("SettingsViewModel", "Error creating list view settings");
         }
@@ -185,14 +185,14 @@ public class SettingsViewModel extends ViewModel {
     public void clickChange(@NonNull String key){
         switch (key) {
             case GET_USER_DATA:
-                //loadDataFromUserAPI();
+                loadDataFromUserAPI();
                 break;
 
             case PUT_USER_DATA:
                 break;
 
             case UPDATE_STATIONS_DATA:
-                //loadFromAPI();
+                loadFromAPI();
                 break;
         }
     }
@@ -210,6 +210,7 @@ public class SettingsViewModel extends ViewModel {
         }
     }
     private void loadFromAPI() {
+        radioRepository.clearTable();
         executor.execute(() -> dataFromRadio.getStations(new StationsCallback() {
             @Override
             public void onSuccess(List<RadioStationDTO> stations) {

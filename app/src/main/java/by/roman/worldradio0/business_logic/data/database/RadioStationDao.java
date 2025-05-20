@@ -2,7 +2,9 @@ package by.roman.worldradio0.business_logic.data.database;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -57,6 +59,13 @@ public class RadioStationDao {
     private final SQLiteDatabase db;
     public RadioStationDao(SQLiteDatabase db) {
         this.db = db;
+    }
+    public void clearTable(){
+        try {
+            db.execSQL("DELETE FROM " + TABLE_RADIO_STATION);
+        } catch (SQLException e) {
+            Log.e("RadioDao", "Error clearing table");
+        }
     }
     public List<String> getNamesList() {
         List<String> names = new ArrayList<>();

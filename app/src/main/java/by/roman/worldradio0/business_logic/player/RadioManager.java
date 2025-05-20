@@ -21,6 +21,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class RadioManager {
     private final ExoPlayer player;
     private final MutableLiveData<String> currentTrack = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isPlaying = new MutableLiveData<>();
 
     public RadioManager(Context context) {
         this.player = new ExoPlayer.Builder(context).build();
@@ -52,6 +53,7 @@ public class RadioManager {
         player.setMediaItem(mediaItem);
         player.prepare();
         player.play();
+        isPlaying.postValue(true);
     }
 
     public LiveData<String> getCurrentTrack() {
@@ -60,6 +62,7 @@ public class RadioManager {
 
     public void stop() {
         player.stop();
+        isPlaying.postValue(false);
     }
 
     public void release() {
@@ -67,6 +70,9 @@ public class RadioManager {
     }
     public boolean getIsPlaying(){
         return player != null && player.isPlaying();
+    }
+    public LiveData<Boolean> getLiveIsPlaying(){
+        return isPlaying;
     }
 }
 

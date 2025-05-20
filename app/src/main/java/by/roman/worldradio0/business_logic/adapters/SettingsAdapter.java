@@ -249,12 +249,10 @@ public class SettingsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
                 @Override
                 public void onStartTrackingTouch(SeekBar seekBar) {
-                    // Дополнительные действия при начале перетаскивания
                 }
 
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
-                    // Дополнительные действия после отпускания
                 }
             });
         }

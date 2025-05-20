@@ -1,6 +1,8 @@
 package by.roman.worldradio0.business_logic.adapters;
 
 import static android.app.AppOpsManager.MODE_DEFAULT;
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -124,7 +126,7 @@ public class RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     class StationViewHolder extends RecyclerView.ViewHolder {
-        private final TextView nameStation, country;
+        private final TextView nameStation, country, quality;
         private final ImageView logoStation, flag, button;
 
         public StationViewHolder(@NonNull View itemView) {
@@ -134,22 +136,42 @@ public class RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             flag = itemView.findViewById(R.id.flagStation_CardHome);
             country = itemView.findViewById(R.id.countryName_CardHome);
             button = itemView.findViewById(R.id.delButton_card);
+            quality = itemView.findViewById(R.id.quality_collapsed_player);
         }
 
-        void bind(RadioStation station) {
+        @SuppressLint("SetTextI18n")
+        void bind(@NonNull RadioStation station) {
             nameStation.setText(station.getName());
             nameStation.setSelected(true);
             country.setText(station.getCountry());
+            int bitrate = station.getBitrate();
+            if(bitrate > 400){
+                if(bitrate > 5000){
+                    bitrate = bitrate / 100;
+                    if(bitrate < 129){
+                        quality.setText("LQ");
+                    } else if (bitrate < 320 ) {
+                    } else quality.setText("HQ");
+                } else quality.setText("LQ");
+            } else {
+                if(bitrate < 129){
+                    quality.setText("LQ");
+                } else if (bitrate > 319 ) {
+                    quality.setText("HQ");
+                }
+            }
             if (mode == 1) {
-                button.setVisibility(View.VISIBLE);
+                button.setVisibility(VISIBLE);
                 button.setOnClickListener(v -> {
                     int pos = getAdapterPosition();
                     if (pos != RecyclerView.NO_POSITION) {
                         listener.onDeleteClick(pos);
                     }
+                    quality.setVisibility(GONE);
                 });
             } else {
-                button.setVisibility(View.GONE);
+                quality.setVisibility(VISIBLE);
+                button.setVisibility(GONE);
             }
 
             Glide.with(itemView.getContext())

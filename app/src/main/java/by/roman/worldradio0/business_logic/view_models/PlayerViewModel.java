@@ -36,6 +36,7 @@ public class PlayerViewModel extends ViewModel {
     private final RadioManager radioManager;
     private final UserRepository userRepository;
     private final MutableLiveData<String> currentTrack = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isPlaying = new MutableLiveData<>();
     @Inject
     public PlayerViewModel(@NonNull RadioManager radioManager,FavoriteRepository favoriteRepository, @ApplicationContext Context context, RadioRepository radioRepository, UserRepository userRepository) {
         this.context = context;
@@ -47,6 +48,12 @@ public class PlayerViewModel extends ViewModel {
             if (track != null) {
                 currentTrack.setValue(track);
                 Log.d("PlayerViewModel","Now playing: " + track);
+            }
+        });
+        radioManager.getLiveIsPlaying().observeForever(status -> {
+            if (status != null) {
+                isPlaying.setValue(status);
+                Log.d("PlayerViewModel","Player status: " + status);
             }
         });
     }
@@ -107,7 +114,7 @@ public class PlayerViewModel extends ViewModel {
     public RadioStation getCurrentStation(){
         return radioRepository.getPlayingStation();
     }
-    public boolean getIsPlaying(){
-        return radioManager.getIsPlaying();
+    public LiveData<Boolean> getIsPlaying(){
+        return isPlaying;
     }
 }

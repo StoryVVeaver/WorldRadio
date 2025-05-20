@@ -283,7 +283,7 @@ public class TimerActivity extends AppCompatActivity {
             private void scrollToPosition(int value, RecyclerView recyclerView, TimerWheelAdapter adapter){
                 LinearLayoutManager layoutManager1 = (LinearLayoutManager) recyclerView.getLayoutManager();
                 if (layoutManager1 != null) {
-                    layoutManager1.scrollToPositionWithOffset((adapter.getItemCount() / 2) + value, -18);
+                    layoutManager1.scrollToPositionWithOffset((adapter.getItemCount() / 2) + value, -14);
                 }
                 adapter.setSelectedPosition((adapter.getItemCount() / 2) + value);
             }
