@@ -95,8 +95,8 @@ public class PlayerService extends Service {
             case ACTION_START:
                 Log.d("RadioService","start");
                 currentStreamUrl = intent.getStringExtra(PlayerService.EXTRA_STREAM_URL);
-                Log.d("RadioService", currentStreamUrl);
                 if (currentStreamUrl != null) {
+                    Log.d("RadioService", currentStreamUrl);
                     radioManager.play(currentStreamUrl);
                     currentTrack = null;
                     Log.d("RadioService", "Station: " + radioRepository.getPlayingStation().getName());

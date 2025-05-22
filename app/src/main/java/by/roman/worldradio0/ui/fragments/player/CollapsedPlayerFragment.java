@@ -87,6 +87,7 @@ public class CollapsedPlayerFragment extends Fragment {
         });
         Glide.with(view.getContext())
                 .load(viewModel.getCurrentStation().getFavicon())
+                .error(AppCompatResources.getDrawable(requireContext(),R.drawable.no_icon))
                 .into(logo);
         fav_icons();
     }

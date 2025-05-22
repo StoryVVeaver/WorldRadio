@@ -15,6 +15,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -177,11 +178,13 @@ public class RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             Glide.with(itemView.getContext())
                     .load("https://flagsapi.com/" + station.getCountryCode() + "/flat/64.png")
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .error(AppCompatResources.getDrawable(context,R.drawable.no_icon))
                     .into(flag);
 
             Glide.with(itemView.getContext())
                     .load(station.getFavicon())
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .error(AppCompatResources.getDrawable(context,R.drawable.no_icon))
                     .into(logoStation);
         }
     }

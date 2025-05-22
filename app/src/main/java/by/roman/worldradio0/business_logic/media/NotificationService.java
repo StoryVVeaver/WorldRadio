@@ -16,8 +16,10 @@ import android.os.Build;
 import android.os.IBinder;
 import android.widget.RemoteViews;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.app.NotificationCompat;
 import androidx.media3.common.util.UnstableApi;
 
@@ -31,6 +33,7 @@ import javax.inject.Inject;
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.player.PlayerService;
+import by.roman.worldradio0.ui.activities.MainActivity;
 import dagger.hilt.android.AndroidEntryPoint;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 
@@ -62,15 +65,16 @@ public class NotificationService extends Service {
         currentTrack = contentText;
         remoteViews = new RemoteViews(context.getPackageName(), R.layout.notification_custom);
 
-        updateRemoteViews(); // Здесь обновляем remoteViews с правильным состоянием
+        updateRemoteViews();
 
         Glide.with(context)
                 .asBitmap()
+                .error(AppCompatResources.getDrawable(context,R.drawable.no_icon))
                 .load(radioStation.getFavicon())
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(new SimpleTarget<Bitmap>() {
                     @Override
-                    public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+                    public void onResourceReady(@NonNull Bitmap resource, Transition<? super Bitmap> transition) {
                         remoteViews.setImageViewBitmap(R.id.image_view_station_notification, resource);
                         notificationManager.notify(NOTIFICATION_ID, buildNotification());
                     }
@@ -107,12 +111,14 @@ public class NotificationService extends Service {
         remoteViews.setOnClickPendingIntent(R.id.stop_notification, createActionIntent(PlayerService.ACTION_STOP));
     }
 
+    @NonNull
     private Notification buildNotification() {
         return new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.globe_selector)
                 .setCustomContentView(remoteViews)
+                .setContentIntent(createContentIntent())
                 .setOngoing(true)
-                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setStyle(null)
                 .build();
@@ -124,11 +130,21 @@ public class NotificationService extends Service {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
                     "Radio Playback",
-                    NotificationManager.IMPORTANCE_LOW
+                    NotificationManager.IMPORTANCE_DEFAULT
             );
             channel.setDescription("Channel for radio playback controls");
             notificationManager.createNotificationChannel(channel);
         }
+    }
+    private PendingIntent createContentIntent() {
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        return PendingIntent.getActivity(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
     }
 
     private PendingIntent createActionIntent(String action) {
