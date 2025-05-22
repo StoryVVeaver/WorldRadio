@@ -18,12 +18,9 @@
 
             <ImageView
                 android:id="@+id/bottom_player_logo"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_marginStart="10dp"
-                android:src="@drawable/back"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -35,7 +32,6 @@
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="15dp"
                 android:layout_marginEnd="10dp"
-                android:text="TextView"
                 android:textSize="16sp"
                 android:ellipsize="marquee"
                 android:focusable="true"
@@ -77,11 +73,11 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
-                android:id="@+id/bottom_player_stop"
+                android:id="@+id/bottom_player_save"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
-                android:src="@drawable/delete"
+                android:src="@drawable/unsaved"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/bottom_player_play_pause"
                 app:layout_constraintTop_toTopOf="parent" />

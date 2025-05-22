@@ -18,6 +18,7 @@ import javax.inject.Inject;
 
 import by.roman.worldradio0.business_logic.UiState;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
+import by.roman.worldradio0.business_logic.data.repositories.FavoriteRepositoryImpl;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.UserRepository;
@@ -27,7 +28,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 
 @HiltViewModel
-public class PlayerViewModel extends ViewModel {
+public class PlayerViewModel extends ViewModel implements FavoriteRepositoryImpl.OnFavoritesChangedListener{
 
     @SuppressLint("StaticFieldLeak")
     private final Context context;
@@ -37,6 +38,7 @@ public class PlayerViewModel extends ViewModel {
     private final UserRepository userRepository;
     private final MutableLiveData<String> currentTrack = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isPlaying = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isFavorite = new MutableLiveData<>();
     @Inject
     public PlayerViewModel(@NonNull RadioManager radioManager,FavoriteRepository favoriteRepository, @ApplicationContext Context context, RadioRepository radioRepository, UserRepository userRepository) {
         this.context = context;
@@ -56,6 +58,8 @@ public class PlayerViewModel extends ViewModel {
                 Log.d("PlayerViewModel","Player status: " + status);
             }
         });
+        favoriteRepository.addListener(this);
+        isFavorite.postValue(isFavorite());
     }
     public LiveData<String> getCurrentTrack() {
         return currentTrack;
@@ -70,14 +74,12 @@ public class PlayerViewModel extends ViewModel {
         intent.putExtra(PlayerService.EXTRA_STREAM_URL, streamUrl);
         startForegroundService(context, intent);
     }
-
     @OptIn(markerClass = UnstableApi.class)
     public void stop(){
         Intent intent = new Intent(context, PlayerService.class);
         intent.setAction(PlayerService.ACTION_STOP);
         startForegroundService(context, intent);
     }
-
     @OptIn(markerClass = UnstableApi.class)
     public void play(){
         Intent intent = new Intent(context, PlayerService.class);
@@ -101,7 +103,15 @@ public class PlayerViewModel extends ViewModel {
         try {
             favoriteRepository.removeFromFavorite(userRepository.getPlayingUUID());
         } catch (Exception e) {
-            Log.e("PlayerVM", "Failed remove from favorite");
+            Log.e("PlayerVM", "Failed remove from favorite: " + e.getMessage());
+        }
+    }
+    private boolean isFavorite(){
+        try {
+            return favoriteRepository.isStationFavorite(userRepository.getPlayingUUID());
+        } catch (Exception e) {
+            Log.e("PlayerViewModel", "Failed check is favorite");
+            return false;
         }
     }
     public void setPlaying(String UUID){
@@ -116,5 +126,18 @@ public class PlayerViewModel extends ViewModel {
     }
     public LiveData<Boolean> getIsPlaying(){
         return isPlaying;
+    }
+    public LiveData<Boolean> getIsFavorite(){
+        return isFavorite;
+    }
+    @Override
+    public void onFavoritesChanged() {
+        isFavorite.postValue(isFavorite());
+        Log.d("PlayerViewModel","Trig: " + isFavorite());
+    }
+    @Override
+    public void onCleared(){
+        super.onCleared();
+        favoriteRepository.removeListener(this);
     }
 }

@@ -3,9 +3,11 @@ package by.roman.worldradio0.business_logic.data.database;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,14 +30,14 @@ public class FavoriteDao {
     public FavoriteDao(SQLiteDatabase db){
         this.db = db;
     }
-    public void addFavorite(int id,String UUID) {
+    public void addFavorite(int id, String UUID) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_USER_ID_FAVORITE, id);
         values.put(COLUMN_STATION_UUID_FAVORITE, UUID);
         db.insertWithOnConflict(TABLE_FAVORITE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
     }
     public void removeFavorite(int id, String UUID) {
-        db.delete(TABLE_FAVORITE, COLUMN_USER_ID_FAVORITE + " = ? "
+        db.delete(TABLE_FAVORITE, COLUMN_USER_ID_FAVORITE + " = ? AND "
                 + COLUMN_STATION_UUID_FAVORITE + " = ?", new String[]{String.valueOf(id), UUID});
     }
     public boolean isFavorite(int id,String UUID){
@@ -57,9 +59,17 @@ public class FavoriteDao {
     }
     public List<String> getFavoritesByUser(int id, int currentPage, int pageSize) {
         List<String> favorites = new ArrayList<>();
+        int offset = currentPage * pageSize;
+
         String query = "SELECT " + COLUMN_STATION_UUID_FAVORITE + " FROM " + TABLE_FAVORITE +
-                " WHERE " + COLUMN_USER_ID_FAVORITE + " = ?";
-        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(id)});
+                " WHERE " + COLUMN_USER_ID_FAVORITE + " = ?" +
+                " LIMIT ? OFFSET ?";
+
+        Cursor cursor = db.rawQuery(query, new String[]{
+                String.valueOf(id),
+                String.valueOf(pageSize),
+                String.valueOf(offset)
+        });
 
         if (cursor != null) {
             try (cursor) {
@@ -68,9 +78,10 @@ public class FavoriteDao {
                     favorites.add(uuid);
                 }
             } catch (Exception e) {
-                Log.e("FavoriteDao","Error reading favorite id");
+                Log.e("FavoriteDao", "Error reading favorite id");
             }
         }
         return favorites;
     }
+
 }

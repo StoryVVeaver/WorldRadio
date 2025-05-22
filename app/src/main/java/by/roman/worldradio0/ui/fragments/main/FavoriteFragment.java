@@ -64,9 +64,10 @@ public class FavoriteFragment extends Fragment {
                     int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
 
                     if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount - 5) {
-                        isLoadingNextPage = true;
-                        adapter.showLoading();
-                        viewModel.loadNextPage();
+                        //isLoadingNextPage = true;
+                        //adapter.showLoading();
+                        //viewModel.loadNextPage();
+                        //TODO переделать хуйню
                     }
                 }
             }
@@ -87,6 +88,7 @@ public class FavoriteFragment extends Fragment {
                 viewModel.removeFromFavorite(adapter.getUUID(position));
             }
         });
+        adapter.setMode(1);
         playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
         viewModel = new ViewModelProvider(this).get(FavoriteViewModel.class);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -103,7 +105,7 @@ public class FavoriteFragment extends Fragment {
                 case SUCCESS:
                     adapter.hideLoading();
                     List<RadioStation> allData = stations.data;
-                    adapter.addStations(allData.subList(adapter.getItemCount(), allData.size()));
+                    adapter.replaceAll(allData);
                     isLoadingNextPage = false;
                     break;
                 case ERROR:

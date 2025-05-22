@@ -77,9 +77,9 @@ public class SettingsViewModel extends ViewModel {
         this.userRepository = userRepository;
         this.filterRepository = filterRepository;
         this.favoriteRepository = favoriteRepository;
+        settModel = settingsRepository.getSettings();
     }
     public List<SettingsGroup> getSettingsList(){
-        settModel = settingsRepository.getSettings();
 
         List<SettingsGroup> groups = new ArrayList<>();
 
@@ -269,6 +269,9 @@ public class SettingsViewModel extends ViewModel {
                 Log.e("SettingsViewModel", Objects.requireNonNull(t.getMessage()));
             }
         }));
+    }
+    public Settings getSettingsModel(){
+        return settModel;
     }
 
     @Override

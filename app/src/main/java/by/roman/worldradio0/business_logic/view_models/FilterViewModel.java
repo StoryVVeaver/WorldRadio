@@ -31,9 +31,12 @@ public class FilterViewModel extends ViewModel {
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
     private int currentPage = 0;
     private boolean isLastPage = false;
-    private final int pageSize = 10;
+    private final int pageSize = 20;
     public boolean getIsLastPage() {
         return isLastPage;
+    }
+    public void setIsLastPage(boolean isLastPage){
+        this.isLastPage = isLastPage;
     }
     public void setPage(int page){
         this.currentPage = page;
@@ -83,6 +86,7 @@ public class FilterViewModel extends ViewModel {
                 List<RadioStation> list = radioRepository.getFilteredStations(currentPage, pageSize);
                 if (list.isEmpty()) {
                     isLastPage = true;
+                    stations.postValue(UiState.error(""));
                 } else {
                     List<RadioStation> currentList = stations.getValue() != null && stations.getValue().data != null
                             ? new ArrayList<>(stations.getValue().data)

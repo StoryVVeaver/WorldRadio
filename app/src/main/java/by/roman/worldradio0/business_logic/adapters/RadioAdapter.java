@@ -162,12 +162,12 @@ public class RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             }
             if (mode == 1) {
                 button.setVisibility(VISIBLE);
+                quality.setVisibility(GONE);
                 button.setOnClickListener(v -> {
                     int pos = getAdapterPosition();
                     if (pos != RecyclerView.NO_POSITION) {
                         listener.onDeleteClick(pos);
                     }
-                    quality.setVisibility(GONE);
                 });
             } else {
                 quality.setVisibility(VISIBLE);

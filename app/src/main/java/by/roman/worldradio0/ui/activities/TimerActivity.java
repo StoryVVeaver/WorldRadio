@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -32,6 +33,7 @@ import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.adapters.RadioAdapter;
 import by.roman.worldradio0.business_logic.adapters.TimerWheelAdapter;
 import by.roman.worldradio0.business_logic.media.TimerService;
+import by.roman.worldradio0.business_logic.view_models.SettingsViewModel;
 import by.roman.worldradio0.business_logic.view_models.TimerViewModel;
 import by.roman.worldradio0.ui.elements.view.CircularTimerView;
 import dagger.hilt.android.AndroidEntryPoint;
@@ -45,6 +47,7 @@ public class TimerActivity extends AppCompatActivity {
     private CountDownTimer countDownTimer;
     //private SettingsViewModel settingsViewModel;
     private TimerViewModel viewModel;
+    private SettingsViewModel settingsViewModel;
 
     private ImageView pauseButton;
     private ImageView playButton;
@@ -237,6 +240,7 @@ public class TimerActivity extends AppCompatActivity {
     }
     private void initAll(){
         viewModel = new ViewModelProvider(this).get(TimerViewModel.class);
+        settingsViewModel = new ViewModelProvider(this).get(SettingsViewModel.class);
         hourAdapter = new TimerWheelAdapter(this, 24);
         setupRecyclerView(recyclerHour, hourAdapter);
         hourAdapter.setSelectedPosition(hourAdapter.getItemCount() / 2);
@@ -244,14 +248,20 @@ public class TimerActivity extends AppCompatActivity {
         minuteAdapter = new TimerWheelAdapter(this, 60);
         setupRecyclerView(recyclerMinute, minuteAdapter);
         minuteAdapter.setSelectedPosition(minuteAdapter.getItemCount() / 2);
-        //TODO
-        //if(settingsViewModel.timer seconds config ){
+        if (settingsViewModel.getSettingsModel().getTimerSecondsEnabled() == 1){
             recyclerSecond.setVisibility(VISIBLE);
             divider2.setVisibility(VISIBLE);
             secondAdapter = new TimerWheelAdapter(this, 60);
             setupRecyclerView(recyclerSecond, secondAdapter);
             secondAdapter.setSelectedPosition(secondAdapter.getItemCount() / 2);
-        //}
+        }
+        if (settingsViewModel.getSettingsModel().getTimerDotsType() == 0){
+            divider1.setImageDrawable(AppCompatResources.getDrawable(this,R.drawable.circle));
+            divider2.setImageDrawable(AppCompatResources.getDrawable(this,R.drawable.circle));
+        } else {
+            divider1.setImageDrawable(AppCompatResources.getDrawable(this,R.drawable.romb));
+            divider2.setImageDrawable(AppCompatResources.getDrawable(this,R.drawable.romb));
+        }
     }
             private void setupRecyclerView(@NonNull RecyclerView recyclerView, TimerWheelAdapter adapter) {
                 LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
@@ -280,10 +290,10 @@ public class TimerActivity extends AppCompatActivity {
                     }
                 });
             }
-            private void scrollToPosition(int value, RecyclerView recyclerView, TimerWheelAdapter adapter){
+            private void scrollToPosition(int value, @NonNull RecyclerView recyclerView, TimerWheelAdapter adapter){
                 LinearLayoutManager layoutManager1 = (LinearLayoutManager) recyclerView.getLayoutManager();
                 if (layoutManager1 != null) {
-                    layoutManager1.scrollToPositionWithOffset((adapter.getItemCount() / 2) + value, -14);
+                    layoutManager1.scrollToPositionWithOffset((adapter.getItemCount() / 2) + value, -20);
                 }
                 adapter.setSelectedPosition((adapter.getItemCount() / 2) + value);
             }
@@ -292,11 +302,10 @@ public class TimerActivity extends AppCompatActivity {
                     int hours = hourAdapter.getSelectedPosition() % 24;
                     int minutes = minuteAdapter.getSelectedPosition() % 60;
                     totalTime = (hours * 3600000L) + (minutes * 60000L);
-                    //TODO
-                    //if(settingsViewModel.timer seconds config ){
+                    if(settingsViewModel.getSettingsModel().getTimerSecondsEnabled() == 1){
                         int seconds = secondAdapter.getSelectedPosition() % 60;
                         totalTime = totalTime + (seconds * 1000L);
-                    //}
+                    }
                     circularTimerView.setMaxTimeMillis(totalTime+1L);
                     circularTimerView.setCurrentTimeMillis(totalTime);
                 }
@@ -312,10 +321,9 @@ public class TimerActivity extends AppCompatActivity {
                 remaining = remaining % 60_000L;
                 int seconds = (int) (remaining / 1_000L);
                 Log.d("TA", "Seconds: " + seconds);
-                //TODO
-                //if(settings){
+                if(settingsViewModel.getSettingsModel().getTimerSecondsEnabled() == 1){
                     scrollToPosition(seconds,recyclerSecond,secondAdapter);
-                //}
+                }
                 circularTimerView.setMaxTimeMillis(totalTime+1L);
                 circularTimerView.setCurrentTimeMillis(totalTime);
             }

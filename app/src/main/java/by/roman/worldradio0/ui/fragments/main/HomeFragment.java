@@ -104,7 +104,9 @@ public class HomeFragment extends Fragment {
                     break;
                 case ERROR:
                     adapter.hideLoading();
-                    Toast.makeText(getContext(), stations.message, Toast.LENGTH_SHORT).show();
+                    if (!stations.message.isEmpty()){
+                        Toast.makeText(getContext(), stations.message, Toast.LENGTH_SHORT).show();
+                    }
                     isLoadingNextPage = false;
                     break;
             }

@@ -1,5 +1,7 @@
 package by.roman.worldradio0.business_logic.view_models;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -13,19 +15,20 @@ import javax.inject.Inject;
 
 import by.roman.worldradio0.business_logic.UiState;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
+import by.roman.worldradio0.business_logic.data.repositories.FavoriteRepositoryImpl;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRepository;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
-public class FavoriteViewModel extends ViewModel {
+public class FavoriteViewModel extends ViewModel implements FavoriteRepositoryImpl.OnFavoritesChangedListener {
     private final RadioRepository radioRepository;
     private final FavoriteRepository favoriteRepository;
     private final MutableLiveData<UiState<List<RadioStation>>> favoriteStations = new MutableLiveData<>();
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
     private int currentPage = 0;
     private boolean isLastPage = false;
-    private final int pageSize = 50;
+    private final int pageSize = 200;
     public boolean getIsLastPage() {
         return isLastPage;
     }
@@ -34,6 +37,7 @@ public class FavoriteViewModel extends ViewModel {
         this.radioRepository = radioRepository;
         this.favoriteRepository = favoriteRepository;
         loadStart();
+        favoriteRepository.addListener(this);
     }
     public LiveData<UiState<List<RadioStation>>> getFavoriteStations(){
         return favoriteStations;
@@ -42,30 +46,9 @@ public class FavoriteViewModel extends ViewModel {
         favoriteStations.setValue(UiState.loading());
         executor.execute(() -> {
             try {
+                Log.d("FavoriteViewModel","loadStart");
                 List<RadioStation> list = radioRepository.getFavoriteStations(currentPage,pageSize);
-                list.isEmpty(); // вызов ошибки
                 favoriteStations.postValue(UiState.success(list));
-                currentPage++;
-            } catch (Exception e) {
-                favoriteStations.postValue(UiState.error("Ошибка загрузки: " + e.getMessage()));
-            }
-        });
-    }
-    public void loadNextPage() {
-        if (isLastPage) return;
-        executor.execute(() -> {
-            try {
-                List<RadioStation> list = radioRepository.getFavoriteStations(currentPage, pageSize);
-                if (list.isEmpty()) {
-                    isLastPage = true;
-                } else {
-                    List<RadioStation> currentList = favoriteStations.getValue() != null && favoriteStations.getValue().data != null
-                            ? new ArrayList<>(favoriteStations.getValue().data)
-                            : new ArrayList<>();
-                    currentList.addAll(list);
-                    favoriteStations.postValue(UiState.success(currentList));
-                    currentPage++;
-                }
             } catch (Exception e) {
                 favoriteStations.postValue(UiState.error("Ошибка загрузки: " + e.getMessage()));
             }
@@ -78,5 +61,12 @@ public class FavoriteViewModel extends ViewModel {
     protected void onCleared() {
         super.onCleared();
         executor.shutdown();
+        favoriteRepository.removeListener(this);
+    }
+
+    @Override
+    public void onFavoritesChanged() {
+        Log.d("PlayerViewModel","Trig");
+        loadStart();
     }
 }

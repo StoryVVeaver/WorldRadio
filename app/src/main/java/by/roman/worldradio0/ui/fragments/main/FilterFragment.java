@@ -133,6 +133,7 @@ public class FilterFragment extends Fragment {
                     if(resume){
                         adapter.replaceAll(Data);
                         resume = false;
+                        viewModel.setIsLastPage(false);
                     } else {
                         adapter.addStations(Data.subList(adapter.getItemCount(), Data.size()));
                     }
@@ -140,7 +141,9 @@ public class FilterFragment extends Fragment {
                     break;
                 case ERROR:
                     adapter.hideLoading();
-                    Toast.makeText(getContext(), stations.message, Toast.LENGTH_SHORT).show();
+                    if (!stations.message.isEmpty()){
+                        Toast.makeText(getContext(), stations.message, Toast.LENGTH_SHORT).show();
+                    }
                     isLoadingNextPage = false;
                     break;
             }

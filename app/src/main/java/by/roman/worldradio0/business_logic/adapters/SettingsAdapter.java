@@ -373,6 +373,7 @@ public class SettingsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             text.setText(item.getTitle());
             types = item.getTypes();
             pos = item.getPos();
+            value.setText(types.get(pos));
             view.setOnClickListener(v -> {
                 if(pos < types.size()-1){
                     pos++;

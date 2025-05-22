@@ -33,7 +33,7 @@ public class HomeViewModel extends ViewModel {
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
     private int currentPage = 0;
     private boolean isLastPage = false;
-    private final int pageSize = 50;
+    private final int pageSize = 20;
     public boolean getIsLastPage() {
         return isLastPage;
     }
@@ -52,8 +52,11 @@ public class HomeViewModel extends ViewModel {
             try {
                 Log.d("HomeVW", "before_page: " + currentPage);
                 List<RadioStation> list = radioRepository.getAllStations(currentPage,pageSize);
-                list.isEmpty(); // вызов ошибки
+                if(list.isEmpty()){
+                    stations.postValue(UiState.error("Лист пуст"));
+                }
                 stations.postValue(UiState.success(list));
+                currentPage++;
                 Log.d("HomeVW", "after_page: " + currentPage);
             } catch (Exception e) {
                 stations.postValue(UiState.error("Ошибка загрузки: " + e.getMessage()));
@@ -68,6 +71,7 @@ public class HomeViewModel extends ViewModel {
                 List<RadioStation> list = radioRepository.getAllStations(currentPage, pageSize);
                 if (list.isEmpty()) {
                     isLastPage = true;
+                    stations.postValue(UiState.error("finish"));
                 } else {
                     List<RadioStation> currentList = stations.getValue() != null && stations.getValue().data != null
                             ? new ArrayList<>(stations.getValue().data)
