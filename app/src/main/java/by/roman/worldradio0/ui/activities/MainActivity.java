@@ -1,7 +1,6 @@
 package by.roman.worldradio0.ui.activities;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -12,24 +11,23 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.Objects;
 
 import by.roman.worldradio0.R;
+import by.roman.worldradio0.business_logic.adapters.ViewPagerAdapter;
 import by.roman.worldradio0.business_logic.view_models.StatePlayerViewModel;
-import by.roman.worldradio0.ui.fragments.main.FavoriteFragment;
-import by.roman.worldradio0.ui.fragments.main.FilterFragment;
-import by.roman.worldradio0.ui.fragments.main.GlobeFragment;
-import by.roman.worldradio0.ui.fragments.main.HomeFragment;
-import by.roman.worldradio0.ui.fragments.main.SettingsFragment;
 import by.roman.worldradio0.ui.fragments.player.CollapsedPlayerFragment;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavigationView;
+    private ViewPager2 viewPager;
+    private ViewPagerAdapter adapter;
     private StatePlayerViewModel viewModel;
     private int currentSelectedItemId = -1;
 
@@ -48,9 +46,20 @@ public class MainActivity extends AppCompatActivity {
         viewModel = new ViewModelProvider(this).get(StatePlayerViewModel.class);
         viewModel.shouldShowPanel().observe(this, show -> {
             if (Boolean.TRUE.equals(show)) {
-                showPlayer();
+                startBottomPlayer();
             } else {
-                hidePlayer();
+                removeBottomPlayer();
+            }
+        });
+        adapter = new ViewPagerAdapter(this);
+        viewPager.setAdapter(adapter);
+        viewPager.setUserInputEnabled(true);
+        viewPager.setOffscreenPageLimit(4);
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                bottomNavigationView.getMenu().getItem(position).setChecked(true);
             }
         });
         bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -61,37 +70,30 @@ public class MainActivity extends AppCompatActivity {
             currentSelectedItemId = itemId;
             switch (Objects.requireNonNull(item.getTitle()).toString()) {
                 case "Globe":
-                    loadFragment(new GlobeFragment());
+                    viewPager.setCurrentItem(0);
                     return true;
                 case "Favorite":
-                    loadFragment(new FavoriteFragment());
+                    viewPager.setCurrentItem(1);
                     return true;
                 case "Home":
-                    loadFragment(new HomeFragment());
+                    viewPager.setCurrentItem(2);
                     return true;
                 case "Filter":
-                    loadFragment(new FilterFragment());
+                    viewPager.setCurrentItem(3);
                     return true;
                 case "Settings":
-                    loadFragment(new SettingsFragment());
+                    viewPager.setCurrentItem(4);
                     return true;
             }
             return false;
         });
         if (savedInstanceState == null) {
-            bottomNavigationView.setSelectedItemId(R.id.nav_home);
-            loadFragment(new HomeFragment());
+            viewPager.setCurrentItem(2, false);
         }
     }
     private void findAllId(){
+        viewPager = findViewById(R.id.viewPager);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
-    }
-    private void loadFragment(Fragment fragment) {
-        getSupportFragmentManager()
-                .beginTransaction()
-                .setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
-                .replace(R.id.fragmentContainerView, fragment)
-                .commit();
     }
     private void startBottomPlayer(){
         getSupportFragmentManager()
@@ -100,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
                 .replace(R.id.bottom_player_container,new CollapsedPlayerFragment())
                 .commit();
     }
-
     private void removeBottomPlayer() {
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.bottom_player_container);
         if (fragment != null) {
@@ -109,56 +110,6 @@ public class MainActivity extends AppCompatActivity {
                     .setCustomAnimations(R.anim.slide_out_to_bottom, R.anim.slide_out_to_bottom)
                     .remove(fragment)
                     .commit();
-        }
-    }
-    private void repairBottomPlayer(){
-        getSupportFragmentManager()
-                .beginTransaction()
-                .setCustomAnimations(R.anim.slide_in_from_top,R.anim.slide_in_from_top)
-                .replace(R.id.bottom_player_container,new CollapsedPlayerFragment())
-                .commit();
-    }
-    private void hideBottomPlayer(){
-        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.bottom_player_container);
-        if (fragment != null) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .setCustomAnimations(R.anim.slide_out_to_top, R.anim.slide_out_to_top)
-                    .remove(fragment)
-                    .commit();
-        }
-    }
-    private void startPlayer(){
-        hideBottomPlayer();
-        getSupportFragmentManager()
-                .beginTransaction()
-                .setCustomAnimations(R.anim.slide_in_from_bottom,R.anim.slide_in_from_bottom)
-                .replace(R.id.bottom_player_container,new CollapsedPlayerFragment())
-                .commit();
-    }
-    private void removePlayer(){
-        repairBottomPlayer();
-        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.bottom_player_container);
-        if (fragment != null) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .setCustomAnimations(R.anim.slide_out_to_bottom, R.anim.slide_out_to_bottom)
-                    .remove(fragment)
-                    .commit();
-        }
-    }
-    public void showPlayer() {
-        if(viewModel.isExpanded()){
-            startPlayer();
-        } else {
-            startBottomPlayer();
-        }
-    }
-    public void hidePlayer(){
-        if(viewModel.isExpanded()){
-            removePlayer();
-        } else {
-            removeBottomPlayer();
         }
     }
 }

@@ -11,6 +11,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.Metadata;
 import androidx.media3.common.MimeTypes;
+import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.analytics.AnalyticsListener;
@@ -41,6 +42,17 @@ public class RadioManager {
                 }
             }
         });
+        player.addListener(
+                new Player.Listener() {
+                    @Override
+                    public void onIsPlayingChanged(boolean status) {
+                        if (status) {
+                            isPlaying.postValue(true);
+                        } else {
+                            isPlaying.postValue(false);
+                        }
+                    }
+                });
     }
 
     public void play(String streamUrl) {
@@ -63,6 +75,9 @@ public class RadioManager {
     public void stop() {
         player.stop();
         isPlaying.postValue(false);
+    }
+    public ExoPlayer getPlayer(){
+        return player;
     }
 
     public void release() {
