@@ -9,17 +9,33 @@ import jakarta.persistence.Table;
 public class Filters {
     @Id
     private Long id;
+    private String name;
+    private String codec;
     private String country;
     private String tags;
     private String lang;
     private int sort;
 
-    public Filters(Long id, String country, String tags, String lang, int sort) {
+    public Filters() {
+        
+    }
+
+    public Filters(Long id, String name, String codec, String country, String tags, String lang, int sort) {
         this.id = id;
+        this.name = name;
+        this.codec = codec;
         this.country = country;
         this.tags = tags;
         this.lang = lang;
         this.sort = sort;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getCodec() {
+        return codec;
     }
 
     public Long getId() {
