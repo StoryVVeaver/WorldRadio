@@ -94,7 +94,7 @@ public class PlayerViewModel extends ViewModel implements FavoriteRepositoryImpl
     }
     public void addToFavorite(){
         try {
-            favoriteRepository.addToFavorite(userRepository.getPlayingUUID());
+            favoriteRepository.addToFavorite(-1, userRepository.getPlayingUUID());
         } catch (Exception e) {
             Log.e("PlayerVM", "Failed add to favorite");
         }

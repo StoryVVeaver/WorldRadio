@@ -23,6 +23,8 @@ public class SettingsKeys {
     public static final String GET_USER_DATA = "get_user_data"; //button
     public static final String PUT_USER_DATA = "put_user_data"; //button
     public static final String UPDATE_STATIONS_DATA = "update_stations_data"; //button
+    public static final String EXIT_FROM_ACCOUNT = "exit_from_account"; //button
+    public static final String DELETE_ACCOUNT = "delete_account"; //button
     @Inject
     public SettingsKeys(){}
 }

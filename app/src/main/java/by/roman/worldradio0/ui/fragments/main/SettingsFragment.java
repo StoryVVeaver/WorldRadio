@@ -1,5 +1,7 @@
 package by.roman.worldradio0.ui.fragments.main;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -12,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,11 +30,14 @@ import by.roman.worldradio0.business_logic.data.models.settings.child.TextButton
 import by.roman.worldradio0.business_logic.data.models.settings.child.TextItem;
 import by.roman.worldradio0.business_logic.settings.SettingsChangeListener;
 import by.roman.worldradio0.business_logic.view_models.SettingsViewModel;
+import by.roman.worldradio0.ui.activities.AccountActivity;
+import by.roman.worldradio0.ui.activities.MainActivity;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class SettingsFragment extends Fragment {
     private RecyclerView recyclerView;
+    private TextView textView;
     private SettingsViewModel viewModel;
 
     @Override
@@ -56,7 +62,9 @@ public class SettingsFragment extends Fragment {
     }
     private void findAllId(@NonNull View view){
         recyclerView = view.findViewById(R.id.recyclerView_Settings);
+        textView = view.findViewById(R.id.nameAccountView);
     }
+    @SuppressLint("SetTextI18n")
     private void initAll(){
         viewModel = new ViewModelProvider(this).get(SettingsViewModel.class);
         SettingsAdapter adapter = new SettingsAdapter(viewModel.getSettingsList(), new SettingsChangeListener() {
@@ -82,5 +90,10 @@ public class SettingsFragment extends Fragment {
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
+        viewModel.getTimeToLeave().observe(getViewLifecycleOwner(), timeToLeave -> {
+            requireActivity().startActivity(new Intent(requireContext(), AccountActivity.class));
+            requireActivity().finish();
+        });
+        textView.setText("Hi, " +viewModel.getUserData().getLogin());
     }
 }

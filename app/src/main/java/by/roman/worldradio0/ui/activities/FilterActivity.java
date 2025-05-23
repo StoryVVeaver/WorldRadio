@@ -1,6 +1,7 @@
 package by.roman.worldradio0.ui.activities;
 
 import static android.view.View.INVISIBLE;
+import static android.view.View.NO_ID;
 import static android.view.View.VISIBLE;
 
 import android.annotation.SuppressLint;
@@ -19,6 +20,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 
 import java.util.List;
@@ -45,6 +48,10 @@ public class FilterActivity extends AppCompatActivity {
     private TextView countText;
     private FilterViewModel viewModel;
     private Filter filter;
+    private Chip chip1;
+    private Chip chip2;
+    private Chip chip3;
+    private int pos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +71,6 @@ public class FilterActivity extends AppCompatActivity {
         buttons();
         fillFields();
         Log.v("FilterActivity: performance", "onCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
-        //TODO chips
         //TODO asynch loading
     }
     private void fillFields(){
@@ -95,6 +101,33 @@ public class FilterActivity extends AppCompatActivity {
     }
     private void buttons(){
         try {
+            chip1.setOnClickListener(v -> {
+                if(pos == 1){
+                    pos = 0;
+                } else pos = 1;
+                chip2.setChecked(false);
+                chip3.setChecked(false);
+                filter.setSort(pos);
+                viewModel.setFilters(filter);
+            });
+            chip2.setOnClickListener(v -> {
+                if(pos == 2){
+                    pos = 0;
+                } else pos = 2;
+                chip1.setChecked(false);
+                chip3.setChecked(false);
+                filter.setSort(pos);
+                viewModel.setFilters(filter);
+            });
+            chip3.setOnClickListener(v -> {
+                if(pos == 3){
+                    pos = 0;
+                } else pos = 3;
+                chip1.setChecked(false);
+                chip2.setChecked(false);
+                filter.setSort(pos);
+                viewModel.setFilters(filter);
+            });
             backButton.setOnClickListener(v -> {
                 finish();
             });
@@ -204,12 +237,31 @@ public class FilterActivity extends AppCompatActivity {
             setupAutoComplete(actvLang,viewModel.getLanguage(),3);
             setupAutoComplete(actvName,viewModel.getNames(),4);
             setupAutoComplete(actvCodec,viewModel.getCodecs(),5);
+            switch (filter.getSort()){
+                case 1:
+                    chip1.setChecked(true);
+                    break;
+
+                case 2:
+                    chip2.setChecked(true);
+                    break;
+
+                case 3:
+                    chip3.setChecked(true);
+                    break;
+
+                default:
+                    break;
+            }
         } catch (Exception e) {
             Log.e("FilterActivity", Objects.requireNonNull(e.getMessage()));
         }
     }
     @SuppressLint("SetTextI18n")
     private void findAllId(){
+        chip1 = findViewById(R.id.chipAlphabet);
+        chip2 = findViewById(R.id.chipRating);
+        chip3 = findViewById(R.id.chipBitrate);
         View filter_countryView = findViewById(R.id.filterCountry);
         View filter_tagsView = findViewById(R.id.filterTags);
         View filter_langView = findViewById(R.id.filterLanguage);

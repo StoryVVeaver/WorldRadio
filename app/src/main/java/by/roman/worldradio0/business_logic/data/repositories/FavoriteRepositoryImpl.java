@@ -36,9 +36,9 @@ public class FavoriteRepositoryImpl implements FavoriteRepository {
         }
     }
     @Override
-    public void addToFavorite(String UUID){
+    public void addToFavorite(int id, String UUID){
         try {
-            favoriteDao.addFavorite(userDao.getIdUserInSystem(),UUID);
+            favoriteDao.addFavorite(id, userDao.getIdUserInSystem(),UUID);
             notifyFavoritesChanged();
         } catch (Exception e) {
             Log.e("FavoriteRepositoryImp","Failed add to favorite");

@@ -73,21 +73,36 @@ public class UserDao {
         }
     }
     public User getUserData(int id){
-        return null; //TODO
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_USER + " WHERE " +
+                COLUMN_ID_USER + " = ?", new  String[]{String.valueOf(id)});
+        if (cursor.moveToNext()) {
+            try (cursor) {
+                int idIndex = cursor.getColumnIndex(COLUMN_ID_USER);
+                int loginIndex = cursor.getColumnIndex(COLUMN_LOGIN_USER);
+                int passwordIndex = cursor.getColumnIndex(COLUMN_PASSWORD_USER);
+                int stationIndex = cursor.getColumnIndex(COLUMN_UUID_PLAYING_STATION);
+                int inSystemIndex = cursor.getColumnIndex(COLUMN_IN_SYSTEM_USER);
+                if(idIndex != -1 && loginIndex != -1 && passwordIndex != -1 && stationIndex != -1 && inSystemIndex != -1){
+                    return new User(
+                            cursor.getInt(idIndex),
+                            cursor.getString(loginIndex),
+                            cursor.getString(passwordIndex),
+                            cursor.getString(stationIndex),
+                            cursor.getInt(inSystemIndex)
+                    );
+                }
+            }
+        }
+        return null;
     }
     public boolean isTableEmpty() {
-        Cursor cursor = null;
-        try {
-            cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_USER, null);
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_USER, null);
+        try (cursor){
             if (cursor.moveToFirst()) {
                 int count = cursor.getInt(0);
                 return count == 0;
             }
             return true;
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
         }
     }
     public String getColumnPlayingUUID(int id){

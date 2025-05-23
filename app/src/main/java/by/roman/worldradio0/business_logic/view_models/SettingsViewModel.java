@@ -4,6 +4,8 @@ import static by.roman.worldradio0.business_logic.settings.SettingsKeys.AGC_ENAB
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.AUDIO_BALANCE;
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.CROSSFADE_ENABLED;
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.CROSSFADE_TIME;
+import static by.roman.worldradio0.business_logic.settings.SettingsKeys.DELETE_ACCOUNT;
+import static by.roman.worldradio0.business_logic.settings.SettingsKeys.EXIT_FROM_ACCOUNT;
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.GAIN_BROADCAST;
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.GAIN_RECORD;
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.GET_USER_DATA;
@@ -14,9 +16,12 @@ import static by.roman.worldradio0.business_logic.settings.SettingsKeys.TIMER_DO
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.TIMER_SECONDS_ENABLED;
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.UPDATE_STATIONS_DATA;
 
+import android.content.Intent;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import java.util.ArrayList;
@@ -32,6 +37,7 @@ import by.roman.worldradio0.business_logic.data.dto.FilterDTO;
 import by.roman.worldradio0.business_logic.data.dto.RadioStationDTO;
 import by.roman.worldradio0.business_logic.data.dto.SettingsDTO;
 import by.roman.worldradio0.business_logic.data.models.Settings;
+import by.roman.worldradio0.business_logic.data.models.User;
 import by.roman.worldradio0.business_logic.data.models.settings.SettingsGroup;
 import by.roman.worldradio0.business_logic.data.models.settings.SettingsItem;
 import by.roman.worldradio0.business_logic.data.models.settings.child.CheckItem;
@@ -56,6 +62,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
 public class SettingsViewModel extends ViewModel {
+    private MutableLiveData<Boolean> timeToLeave = new MutableLiveData<>();
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
     private final SettingsRepository settingsRepository;
     private final RadioRepository radioRepository;
@@ -78,6 +85,9 @@ public class SettingsViewModel extends ViewModel {
         this.filterRepository = filterRepository;
         this.favoriteRepository = favoriteRepository;
         settModel = settingsRepository.getSettings();
+    }
+    public LiveData<Boolean> getTimeToLeave(){
+        return timeToLeave;
     }
     public List<SettingsGroup> getSettingsList(){
 
@@ -125,8 +135,10 @@ public class SettingsViewModel extends ViewModel {
             List<SettingsItem> dataItems = new ArrayList<>();
             dataItems.add(new TextButtonItem(GET_USER_DATA, PUT_USER_DATA,"Синхронизация:", "[Загрузить]", "[Выгрузить]"));
             dataItems.add(new TextButtonItem(UPDATE_STATIONS_DATA,"Станции:", "[Обновить]"));
-            dataItems.add(new TextButtonItem("9","История:", "[Очистить]")); //TODO
-            groups.add(new SettingsGroup("Данные", dataItems));
+            dataItems.add(new TextButtonItem(EXIT_FROM_ACCOUNT,"Выйти из аккаунта", "                "));
+            dataItems.add(new TextButtonItem(DELETE_ACCOUNT,"Удалить аккаунт", "                "));
+            //dataItems.add(new TextButtonItem("9","История:", "[Очистить]")); //TODO
+            groups.add(new SettingsGroup("Данные и аккаунт", dataItems));
         } catch (Exception e) {
             Log.e("SettingsViewModel", "Error creating list data settings");
         }
@@ -135,6 +147,14 @@ public class SettingsViewModel extends ViewModel {
     }
     private void setSettings(){
         settingsRepository.setSettings(new SettingsDTO().fromModel(settModel));
+    }
+    public User getUserData(){
+        try {
+            return userRepository.getUserData();
+        } catch (Exception e) {
+            Log.e("SettingsViewModel", "Error loading user data: " + e.getMessage());
+            return null;
+        }
     }
     public void toggleChange(@NonNull String key, boolean flag){
         switch (key) {
@@ -189,10 +209,21 @@ public class SettingsViewModel extends ViewModel {
                 break;
 
             case PUT_USER_DATA:
+                //TODO
                 break;
 
             case UPDATE_STATIONS_DATA:
                 loadFromAPI();
+                break;
+
+            case EXIT_FROM_ACCOUNT:
+                userRepository.exit();
+                timeToLeave.postValue(true);
+                break;
+
+            case DELETE_ACCOUNT:
+                userRepository.removeUser();
+                timeToLeave.postValue(true);
                 break;
         }
     }
@@ -247,7 +278,7 @@ public class SettingsViewModel extends ViewModel {
             @Override
             public void onSuccess(List<FavoriteStationDTO> favoriteStations) {
                 for (FavoriteStationDTO station : favoriteStations) {
-                    favoriteRepository.addToFavorite(station.getStationUUID());
+                    favoriteRepository.addToFavorite(station.getId(), station.getStationUUID());
                 }
             }
 

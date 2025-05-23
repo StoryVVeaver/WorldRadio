@@ -6,7 +6,7 @@ import by.roman.worldradio0.business_logic.data.repositories.FavoriteRepositoryI
 
 public interface FavoriteRepository {
     List<String> getFavoritesById(int currentPage, int pageSize);
-    void addToFavorite(String uuid);
+    void addToFavorite(int id, String uuid);
     void removeFromFavorite(String uuid);
     boolean isStationFavorite(String uuid);
     void addListener(FavoriteRepositoryImpl.OnFavoritesChangedListener listener);

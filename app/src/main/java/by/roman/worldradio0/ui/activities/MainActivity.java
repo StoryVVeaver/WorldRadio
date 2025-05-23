@@ -20,7 +20,7 @@ import java.util.Objects;
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.adapters.ViewPagerAdapter;
 import by.roman.worldradio0.business_logic.view_models.StatePlayerViewModel;
-import by.roman.worldradio0.ui.fragments.player.CollapsedPlayerFragment;
+import by.roman.worldradio0.ui.fragments.player.PlayerFragment;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
         getSupportFragmentManager()
                 .beginTransaction()
                 .setCustomAnimations(R.anim.slide_in_from_bottom,R.anim.slide_in_from_bottom)
-                .replace(R.id.bottom_player_container,new CollapsedPlayerFragment())
+                .replace(R.id.bottom_player_container,new PlayerFragment())
                 .commit();
     }
     private void removeBottomPlayer() {
