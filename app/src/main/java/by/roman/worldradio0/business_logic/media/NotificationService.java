@@ -21,6 +21,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.app.NotificationCompat;
+import androidx.media3.common.util.Log;
 import androidx.media3.common.util.UnstableApi;
 
 import com.bumptech.glide.Glide;
@@ -107,6 +108,7 @@ public class NotificationService extends Service {
         remoteViews.setImageViewResource(R.id.play_pause_notification, buttonIcon);
 
         String action = isPlaying ? ACTION_PAUSE : ACTION_PLAY;
+        Log.d("notification",action);
         remoteViews.setOnClickPendingIntent(R.id.play_pause_notification, createActionIntent(action));
         remoteViews.setOnClickPendingIntent(R.id.stop_notification, createActionIntent(PlayerService.ACTION_STOP));
     }
@@ -118,7 +120,7 @@ public class NotificationService extends Service {
                 .setCustomContentView(remoteViews)
                 .setContentIntent(createContentIntent())
                 .setOngoing(true)
-                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setStyle(null)
                 .build();
@@ -130,7 +132,7 @@ public class NotificationService extends Service {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
                     "Radio Playback",
-                    NotificationManager.IMPORTANCE_DEFAULT
+                    NotificationManager.IMPORTANCE_NONE
             );
             channel.setDescription("Channel for radio playback controls");
             notificationManager.createNotificationChannel(channel);

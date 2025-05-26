@@ -7,6 +7,7 @@ import java.util.List;
 
 import by.roman.worldradio0.business_logic.data.database.FavoriteDao;
 import by.roman.worldradio0.business_logic.data.database.UserDao;
+import by.roman.worldradio0.business_logic.data.models.FavoriteStation;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteRepository;
 
 public class FavoriteRepositoryImpl implements FavoriteRepository {
@@ -41,7 +42,7 @@ public class FavoriteRepositoryImpl implements FavoriteRepository {
             favoriteDao.addFavorite(id, userDao.getIdUserInSystem(),UUID);
             notifyFavoritesChanged();
         } catch (Exception e) {
-            Log.e("FavoriteRepositoryImp","Failed add to favorite");
+            Log.e("FavoriteRepositoryImp","Failed add to favorite: " + e.getMessage());
         }
     }
     @Override
@@ -67,7 +68,16 @@ public class FavoriteRepositoryImpl implements FavoriteRepository {
         try {
             return favoriteDao.getFavoritesByUser(userDao.getIdUserInSystem(),currentPage,pagSize);
         } catch (Exception e) {
-            Log.e("FavoriteRepositoryImp","Failed get favorites list");
+            Log.e("FavoriteRepositoryImpl","Failed get favorites list: " + e.getMessage());
+            return null;
+        }
+    }
+    @Override
+    public List<FavoriteStation> getAllFavorites(){
+        try {
+            return favoriteDao.getAllFavorites(userDao.getIdUserInSystem());
+        } catch (Exception e) {
+            Log.e("FavoriteRepositoryImpl","Failed get all favorites: " + e.getMessage());
             return null;
         }
     }

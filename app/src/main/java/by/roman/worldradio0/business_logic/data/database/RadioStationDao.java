@@ -88,6 +88,16 @@ public class RadioStationDao {
         }
         return names;
     }
+    public boolean hasRecords() {
+        String query = "SELECT 1 FROM " + TABLE_RADIO_STATION + " LIMIT 1";
+
+        try (Cursor cursor = db.rawQuery(query, null)) {
+            return cursor != null && cursor.moveToFirst();
+        } catch (Exception e) {
+            Log.e("DB_ERROR", "Failed to check records", e);
+            return false;
+        }
+    }
     public List<String> getCodecsList() {
         List<String> codecs = new ArrayList<>();
         Cursor cursor = db.query(true,

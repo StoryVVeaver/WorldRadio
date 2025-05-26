@@ -4,6 +4,8 @@ import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -24,6 +26,7 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -50,7 +53,9 @@ public class EntranceFragment extends Fragment {
     private InnerGlowMaterialCardView passwordCard;
     private TextView textReg;
     private TextView errorText;
+    private TextView loadingText;
     private ProgressBar progressBar;
+    private ProgressBar progressBar_loading;
     private boolean passVisibility;
     private String login;
     private String password;
@@ -77,6 +82,8 @@ public class EntranceFragment extends Fragment {
         Log.v("EntranceFragment","Performance - onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
     }
     private void findAll(@NonNull View view){
+        progressBar_loading = view.findViewById(R.id.progressBar_loading_Entrance);
+        loadingText = view.findViewById(R.id.textStationsLoading_Entrance);
         loginText = view.findViewById(R.id.loginInput_Entrance);
         passwordText = view.findViewById(R.id.passwordInput_Entrance);
         passButton = view.findViewById(R.id.passStatus_Entrance);
@@ -104,6 +111,7 @@ public class EntranceFragment extends Fragment {
         });
         enterButton.setOnClickListener(v -> {
             enterButton.setEnabled(false);
+            hideKeyboard(requireActivity());
             hideError();
             login = loginText.getText().toString();
             password = passwordText.getText().toString();
@@ -132,8 +140,7 @@ public class EntranceFragment extends Fragment {
                     showLoading();
                     break;
                 case SUCCESS:
-                    startActivity(new Intent(requireActivity(), MainActivity.class));
-                    requireActivity().finish();
+                    onSuccess();
                     break;
                 case ERROR:
                     hideError();
@@ -156,6 +163,16 @@ public class EntranceFragment extends Fragment {
             }
         });
     }
+    public void hideKeyboard(Activity activity) {
+        View view = activity.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            }
+        }
+    }
+
     private void hideError(){
         loginCard.setInnerGlowEnabled(false);
         passwordCard.setInnerGlowEnabled(false);
@@ -168,7 +185,7 @@ public class EntranceFragment extends Fragment {
         textReg.setVisibility(VISIBLE);
         progressBar.setVisibility(INVISIBLE);
     }
-    private void error(EditText text,InnerGlowMaterialCardView card) {
+    private void error(@NonNull EditText text, @NonNull InnerGlowMaterialCardView card) {
         int errorColor = ContextCompat.getColor(requireContext(), R.color.red);
         int lightErrorColor = ContextCompat.getColor(requireContext(), R.color.lightRed);
 
@@ -194,5 +211,25 @@ public class EntranceFragment extends Fragment {
                 dp,
                 getResources().getDisplayMetrics()
         );
+    }
+    private void onSuccess(){
+        viewModel.loadStations();
+        viewModel.getStationsLoading().observe(getViewLifecycleOwner(), stations -> {
+            switch (stations.status){
+                case LOADING:
+                    progressBar_loading.setVisibility(VISIBLE);
+                    loadingText.setVisibility(VISIBLE);
+                    break;
+
+                case SUCCESS:
+                    startActivity(new Intent(requireActivity(), MainActivity.class));
+                    requireActivity().finish();
+                    break;
+
+                case ERROR:
+                    Toast.makeText(requireContext(), stations.message, Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 }

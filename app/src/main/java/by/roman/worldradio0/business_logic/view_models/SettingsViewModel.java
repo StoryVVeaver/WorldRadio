@@ -10,6 +10,7 @@ import static by.roman.worldradio0.business_logic.settings.SettingsKeys.GAIN_BRO
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.GAIN_RECORD;
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.GET_USER_DATA;
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.NETWORK_TYPE;
+import static by.roman.worldradio0.business_logic.settings.SettingsKeys.NOTIFICATION_ENABLED;
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.PUT_USER_DATA;
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.RADIO_MODULE_ENABLED;
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.TIMER_DOTS_TYPE;
@@ -56,6 +57,7 @@ import by.roman.worldradio0.business_logic.network.radio.StationsCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.DataFromUserAPI;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FavoritesCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FiltersCallback;
+import by.roman.worldradio0.business_logic.network.userAPI.callbacks.PutCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.SettingsCallback;
 import by.roman.worldradio0.business_logic.settings.SettingsKeys;
 import dagger.hilt.android.lifecycle.HiltViewModel;
@@ -74,7 +76,7 @@ public class SettingsViewModel extends ViewModel {
     private Settings settModel;
 
     @Inject
-    public SettingsViewModel(SettingsRepository settingsRepository, RadioRepository radioRepository, DataFromRadio loadDataFromRadio,
+    public SettingsViewModel(@NonNull SettingsRepository settingsRepository, RadioRepository radioRepository, DataFromRadio loadDataFromRadio,
                              DataFromUserAPI dataFromUserAPI, UserRepository userRepository, FilterRepository filterRepository,
                              FavoriteRepository favoriteRepository){
         this.settingsRepository = settingsRepository;
@@ -126,6 +128,7 @@ public class SettingsViewModel extends ViewModel {
             dots_types.add("Круг");
             dots_types.add("Ромб");
             viewItems.add(new SwitchItem(TIMER_DOTS_TYPE,"Вид разделителя:",dots_types,settModel.getTimerDotsType()));
+            viewItems.add(new CheckItem(NOTIFICATION_ENABLED,"Показывать уведомление с плеером",false));//TODO
             groups.add(new SettingsGroup("Оформление", viewItems));
         } catch (Exception e) {
             Log.e("SettingsViewModel", "Error creating list view settings");
@@ -209,7 +212,7 @@ public class SettingsViewModel extends ViewModel {
                 break;
 
             case PUT_USER_DATA:
-                //TODO
+                putDataToUserAPI();
                 break;
 
             case UPDATE_STATIONS_DATA:
@@ -222,6 +225,7 @@ public class SettingsViewModel extends ViewModel {
                 break;
 
             case DELETE_ACCOUNT:
+                dataFromUserAPI.deleteUser(userRepository.getUserInSystem());
                 userRepository.removeUser();
                 timeToLeave.postValue(true);
                 break;
@@ -253,10 +257,13 @@ public class SettingsViewModel extends ViewModel {
                     }
                 }
             }
-
             @Override
             public void onFailure(Throwable t) {
                 Log.e("API", "Ошибка загрузки данных", t);
+            }
+            @Override
+            public void onLoading(){
+                //TODO загрузка станций
             }
         }));
     }
@@ -293,6 +300,41 @@ public class SettingsViewModel extends ViewModel {
             public void onSuccess(SettingsDTO settings) {
                 settModel = settings.toModel();
                 setSettings();
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.e("SettingsViewModel", Objects.requireNonNull(t.getMessage()));
+            }
+        }));
+    }
+    private void putDataToUserAPI(){
+        executor.execute(() -> dataFromUserAPI.putSettings(settingsRepository.getSettings(), new PutCallback() {
+            @Override
+            public void onSuccess(String t) {
+                //TODO сигнал о готовности/ошибке
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.e("SettingsViewModel", Objects.requireNonNull(t.getMessage()));
+            }
+        }));
+        executor.execute(() -> dataFromUserAPI.putFilters(filterRepository.getFilters(), new PutCallback() {
+            @Override
+            public void onSuccess(String t) {
+                //TODO сигнал о готовности/ошибке
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.e("SettingsViewModel", Objects.requireNonNull(t.getMessage()));
+            }
+        }));
+        executor.execute(() -> dataFromUserAPI.putFavorites(favoriteRepository.getAllFavorites(), new PutCallback() {
+            @Override
+            public void onSuccess(String t) {
+                //TODO сигнал о готовности/ошибке
             }
 
             @Override

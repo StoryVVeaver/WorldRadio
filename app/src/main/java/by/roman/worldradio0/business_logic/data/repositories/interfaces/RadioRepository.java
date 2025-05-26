@@ -21,6 +21,7 @@ public interface RadioRepository {
     List<String> getNames();
     List<String> getCodecs();
     void clearTable();
+    boolean hasRecords();
     void addRadioStation(RadioStationDTO radioStationDTO);
     int getCountFilteredStations();
 }

@@ -152,11 +152,10 @@
             android:id="@+id/large_play_pause"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="75dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginTop="150dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:contentDescription="Play/Pause" />
+            app:layout_constraintTop_toBottomOf="@+id/large_track_name"/>
 
         <ImageView
             android:id="@+id/large_save_unsave"

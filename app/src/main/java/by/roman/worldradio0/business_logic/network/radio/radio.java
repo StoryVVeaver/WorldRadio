@@ -32,6 +32,7 @@ public class radio {
     }
 
     public void fetchStations (StationsCallback callback) {
+        callback.onLoading();
         OkHttpClient client = new OkHttpClient();
 
         Request request = new Request.Builder()

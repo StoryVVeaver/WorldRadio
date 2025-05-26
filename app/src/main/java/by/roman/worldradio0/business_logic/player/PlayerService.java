@@ -30,6 +30,7 @@ public class PlayerService extends Service {
 
     private static final int NOTIFICATION_ID = 1;
 
+    private boolean isManuallyStopped = false;
     private String currentTrack;
     private String currentStreamUrl;
     private boolean isPlaying = true;
@@ -112,6 +113,7 @@ public class PlayerService extends Service {
                 break;
             case ACTION_STOP:
                 Log.d("RadioService", "stop");
+                isManuallyStopped = true;
                 notificationService.stopNotification();
                 radioManager.stop();
                 userRepository.setPlayingUUID(null);

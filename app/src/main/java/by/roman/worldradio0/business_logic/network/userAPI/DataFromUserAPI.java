@@ -7,9 +7,13 @@ import by.roman.worldradio0.business_logic.data.dto.FavoriteStationDTO;
 import by.roman.worldradio0.business_logic.data.dto.FilterDTO;
 import by.roman.worldradio0.business_logic.data.dto.SettingsDTO;
 import by.roman.worldradio0.business_logic.data.dto.UserDTO;
+import by.roman.worldradio0.business_logic.data.models.FavoriteStation;
+import by.roman.worldradio0.business_logic.data.models.Filter;
+import by.roman.worldradio0.business_logic.data.models.Settings;
 import by.roman.worldradio0.business_logic.data.models.UserRequest;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FavoritesCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FiltersCallback;
+import by.roman.worldradio0.business_logic.network.userAPI.callbacks.PutCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.RequestCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.SettingsCallback;
 
@@ -80,5 +84,47 @@ public class DataFromUserAPI {
                 callback.onFailure(text);
             }
         });
+    }
+    public void putSettings(Settings settings, PutCallback callback){
+        userAPI.putSettings(settings, new PutCallback() {
+            @Override
+            public void onSuccess(String t) {
+                callback.onSuccess(t);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                callback.onFailure(t);
+            }
+        });
+    }
+    public void putFavorites(List<FavoriteStation> list, PutCallback callback){
+        userAPI.putFavorites(list, new PutCallback() {
+            @Override
+            public void onSuccess(String t) {
+                callback.onSuccess(t);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                callback.onFailure(t);
+            }
+        });
+    }
+    public void putFilters(Filter filter, PutCallback callback){
+        userAPI.putFilters(filter, new PutCallback() {
+            @Override
+            public void onSuccess(String t) {
+                callback.onSuccess(t);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                callback.onFailure(t);
+            }
+        });
+    }
+    public void deleteUser(int id){
+        userAPI.deleteUser(id);
     }
 }

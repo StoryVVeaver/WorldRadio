@@ -19,6 +19,7 @@ public class SettingsKeys {
 
     public static final String TIMER_SECONDS_ENABLED = "timer_seconds_enabled"; //toggle
     public static final String TIMER_DOTS_TYPE = "timer_dots_type"; //switch
+    public static final String NOTIFICATION_ENABLED = "notification_enabled"; //check
 
     public static final String GET_USER_DATA = "get_user_data"; //button
     public static final String PUT_USER_DATA = "put_user_data"; //button

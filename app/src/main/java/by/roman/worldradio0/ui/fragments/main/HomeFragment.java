@@ -122,7 +122,6 @@ public class HomeFragment extends Fragment {
             public void onItemClick(int position) {
                 playerViewModel.setPlaying(adapter.getUUID(position));
                 playerViewModel.start();
-                Toast.makeText(requireContext(),"id: " + position,Toast.LENGTH_SHORT).show();
             }
             @Override
             public void onDeleteClick(int position) {

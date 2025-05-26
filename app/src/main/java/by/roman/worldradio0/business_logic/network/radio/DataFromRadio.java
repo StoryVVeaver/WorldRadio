@@ -20,6 +20,10 @@ public class DataFromRadio {
             public void onFailure(Throwable t) {
                 callback.onFailure(t);
             }
+            @Override
+            public void onLoading(){
+                callback.onLoading();
+            }
         });
     }
 }

@@ -1,5 +1,7 @@
 package by.roman.worldradio0.business_logic.data.database;
 
+import static java.lang.String.valueOf;
+
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -13,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import by.roman.worldradio0.business_logic.data.dto.FavoriteStationDTO;
+import by.roman.worldradio0.business_logic.data.models.FavoriteStation;
 
 public class FavoriteDao {
 
@@ -41,7 +44,7 @@ public class FavoriteDao {
     }
     public void removeFavorite(int userId, String UUID) {
         db.delete(TABLE_FAVORITE, COLUMN_USER_ID_FAVORITE + " = ? AND "
-                + COLUMN_STATION_UUID_FAVORITE + " = ?", new String[]{String.valueOf(userId), UUID});
+                + COLUMN_STATION_UUID_FAVORITE + " = ?", new String[]{valueOf(userId), UUID});
     }
     public boolean isFavorite(int userId,String UUID){
         boolean isFavorite = false;
@@ -50,7 +53,7 @@ public class FavoriteDao {
                 new String[]{COLUMN_STATION_UUID_FAVORITE},
                 COLUMN_STATION_UUID_FAVORITE + " = ? AND " +
                         COLUMN_USER_ID_FAVORITE + " = ?",
-                new String[]{UUID, String.valueOf(userId)},
+                new String[]{UUID, valueOf(userId)},
                 null, null, null
         );
         try (cursor) {
@@ -69,9 +72,9 @@ public class FavoriteDao {
                 " LIMIT ? OFFSET ?";
 
         Cursor cursor = db.rawQuery(query, new String[]{
-                String.valueOf(userId),
-                String.valueOf(pageSize),
-                String.valueOf(offset)
+                valueOf(userId),
+                valueOf(pageSize),
+                valueOf(offset)
         });
 
         if (cursor != null) {
@@ -86,5 +89,26 @@ public class FavoriteDao {
         }
         return favorites;
     }
-
+    public List<FavoriteStation> getAllFavorites(int userId){
+        List<FavoriteStation> list = new ArrayList<>();
+        String query = "SELECT * FROM " + TABLE_FAVORITE + " WHERE " + COLUMN_USER_ID_FAVORITE + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[userId]);
+        if (cursor != null){
+            try (cursor){
+                while (cursor.moveToNext()){
+                    int idIndex = cursor.getColumnIndex(COLUMN_ID_FAVORITE);
+                    int userIdIndex = cursor.getColumnIndex(COLUMN_USER_ID_FAVORITE);
+                    int stationIndex = cursor.getColumnIndex(COLUMN_STATION_UUID_FAVORITE);
+                    if(idIndex != -1 && userIdIndex != -1 && stationIndex != -1){
+                        list.add(new FavoriteStation(
+                                cursor.getInt(idIndex),
+                                cursor.getInt(userIdIndex),
+                                cursor.getString(stationIndex)
+                        ));
+                    }
+                }
+            }
+        }
+        return list;
+    }
 }

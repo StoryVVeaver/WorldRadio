@@ -146,7 +146,16 @@ public class RadioRepositoryImpl implements RadioRepository {
         try {
             radioStationDao.clearTable();
         } catch (Exception e) {
-            Log.e("RadioRepositoryImpl","Failed clear table");
+            Log.e("RadioRepositoryImpl","Failed clear table: " + e.getMessage());
+        }
+    }
+    @Override
+    public boolean hasRecords(){
+        try {
+            return radioStationDao.hasRecords();
+        } catch (Exception e) {
+            Log.e("RadioRepositoryImpl","Failed check is empty: " + e.getMessage());
+            return false;
         }
     }
     @Override
@@ -155,7 +164,7 @@ public class RadioRepositoryImpl implements RadioRepository {
             Filter filter = filterDao.getFilters(userDao.getIdUserInSystem());
             return radioStationDao.getCountFilteredStations(filter);
         } catch (Exception e) {
-            Log.e("RadioRepositoryImpl","Failed get count filtered stations");
+            Log.e("RadioRepositoryImpl","Failed get count filtered stations: " + e.getMessage());
             return -1;
         }
     }

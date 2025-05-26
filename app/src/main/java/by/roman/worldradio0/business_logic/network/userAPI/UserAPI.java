@@ -1,5 +1,6 @@
 package by.roman.worldradio0.business_logic.network.userAPI;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -31,6 +32,7 @@ import by.roman.worldradio0.business_logic.network.radio.Model;
 import by.roman.worldradio0.business_logic.network.radio.TagsAdapter;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FavoritesCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FiltersCallback;
+import by.roman.worldradio0.business_logic.network.userAPI.callbacks.PutCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.RequestCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.SettingsCallback;
 import okhttp3.Call;
@@ -45,7 +47,7 @@ import okhttp3.Response;
 public class UserAPI {
     //private static final String API_URL = "http://192.168.43.146:8080/api/v1/user";
     //private static final String API_URL = "http://192.168.0.85:8080/api/v1/user";
-    private static final String API_URL = "https://efc7-88-99-164-244.ngrok-free.app/api/v1/user";
+    private static final String API_URL = "https://shiny-snails-go.loca.lt/api/v1/user";
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     public UserAPI(){
 
@@ -60,17 +62,16 @@ public class UserAPI {
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if(response.isSuccessful()){
                     try (response){
-                        assert response.body() != null;
                         String jsonResponse = response.body().string();
+                        if (jsonResponse.isEmpty()) {
+                            Log.e("UserAPI: filters", "Empty response body.");
+                            callback.onFailure(new Exception("Empty response body"));
+                            return;
+                        }
                         Log.d("UserAPI: filters", "Response: " + jsonResponse);
 
                         if (response.code() != 200) {
                             Log.e("UserAPI: filters", "Response code: " + response.code());
-                            return;
-                        }
-                        if (jsonResponse.isEmpty()) {
-                            Log.e("UserAPI: filters", "Empty response body.");
-                            callback.onFailure(new Exception("Empty response body"));
                             return;
                         }
                         Gson gson = new GsonBuilder().create();
@@ -319,6 +320,141 @@ public class UserAPI {
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 e.printStackTrace();
                 callback.onFailure(e.getMessage());
+            }
+        });
+    }
+    public void putFilters(Filter filter, PutCallback callback){
+        Gson gson = new Gson();
+        String jsonBody;
+        jsonBody = gson.toJson(filter);
+        Log.d("UserAPI","JSON created" + jsonBody);
+        OkHttpClient client = new OkHttpClient();
+        RequestBody requestBody = RequestBody.create(jsonBody,JSON);
+        Request request = new Request.Builder()
+                .url(API_URL + "/put/filters")
+                .put(requestBody)
+                .build();
+        Log.d("UserAPI","Request created");
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.isSuccessful()){
+                    try (response){
+                        if(response.body() != null){
+                            if(response.body().string().equals("saved")){
+                                callback.onSuccess("saved");
+                            } else callback.onFailure(new Exception(response.body().string()));
+                        } else callback.onFailure(new Exception("error"));
+                    } catch (Exception e) {
+                        callback.onFailure(e);
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                callback.onFailure(e);
+            }
+        });
+    }
+    public void putFavorites(List<FavoriteStation> list, PutCallback callback){
+        Gson gson = new Gson();
+        String jsonBody;
+        jsonBody = gson.toJson(list);
+        Log.d("UserAPI","JSON created" + jsonBody);
+        OkHttpClient client = new OkHttpClient();
+        RequestBody requestBody = RequestBody.create(jsonBody,JSON);
+        Request request = new Request.Builder()
+                .url(API_URL + "/put/favorites")
+                .put(requestBody)
+                .build();
+        Log.d("UserAPI","Request created");
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                if (response.isSuccessful()){
+                    try (response){
+                        if(response.body() != null){
+                            if(response.body().string().equals("saved")){
+                                callback.onSuccess("saved");
+                            } else callback.onFailure(new Exception(response.body().string()));
+                        } else callback.onFailure(new Exception("error"));
+                    } catch (Exception e) {
+                        callback.onFailure(e);
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                callback.onFailure(e);
+            }
+        });
+    }
+    public void putSettings(Settings settings, PutCallback callback){
+        Gson gson = new Gson();
+        String jsonBody;
+        jsonBody = gson.toJson(settings);
+        Log.d("UserAPI","JSON created" + jsonBody);
+        OkHttpClient client = new OkHttpClient();
+        RequestBody requestBody = RequestBody.create(jsonBody,JSON);
+        Request request = new Request.Builder()
+                .url(API_URL + "/put/settings")
+                .put(requestBody)
+                .build();
+        Log.d("UserAPI","Request created");
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                if (response.isSuccessful()){
+                    try (response){
+                        if(response.body() != null){
+                            if(response.body().string().equals("saved")){
+                                callback.onSuccess("saved");
+                            } else callback.onFailure(new Exception(response.body().string()));
+                        } else callback.onFailure(new Exception("error"));
+                    } catch (Exception e) {
+                        callback.onFailure(e);
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                callback.onFailure(e);
+            }
+        });
+    }
+    public void deleteUser(int id){
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(API_URL + "/delete/" + id)
+                .build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.isSuccessful()){
+                    try (response){
+                        if(response.body() != null){
+                            String jsonResponse = response.body().string();
+                            if (jsonResponse.isEmpty()) {
+                                Log.e("UserAPI: delete", "Empty response body.");
+                                return;
+                            }
+                            Log.d("UserAPI: delete", "Response: " + jsonResponse);
+
+                            if (response.code() != 200) {
+                                Log.e("UserAPI: delete", "Response code: " + response.code());
+                                return;
+                            }
+                        } else Log.e("UserAPI: delete", "Empty response body.");
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+
             }
         });
     }
