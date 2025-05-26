@@ -120,7 +120,7 @@ public class NotificationService extends Service {
                 .setCustomContentView(remoteViews)
                 .setContentIntent(createContentIntent())
                 .setOngoing(true)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setStyle(null)
                 .build();
@@ -132,7 +132,7 @@ public class NotificationService extends Service {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
                     "Radio Playback",
-                    NotificationManager.IMPORTANCE_NONE
+                    NotificationManager.IMPORTANCE_LOW
             );
             channel.setDescription("Channel for radio playback controls");
             notificationManager.createNotificationChannel(channel);

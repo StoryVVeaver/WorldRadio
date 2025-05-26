@@ -29,8 +29,8 @@ public class PlayerService extends Service {
     public static final String EXTRA_STREAM_URL = "stream_url";
 
     private static final int NOTIFICATION_ID = 1;
-
     private boolean isManuallyStopped = false;
+
     private String currentTrack;
     private String currentStreamUrl;
     private boolean isPlaying = true;
@@ -49,7 +49,7 @@ public class PlayerService extends Service {
     private final Observer<String> trackObserver = new Observer<>() {
         @Override
         public void onChanged(String newTrack) {
-            if (newTrack != null && notificationService != null) {
+            if (newTrack != null && notificationService != null && !isManuallyStopped) {
                 notificationService.updateTrack(newTrack);
             }
         }
@@ -58,7 +58,7 @@ public class PlayerService extends Service {
     private final Observer<Boolean> stateObserver = new Observer<>() {
         @Override
         public void onChanged(Boolean flag) {
-            if (flag != null && notificationService != null) {
+            if (flag != null && notificationService != null && !isManuallyStopped) {
                 isPlaying = flag;
                 notificationService.updatePlaybackState(flag);
             }
@@ -96,8 +96,9 @@ public class PlayerService extends Service {
             case ACTION_START:
                 Log.d("RadioService","start");
                 currentStreamUrl = intent.getStringExtra(PlayerService.EXTRA_STREAM_URL);
+                Log.d("RadioService", currentStreamUrl);
+                isManuallyStopped = false;
                 if (currentStreamUrl != null) {
-                    Log.d("RadioService", currentStreamUrl);
                     radioManager.play(currentStreamUrl);
                     currentTrack = null;
                     Log.d("RadioService", "Station: " + radioRepository.getPlayingStation().getName());
@@ -113,9 +114,9 @@ public class PlayerService extends Service {
                 break;
             case ACTION_STOP:
                 Log.d("RadioService", "stop");
-                isManuallyStopped = true;
                 notificationService.stopNotification();
                 radioManager.stop();
+                isManuallyStopped = true;
                 userRepository.setPlayingUUID(null);
                 stopForeground(true);
                 radioRepository.setStatePlayer(false);
