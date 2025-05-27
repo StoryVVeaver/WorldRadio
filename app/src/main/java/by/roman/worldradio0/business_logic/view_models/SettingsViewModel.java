@@ -124,11 +124,11 @@ public class SettingsViewModel extends ViewModel {
         try {
             List<SettingsItem> viewItems = new ArrayList<>();
             viewItems.add(new CheckItem(TIMER_SECONDS_ENABLED,"Использовать секунды:",settModel.getTimerSecondsEnabled() == 1));
-            List<String> dots_types = new ArrayList<>();
-            dots_types.add("Круг");
-            dots_types.add("Ромб");
+            List<String> dots_types = new ArrayList<>();dots_types.add("Круг");dots_types.add("Ромб");
             viewItems.add(new SwitchItem(TIMER_DOTS_TYPE,"Вид разделителя:",dots_types,settModel.getTimerDotsType()));
-            viewItems.add(new CheckItem(NOTIFICATION_ENABLED,"Показывать уведомление с плеером",false));//TODO
+            //viewItems.add(new CheckItem(NOTIFICATION_ENABLED,"Показывать уведомление с плеером",false));//TODO
+            List<String> nav_types = new ArrayList<>();nav_types.add("Свайп");nav_types.add("Кнопка");nav_types.add("Свайп и кнопка");
+            //viewItems.add(new SwitchItem(TIMER_DOTS_TYPE,"Вид навигации:",nav_types,0)); //TODO
             groups.add(new SettingsGroup("Оформление", viewItems));
         } catch (Exception e) {
             Log.e("SettingsViewModel", "Error creating list view settings");
