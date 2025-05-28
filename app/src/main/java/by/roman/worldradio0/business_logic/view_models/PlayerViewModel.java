@@ -18,10 +18,13 @@ import javax.inject.Inject;
 
 import by.roman.worldradio0.business_logic.UiState;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
+import by.roman.worldradio0.business_logic.data.models.Settings;
 import by.roman.worldradio0.business_logic.data.repositories.FavoriteRepositoryImpl;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRepository;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.SettingsRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.UserRepository;
+import by.roman.worldradio0.business_logic.network.NetworkUtil;
 import by.roman.worldradio0.business_logic.player.PlayerService;
 import by.roman.worldradio0.business_logic.player.RadioManager;
 import dagger.hilt.android.lifecycle.HiltViewModel;
@@ -34,18 +37,19 @@ public class PlayerViewModel extends ViewModel implements FavoriteRepositoryImpl
     private final Context context;
     private final RadioRepository radioRepository;
     private final FavoriteRepository favoriteRepository;
-    private final RadioManager radioManager;
     private final UserRepository userRepository;
+    private final SettingsRepository settingsRepository;
     private final MutableLiveData<String> currentTrack = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isPlaying = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isFavorite = new MutableLiveData<>();
+    private Settings settings;
     @Inject
-    public PlayerViewModel(@NonNull RadioManager radioManager,FavoriteRepository favoriteRepository, @ApplicationContext Context context, RadioRepository radioRepository, UserRepository userRepository) {
+    public PlayerViewModel(@NonNull RadioManager radioManager, FavoriteRepository favoriteRepository, @ApplicationContext Context context, RadioRepository radioRepository, UserRepository userRepository, SettingsRepository settingsRepository) {
         this.context = context;
         this.radioRepository = radioRepository;
         this.userRepository = userRepository;
         this.favoriteRepository = favoriteRepository;
-        this.radioManager = radioManager;
+        this.settingsRepository = settingsRepository;
         radioManager.getCurrentTrack().observeForever(track -> {
             if (track != null) {
                 currentTrack.setValue(track);
@@ -60,11 +64,37 @@ public class PlayerViewModel extends ViewModel implements FavoriteRepositoryImpl
         });
         favoriteRepository.addListener(this);
         isFavorite.postValue(isFavorite());
+        settings = settingsRepository.getSettings();
     }
     public LiveData<String> getCurrentTrack() {
         return currentTrack;
     }
+    public boolean isInternetConnected(){
+        try {
+            settings = settingsRepository.getSettings();
+            return NetworkUtil.isNetworkAvailable(context);
+        } catch (Exception e) {
+            Log.e("PlayerViewModel","Failed check connection status: " + e.getMessage());
+            return false;
+        }
+    }
+    public String checkTypeInternet(){
+        String state = NetworkUtil.getConnectionType(context);
+        switch (settings.getNetworkType()){
+            case 0:
+                if(state.equals("WIFI")){
+                    return "ok";
+                } else return "bad";
 
+            case 1:
+                if(state.equals("MOBILE")){
+                    return "ok";
+                } else return "bad";
+
+            default:
+                return "ok";
+        }
+    }
     @OptIn(markerClass = UnstableApi.class)
     public void start(){
         String streamUrl = radioRepository.getStationById(userRepository.getPlayingUUID()).getUrl();

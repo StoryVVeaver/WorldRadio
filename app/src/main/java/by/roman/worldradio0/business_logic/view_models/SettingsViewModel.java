@@ -9,10 +9,10 @@ import static by.roman.worldradio0.business_logic.settings.SettingsKeys.EXIT_FRO
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.GAIN_BROADCAST;
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.GAIN_RECORD;
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.GET_USER_DATA;
+import static by.roman.worldradio0.business_logic.settings.SettingsKeys.NAVIGATION_TYPE;
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.NETWORK_TYPE;
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.NOTIFICATION_ENABLED;
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.PUT_USER_DATA;
-import static by.roman.worldradio0.business_logic.settings.SettingsKeys.RADIO_MODULE_ENABLED;
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.TIMER_DOTS_TYPE;
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.TIMER_SECONDS_ENABLED;
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.UPDATE_STATIONS_DATA;
@@ -59,12 +59,11 @@ import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FavoritesCa
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FiltersCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.PutCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.SettingsCallback;
-import by.roman.worldradio0.business_logic.settings.SettingsKeys;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
 public class SettingsViewModel extends ViewModel {
-    private MutableLiveData<Boolean> timeToLeave = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> timeToLeave = new MutableLiveData<>();
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
     private final SettingsRepository settingsRepository;
     private final RadioRepository radioRepository;
@@ -103,19 +102,15 @@ public class SettingsViewModel extends ViewModel {
             audioItems.add(new SliderItem(GAIN_BROADCAST,"     Эфир:", 0, 100, settModel.getGainBroadcast(),true));
             audioItems.add(new CheckItem(AGC_ENABLED,"AGC: ",settModel.getAgcEnabled() == 1));
             audioItems.add(new CheckWIthSliderItem(CROSSFADE_ENABLED,CROSSFADE_TIME,"Crossfade: ",0, 20,settModel.getCrossfadeTime(),settModel.getCrossfadeEnabled() == 1));
-            groups.add(new SettingsGroup("Аудио", audioItems));
+            //groups.add(new SettingsGroup("Аудио", audioItems));
         } catch (Exception e) {
             Log.e("SettingsViewModel", "Error creating list audio settings");
         }
 
         try {
             List<SettingsItem> networkItems = new ArrayList<>();
-            List<String> network_types = new ArrayList<>();
-            network_types.add("Только Wi-fi");
-            network_types.add("Только мобильная сеть");
-            network_types.add("Любое");
+            List<String> network_types = new ArrayList<>();network_types.add("Только Wi-fi");network_types.add("Только мобильная сеть");network_types.add("Любое");
             networkItems.add(new SwitchItem(NETWORK_TYPE, "Подключение:", network_types,settModel.getNetworkType()));
-            networkItems.add(new CheckItem(RADIO_MODULE_ENABLED,"Использовать радиомодуль:",settModel.getRadioModuleEnabled() == 1));
             groups.add(new SettingsGroup("Сетевые параметры", networkItems));
         } catch (Exception e) {
             Log.e("SettingsViewModel", "Error creating list network settings");
@@ -126,9 +121,9 @@ public class SettingsViewModel extends ViewModel {
             viewItems.add(new CheckItem(TIMER_SECONDS_ENABLED,"Использовать секунды:",settModel.getTimerSecondsEnabled() == 1));
             List<String> dots_types = new ArrayList<>();dots_types.add("Круг");dots_types.add("Ромб");
             viewItems.add(new SwitchItem(TIMER_DOTS_TYPE,"Вид разделителя:",dots_types,settModel.getTimerDotsType()));
-            //viewItems.add(new CheckItem(NOTIFICATION_ENABLED,"Показывать уведомление с плеером",false));//TODO
+            viewItems.add(new CheckItem(NOTIFICATION_ENABLED,"Показывать уведомление с плеером",settModel.getNotificationEnabled() == 1));
             List<String> nav_types = new ArrayList<>();nav_types.add("Свайп");nav_types.add("Кнопка");nav_types.add("Свайп и кнопка");
-            //viewItems.add(new SwitchItem(TIMER_DOTS_TYPE,"Вид навигации:",nav_types,0)); //TODO
+            //viewItems.add(new SwitchItem(TIMER_DOTS_TYPE,"Вид навигации:",nav_types,settModel.getNavigationType()));
             groups.add(new SettingsGroup("Оформление", viewItems));
         } catch (Exception e) {
             Log.e("SettingsViewModel", "Error creating list view settings");
@@ -171,13 +166,14 @@ public class SettingsViewModel extends ViewModel {
                 setSettings();
                 break;
 
-            case RADIO_MODULE_ENABLED:
-                settModel.setRadioModuleEnabled(flag ? 1 : 0);
-                setSettings();
-                break;
 
             case TIMER_SECONDS_ENABLED:
                 settModel.setTimerSecondsEnabled(flag ? 1 : 0);
+                setSettings();
+                break;
+
+            case NOTIFICATION_ENABLED:
+                settModel.setNotificationEnabled(flag ? 1 : 0);
                 setSettings();
                 break;
         }
@@ -240,6 +236,11 @@ public class SettingsViewModel extends ViewModel {
 
             case TIMER_DOTS_TYPE:
                 settModel.setTimerDotsType(pos);
+                setSettings();
+                break;
+
+            case NAVIGATION_TYPE:
+                settModel.setNavigationType(pos);
                 setSettings();
                 break;
         }

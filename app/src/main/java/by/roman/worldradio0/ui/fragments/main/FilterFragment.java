@@ -102,9 +102,16 @@ public class FilterFragment extends Fragment {
         adapter = new RadioAdapter(getContext(), new RadioAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position) {
-                playerViewModel.setPlaying(adapter.getUUID(position));
-                playerViewModel.start();
-                Toast.makeText(requireContext(),"id: " + position,Toast.LENGTH_SHORT).show();
+                if(playerViewModel.isInternetConnected()){
+                    if(playerViewModel.checkTypeInternet().equals("ok")){
+                        playerViewModel.setPlaying(adapter.getUUID(position));
+                        playerViewModel.start();
+                    } else {
+                        Toast.makeText(getContext(), "Not correct internet type!", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(getContext(), "Check internet connection!", Toast.LENGTH_SHORT).show();
+                }
             }
             @Override
             public void onDeleteClick(int position) {

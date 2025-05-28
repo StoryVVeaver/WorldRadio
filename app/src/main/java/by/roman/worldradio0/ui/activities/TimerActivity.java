@@ -79,6 +79,10 @@ public class TimerActivity extends AppCompatActivity {
         initAll();
         observeTime();
         buttons();
+
+        //TODO перенос на фрагмент
+        //TODO добавление залпланированного старта
+        //TODO улучшенить логику, переключение секунд в процессе работы и пауз некиритично ломает
         Log.v("TimerActivity: performance", "onCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
     }
     @Override

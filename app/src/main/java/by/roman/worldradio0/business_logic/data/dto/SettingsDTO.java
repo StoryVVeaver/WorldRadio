@@ -12,7 +12,6 @@ public class SettingsDTO {
     public int crossfadeTime;
 
     public int networkType;
-    public int radioModuleEnabled;
 
     public int timerSecondsEnabled;
     public int timerDotsType;
@@ -21,7 +20,7 @@ public class SettingsDTO {
         return new Settings(
                 userId,
                 audioBalance, gainRecord, gainBroadcast, agcEnabled, crossfadeEnabled, crossfadeTime,
-                networkType, radioModuleEnabled,
+                networkType,
                 timerSecondsEnabled, timerDotsType
         );
 
@@ -36,10 +35,8 @@ public class SettingsDTO {
         dto.crossfadeEnabled = settings.getCrossfadeEnabled();
         dto.crossfadeTime = settings.getCrossfadeTime();
         dto.networkType = settings.getNetworkType();
-        dto.radioModuleEnabled = settings.getRadioModuleEnabled();
         dto.timerSecondsEnabled = settings.getTimerSecondsEnabled();
         dto.timerDotsType = settings.getTimerDotsType();
-
 
         return dto;
     }
@@ -67,9 +64,6 @@ public class SettingsDTO {
     }
     public int getNetworkType() {
         return networkType;
-    }
-    public int getRadioModuleEnabled() {
-        return radioModuleEnabled;
     }
     public int getTimerSecondsEnabled() {
         return timerSecondsEnabled;

@@ -14,7 +14,9 @@ import androidx.media3.session.MediaSession;
 
 import javax.inject.Inject;
 
+import by.roman.worldradio0.business_logic.data.models.Settings;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRepository;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.SettingsRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.UserRepository;
 import by.roman.worldradio0.business_logic.media.NotificationService;
 import dagger.hilt.android.AndroidEntryPoint;
@@ -31,6 +33,7 @@ public class PlayerService extends Service {
     private static final int NOTIFICATION_ID = 1;
     private boolean isManuallyStopped = false;
 
+    private Settings settings;
     private String currentTrack;
     private String currentStreamUrl;
     private boolean isPlaying = true;
@@ -41,6 +44,8 @@ public class PlayerService extends Service {
     @Inject
     protected UserRepository userRepository;
     @Inject
+    protected SettingsRepository settingsRepository;
+    @Inject
     protected RadioManager radioManager;
     @Inject
     protected NotificationService notificationService;
@@ -49,7 +54,7 @@ public class PlayerService extends Service {
     private final Observer<String> trackObserver = new Observer<>() {
         @Override
         public void onChanged(String newTrack) {
-            if (newTrack != null && notificationService != null && !isManuallyStopped) {
+            if (newTrack != null && notificationService != null && !isManuallyStopped && settings.getNotificationEnabled() == 1) {
                 notificationService.updateTrack(newTrack);
             }
         }
@@ -58,7 +63,7 @@ public class PlayerService extends Service {
     private final Observer<Boolean> stateObserver = new Observer<>() {
         @Override
         public void onChanged(Boolean flag) {
-            if (flag != null && notificationService != null && !isManuallyStopped) {
+            if (flag != null && notificationService != null && !isManuallyStopped && settings.getNotificationEnabled() == 1) {
                 isPlaying = flag;
                 notificationService.updatePlaybackState(flag);
             }
@@ -77,6 +82,7 @@ public class PlayerService extends Service {
                 .setId("RadioMediaSession")
                 .build();
 
+        settings = settingsRepository.getSettings();
 
         Log.d("RadioService", "create");
     }
@@ -103,8 +109,10 @@ public class PlayerService extends Service {
                     currentTrack = null;
                     Log.d("RadioService", "Station: " + radioRepository.getPlayingStation().getName());
                     stopForeground(true);
-                    startForeground(NOTIFICATION_ID, notificationService.startNotification(currentTrack, isPlaying, radioRepository.getPlayingStation()));
-                    notificationService.updatePlaybackState(true);
+                    if(settings.getNotificationEnabled() == 1){
+                        startForeground(NOTIFICATION_ID, notificationService.startNotification(currentTrack, isPlaying, radioRepository.getPlayingStation()));
+                        notificationService.updatePlaybackState(true);
+                    }
                     radioRepository.setStatePlayer(true);
                 }
                 break;
@@ -114,7 +122,9 @@ public class PlayerService extends Service {
                 break;
             case ACTION_STOP:
                 Log.d("RadioService", "stop");
-                notificationService.stopNotification();
+                if(settings.getNotificationEnabled() == 1){
+                    notificationService.stopNotification();
+                }
                 radioManager.stop();
                 isManuallyStopped = true;
                 userRepository.setPlayingUUID(null);

@@ -21,7 +21,6 @@ public class SettingsDao {
     protected static final String COLUMN_CROSSFADE_ENABLED = "crossfade_enabled";
     protected static final String COLUMN_CROSSFADE_TIME = "crossfade_time";
     protected static final String COLUMN_NETWORK_TYPE = "network_type";
-    protected static final String COLUMN_RADIO_MODULE_ENABLED = "radio_module_enabled";
     protected static final String COLUMN_TIMER_SECONDS_ENABLED = "timer_seconds_enabled";
     protected static final String COLUMN_TIMER_DOTS_TYPE = "timer_dots_type";
 
@@ -34,7 +33,6 @@ public class SettingsDao {
             COLUMN_CROSSFADE_ENABLED      + " INTEGER, " +
             COLUMN_CROSSFADE_TIME         + " INTEGER, " +
             COLUMN_NETWORK_TYPE           + " INTEGER, " +
-            COLUMN_RADIO_MODULE_ENABLED   + " INTEGER, " +
             COLUMN_TIMER_SECONDS_ENABLED  + " INTEGER, " +
             COLUMN_TIMER_DOTS_TYPE        + " INTEGER, " +
             "FOREIGN KEY (" + COLUMN_USER_ID_SETTINGS + ") REFERENCES " + UserDao.TABLE_USER + "(" + UserDao.COLUMN_ID_USER + ") ON DELETE CASCADE" +
@@ -52,7 +50,6 @@ public class SettingsDao {
         values.put(COLUMN_CROSSFADE_ENABLED, dto.getCrossfadeEnabled());
         values.put(COLUMN_CROSSFADE_TIME, dto.getCrossfadeTime());
         values.put(COLUMN_NETWORK_TYPE, dto.getNetworkType());
-        values.put(COLUMN_RADIO_MODULE_ENABLED, dto.getRadioModuleEnabled());
         values.put(COLUMN_TIMER_SECONDS_ENABLED, dto.getTimerSecondsEnabled());
         values.put(COLUMN_TIMER_DOTS_TYPE, dto.getTimerDotsType());
 
@@ -66,7 +63,7 @@ public class SettingsDao {
                 new String[]{
                         COLUMN_USER_ID_SETTINGS,
                         COLUMN_AUDIO_BALANCE, COLUMN_GAIN_RECORD, COLUMN_GAIN_BROADCAST, COLUMN_AGC_ENABLED, COLUMN_CROSSFADE_ENABLED, COLUMN_CROSSFADE_TIME,
-                        COLUMN_NETWORK_TYPE, COLUMN_RADIO_MODULE_ENABLED,
+                        COLUMN_NETWORK_TYPE,
                         COLUMN_TIMER_SECONDS_ENABLED, COLUMN_TIMER_DOTS_TYPE
                 },
                 COLUMN_USER_ID_SETTINGS + " = ?",
@@ -88,7 +85,6 @@ public class SettingsDao {
                 int crossfadeTimeIndex = cursor.getColumnIndex(COLUMN_CROSSFADE_TIME);
 
                 int networkTypeIndex = cursor.getColumnIndex(COLUMN_NETWORK_TYPE);
-                int radioModuleEnabledIndex = cursor.getColumnIndex(COLUMN_RADIO_MODULE_ENABLED);
 
                 int timerSecondsIndex = cursor.getColumnIndex(COLUMN_TIMER_SECONDS_ENABLED);
                 int timerDotsIndex = cursor.getColumnIndex(COLUMN_TIMER_DOTS_TYPE);
@@ -102,7 +98,6 @@ public class SettingsDao {
                         crossfadeTimeIndex != -1 &&
 
                         networkTypeIndex != -1 &&
-                        radioModuleEnabledIndex != -1 &&
 
                         timerSecondsIndex != -1 &&
                         timerDotsIndex != -1) {
@@ -118,7 +113,6 @@ public class SettingsDao {
                             cursor.getInt(crossfadeTimeIndex),
 
                             cursor.getInt(networkTypeIndex),
-                            cursor.getInt(radioModuleEnabledIndex),
 
                             cursor.getInt(timerSecondsIndex),
                             cursor.getInt(timerDotsIndex)
@@ -139,7 +133,6 @@ public class SettingsDao {
         values.put(COLUMN_CROSSFADE_TIME, 0);
 
         values.put(COLUMN_NETWORK_TYPE, 0);
-        values.put(COLUMN_RADIO_MODULE_ENABLED, 0);
 
         values.put(COLUMN_TIMER_SECONDS_ENABLED, 0);
         values.put(COLUMN_TIMER_DOTS_TYPE, 0);
@@ -160,7 +153,6 @@ public class SettingsDao {
         values.put(COLUMN_CROSSFADE_TIME, dto.getCrossfadeTime());
 
         values.put(COLUMN_NETWORK_TYPE, dto.getNetworkType());
-        values.put(COLUMN_RADIO_MODULE_ENABLED, dto.getRadioModuleEnabled());
 
         values.put(COLUMN_TIMER_SECONDS_ENABLED, dto.getTimerSecondsEnabled());
         values.put(COLUMN_TIMER_DOTS_TYPE, dto.getTimerDotsType());

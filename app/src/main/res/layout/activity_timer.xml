@@ -32,7 +32,7 @@
             android:id="@+id/circularTimerView"
             android:layout_width="350dp"
             android:layout_height="350dp"
-            android:layout_marginTop="70dp"
+            android:layout_marginTop="130dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -74,7 +74,7 @@
             android:id="@+id/setTime"
             android:layout_width="wrap_content"
             android:layout_height="141dp"
-            android:layout_marginBottom="290dp"
+            android:layout_marginBottom="250dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
