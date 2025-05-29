@@ -1,5 +1,7 @@
 package by.roman.radiomanager.service.impl;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +34,7 @@ class UserServiceImpl implements UserService{
             if (user == null) {
                 userRepository.save(new User(login,password,null,0));
                 filterRepository.save(new Filters(userRepository.findByLogin(login).getId(),null, null, null, null, null, 0));
-                settingsRepository.save(new Settings(userRepository.findByLogin(login).getId(), 0, 0, 0, 0,0,0,0,0,1,0));
+                settingsRepository.save(new Settings(userRepository.findByLogin(login).getId()));
                 System.out.println("User created");
                 return userRepository.findByLoginAndPassword(login, password);
             } else return null;
@@ -56,6 +58,16 @@ class UserServiceImpl implements UserService{
             return null;
         }
     }
-
-
+    @Override
+    public String deleteUser(Long id){
+        try {
+            if(userRepository.existsById(id)){
+                userRepository.deleteById(id);
+                return "deleted";
+            }
+            return "not found";
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
 }

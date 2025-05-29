@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import by.roman.radiomanager.models.User;
 import by.roman.radiomanager.models.UserRequest;
@@ -53,6 +54,20 @@ public class UserController {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }
+
+    @GetMapping("/delete/{id}")
+    public String deleteUser(@PathVariable Long id) {
+        try {
+            String response = userService.deleteUser(id);
+            if(response != null){
+                return response;
+            }
+            return "error";
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+    
 
     @GetMapping
     public String isCorrect(){

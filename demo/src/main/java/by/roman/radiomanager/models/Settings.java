@@ -17,16 +17,17 @@ public class Settings {
     private int crossfade_time;
 
     private int network_type;
-    private int radio_module_enabled;
 
     private int timer_seconds_enabled;
     private int timer_dots_type;
+    private int notification_enabled;
+    private int navigation_type;
 
     public Settings(){
         
     }
 
-    public Settings(Long id, int audio_balance, int gain_record, int gain_broadcast, int agc_enabled, int crossfade_enabled, int crossfade_time, int network_type, int radio_module_enabled, int timer_seconds_enabled, int timer_dots_type) {
+    public Settings(Long id, int audio_balance, int gain_record, int gain_broadcast, int agc_enabled, int crossfade_enabled, int crossfade_time, int network_type, int timer_seconds_enabled, int timer_dots_type, int notification_enabled, int navigation_type) {
         this.id = id;
         this.audio_balance = audio_balance;
         this.gain_record = gain_record;
@@ -35,9 +36,25 @@ public class Settings {
         this.crossfade_enabled = crossfade_enabled;
         this.crossfade_time = crossfade_time;
         this.network_type = network_type;
-        this.radio_module_enabled = radio_module_enabled;
         this.timer_seconds_enabled = timer_seconds_enabled;
         this.timer_dots_type = timer_dots_type;
+        this.notification_enabled = notification_enabled;
+        this.navigation_type = navigation_type;
+    }
+
+    public Settings(Long id) {
+        this.id = id;
+        this.audio_balance = 0;
+        this.gain_record = 0;
+        this.gain_broadcast = 0;
+        this.agc_enabled = 0;
+        this.crossfade_enabled = 0;
+        this.crossfade_time = 0;
+        this.network_type = 0;
+        this.timer_seconds_enabled = 1;
+        this.timer_dots_type = 0;
+        this.notification_enabled = 1;
+        this.navigation_type = 2;
     }
 
     public Long getId() {
@@ -72,15 +89,19 @@ public class Settings {
         return network_type;
     }
 
-    public int getRadio_module_enabled() {
-        return radio_module_enabled;
-    }
-
     public int getTimer_seconds_enabled() {
         return timer_seconds_enabled;
     }
 
     public int getTimer_dots_type() {
         return timer_dots_type;
+    }
+
+    public int getNotification_enabled() {
+        return notification_enabled;
+    }
+
+    public int getNavigation_type() {
+        return navigation_type;
     }
 }
