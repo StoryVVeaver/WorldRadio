@@ -33,6 +33,7 @@ import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
+import by.roman.worldradio0.business_logic.UiState;
 import by.roman.worldradio0.business_logic.data.dto.FavoriteStationDTO;
 import by.roman.worldradio0.business_logic.data.dto.FilterDTO;
 import by.roman.worldradio0.business_logic.data.dto.RadioStationDTO;
@@ -64,6 +65,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 @HiltViewModel
 public class SettingsViewModel extends ViewModel {
     private final MutableLiveData<Boolean> timeToLeave = new MutableLiveData<>();
+    private final MutableLiveData<UiState<Integer>> count = new MutableLiveData<>();
+    private final MutableLiveData<UiState<Boolean>> sendingData = new MutableLiveData<>();
+    private final MutableLiveData<UiState<Boolean>> gettingData = new MutableLiveData<>();
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
     private final SettingsRepository settingsRepository;
     private final RadioRepository radioRepository;
@@ -73,6 +77,9 @@ public class SettingsViewModel extends ViewModel {
     private final DataFromRadio dataFromRadio;
     private final DataFromUserAPI dataFromUserAPI;
     private Settings settModel;
+    private int i = 0;
+    private int j = 0;
+    private boolean flag_stations = false;
 
     @Inject
     public SettingsViewModel(@NonNull SettingsRepository settingsRepository, RadioRepository radioRepository, DataFromRadio loadDataFromRadio,
@@ -89,6 +96,15 @@ public class SettingsViewModel extends ViewModel {
     }
     public LiveData<Boolean> getTimeToLeave(){
         return timeToLeave;
+    }
+    public LiveData<UiState<Integer>> getStationsCount(){
+        return count;
+    }
+    public LiveData<UiState<Boolean>> getSendingStatus(){
+        return sendingData;
+    }
+    public LiveData<UiState<Boolean>> getGettingStatus(){
+        return gettingData;
     }
     public List<SettingsGroup> getSettingsList(){
 
@@ -121,9 +137,9 @@ public class SettingsViewModel extends ViewModel {
             viewItems.add(new CheckItem(TIMER_SECONDS_ENABLED,"Использовать секунды:",settModel.getTimerSecondsEnabled() == 1));
             List<String> dots_types = new ArrayList<>();dots_types.add("Круг");dots_types.add("Ромб");
             viewItems.add(new SwitchItem(TIMER_DOTS_TYPE,"Вид разделителя:",dots_types,settModel.getTimerDotsType()));
-            viewItems.add(new CheckItem(NOTIFICATION_ENABLED,"Показывать уведомление с плеером",settModel.getNotificationEnabled() == 1));
+            //viewItems.add(new CheckItem(NOTIFICATION_ENABLED,"Показывать уведомление с плеером",settModel.getNotificationEnabled() == 1));
             List<String> nav_types = new ArrayList<>();nav_types.add("Свайп");nav_types.add("Кнопка");nav_types.add("Свайп и кнопка");
-            //viewItems.add(new SwitchItem(TIMER_DOTS_TYPE,"Вид навигации:",nav_types,settModel.getNavigationType()));
+            viewItems.add(new SwitchItem(NAVIGATION_TYPE,"Вид навигации:",nav_types,settModel.getNavigationType()));
             groups.add(new SettingsGroup("Оформление", viewItems));
         } catch (Exception e) {
             Log.e("SettingsViewModel", "Error creating list view settings");
@@ -204,15 +220,21 @@ public class SettingsViewModel extends ViewModel {
     public void clickChange(@NonNull String key){
         switch (key) {
             case GET_USER_DATA:
-                loadDataFromUserAPI();
+                if(!flag_stations){
+                    loadDataFromUserAPI();
+                }
                 break;
 
             case PUT_USER_DATA:
-                putDataToUserAPI();
+                if(!flag_stations){
+                    putDataToUserAPI();
+                }
                 break;
 
             case UPDATE_STATIONS_DATA:
-                loadFromAPI();
+                if(!flag_stations){
+                    loadFromAPI();
+                }
                 break;
 
             case EXIT_FROM_ACCOUNT:
@@ -246,21 +268,30 @@ public class SettingsViewModel extends ViewModel {
         }
     }
     private void loadFromAPI() {
+        flag_stations = true;
+        count.postValue(UiState.loading(0));
         radioRepository.clearTable();
         executor.execute(() -> dataFromRadio.getStations(new StationsCallback() {
             @Override
             public void onSuccess(List<RadioStationDTO> stations) {
+                long i = 0;
                 for (RadioStationDTO dto : stations) {
                     try {
                         radioRepository.addRadioStation(dto);
+                        i++;
+                        count.postValue(UiState.loading((int)(i * 100) / stations.size()));
                     } catch (Exception e) {
                         Log.e("DB", "Ошибка при добавлении: " + dto.getName(), e);
                     }
                 }
+                count.postValue(UiState.success(100));
+                flag_stations = false;
             }
             @Override
             public void onFailure(Throwable t) {
                 Log.e("API", "Ошибка загрузки данных", t);
+                count.postValue(UiState.error(t.getMessage()));
+                flag_stations = false;
             }
             @Override
             public void onLoading(){
@@ -269,16 +300,23 @@ public class SettingsViewModel extends ViewModel {
         }));
     }
     private void loadDataFromUserAPI(){
+        i = 0;
+        gettingData.postValue(UiState.loading());
         executor.execute(() -> dataFromUserAPI.getFilters(userRepository.getUserInSystem(), new FiltersCallback() {
 
             @Override
             public void onSuccess(FilterDTO dto) {
                 filterRepository.setFilters(dto);
+                i++;
+                if(i == 3){
+                    gettingData.postValue(UiState.success(true));
+                }
             }
 
             @Override
             public void onFailure(Throwable t) {
                 Log.e("SettingsViewModel", Objects.requireNonNull(t.getMessage()));
+                gettingData.postValue(UiState.error(t.getMessage()));
             }
         }));
         executor.execute(() -> dataFromUserAPI.getFavorites(userRepository.getUserInSystem(), new FavoritesCallback() {
@@ -288,11 +326,16 @@ public class SettingsViewModel extends ViewModel {
                 for (FavoriteStationDTO station : favoriteStations) {
                     favoriteRepository.addToFavorite(station.getId(), station.getStationUUID());
                 }
+                i++;
+                if(i == 3){
+                    gettingData.postValue(UiState.success(true));
+                }
             }
 
             @Override
             public void onFailure(Throwable t) {
                 Log.e("SettingsViewModel", Objects.requireNonNull(t.getMessage()));
+                gettingData.postValue(UiState.error(t.getMessage()));
             }
         }));
         executor.execute(() -> dataFromUserAPI.getSettings(userRepository.getUserInSystem(), new SettingsCallback() {
@@ -301,46 +344,71 @@ public class SettingsViewModel extends ViewModel {
             public void onSuccess(SettingsDTO settings) {
                 settModel = settings.toModel();
                 setSettings();
+                i++;
+                if(i == 3){
+                    gettingData.postValue(UiState.success(true));
+                }
             }
 
             @Override
             public void onFailure(Throwable t) {
                 Log.e("SettingsViewModel", Objects.requireNonNull(t.getMessage()));
+                gettingData.postValue(UiState.error(t.getMessage()));
             }
         }));
     }
     private void putDataToUserAPI(){
+        j = 0;
+        sendingData.postValue(UiState.loading());
         executor.execute(() -> dataFromUserAPI.putSettings(settingsRepository.getSettings(), new PutCallback() {
             @Override
             public void onSuccess(String t) {
-                //TODO сигнал о готовности/ошибке
+                if (t.equals("saved")){
+                    j++;
+                    if(j == 3){
+                        sendingData.postValue(UiState.success(true));
+                    }
+                }
             }
 
             @Override
             public void onFailure(Throwable t) {
-                Log.e("SettingsViewModel", Objects.requireNonNull(t.getMessage()));
+                Log.e("SettingsViewModel: Settings", Objects.requireNonNull(t.getMessage()));
+                sendingData.postValue(UiState.error(t.getMessage()));
             }
         }));
         executor.execute(() -> dataFromUserAPI.putFilters(filterRepository.getFilters(), new PutCallback() {
             @Override
             public void onSuccess(String t) {
-                //TODO сигнал о готовности/ошибке
+                if (t.equals("saved")){
+                    j++;
+                    if(j == 3){
+                        sendingData.postValue(UiState.success(true));
+                    }
+                }
             }
 
             @Override
             public void onFailure(Throwable t) {
-                Log.e("SettingsViewModel", Objects.requireNonNull(t.getMessage()));
+                Log.e("SettingsViewModel: Filters", Objects.requireNonNull(t.getMessage()));
+                sendingData.postValue(UiState.error(t.getMessage()));
             }
         }));
         executor.execute(() -> dataFromUserAPI.putFavorites(favoriteRepository.getAllFavorites(), new PutCallback() {
             @Override
             public void onSuccess(String t) {
-                //TODO сигнал о готовности/ошибке
+                if (t.equals("saved")){
+                    j++;
+                    if(j == 3){
+                        sendingData.postValue(UiState.success(true));
+                    }
+                }
             }
 
             @Override
             public void onFailure(Throwable t) {
-                Log.e("SettingsViewModel", Objects.requireNonNull(t.getMessage()));
+                Log.e("SettingsViewModel: Favorites", Objects.requireNonNull(t.getMessage()));
+                sendingData.postValue(UiState.error(t.getMessage()));
             }
         }));
     }

@@ -23,6 +23,12 @@ public class SettingsDao {
     protected static final String COLUMN_NETWORK_TYPE = "network_type";
     protected static final String COLUMN_TIMER_SECONDS_ENABLED = "timer_seconds_enabled";
     protected static final String COLUMN_TIMER_DOTS_TYPE = "timer_dots_type";
+    protected static final String COLUMN_NOTIFICATION_ENABLED = "notification_enabled";
+    protected static final String COLUMN_NAVIGATION_TYPE = "navigation_type";
+    protected static final String COLUMN_X = "x";
+    protected static final String COLUMN_Y = "y";
+    protected static final String COLUMN_Z = "z";
+    protected static final String COLUMN_C = "c";
 
     protected static final String CREATE_TABLE_SETTINGS = "CREATE TABLE " + TABLE_SETTINGS + " (" +
             COLUMN_USER_ID_SETTINGS       + " INTEGER PRIMARY KEY, " +
@@ -35,6 +41,12 @@ public class SettingsDao {
             COLUMN_NETWORK_TYPE           + " INTEGER, " +
             COLUMN_TIMER_SECONDS_ENABLED  + " INTEGER, " +
             COLUMN_TIMER_DOTS_TYPE        + " INTEGER, " +
+            COLUMN_NOTIFICATION_ENABLED   + " INTEGER, " +
+            COLUMN_NAVIGATION_TYPE        + " INTEGER, " +
+            COLUMN_X        + " INTEGER, " +
+            COLUMN_Y        + " INTEGER, " +
+            COLUMN_Z        + " INTEGER, " +
+            COLUMN_C        + " INTEGER, " +
             "FOREIGN KEY (" + COLUMN_USER_ID_SETTINGS + ") REFERENCES " + UserDao.TABLE_USER + "(" + UserDao.COLUMN_ID_USER + ") ON DELETE CASCADE" +
             ");";
     private final SQLiteDatabase db;
@@ -49,9 +61,13 @@ public class SettingsDao {
         values.put(COLUMN_AGC_ENABLED, dto.getAgcEnabled());
         values.put(COLUMN_CROSSFADE_ENABLED, dto.getCrossfadeEnabled());
         values.put(COLUMN_CROSSFADE_TIME, dto.getCrossfadeTime());
+
         values.put(COLUMN_NETWORK_TYPE, dto.getNetworkType());
+
         values.put(COLUMN_TIMER_SECONDS_ENABLED, dto.getTimerSecondsEnabled());
         values.put(COLUMN_TIMER_DOTS_TYPE, dto.getTimerDotsType());
+        values.put(COLUMN_NOTIFICATION_ENABLED, dto.getNotification_enabled());
+        values.put(COLUMN_NAVIGATION_TYPE, dto.getNavigation_type());
 
         String selection = COLUMN_USER_ID_SETTINGS + " = ?";
         String[] selectionArgs = {String.valueOf(dto.getUserId())};
@@ -64,7 +80,7 @@ public class SettingsDao {
                         COLUMN_USER_ID_SETTINGS,
                         COLUMN_AUDIO_BALANCE, COLUMN_GAIN_RECORD, COLUMN_GAIN_BROADCAST, COLUMN_AGC_ENABLED, COLUMN_CROSSFADE_ENABLED, COLUMN_CROSSFADE_TIME,
                         COLUMN_NETWORK_TYPE,
-                        COLUMN_TIMER_SECONDS_ENABLED, COLUMN_TIMER_DOTS_TYPE
+                        COLUMN_TIMER_SECONDS_ENABLED, COLUMN_TIMER_DOTS_TYPE, COLUMN_NOTIFICATION_ENABLED, COLUMN_NAVIGATION_TYPE
                 },
                 COLUMN_USER_ID_SETTINGS + " = ?",
                 new String[]{String.valueOf(id)},
@@ -88,6 +104,8 @@ public class SettingsDao {
 
                 int timerSecondsIndex = cursor.getColumnIndex(COLUMN_TIMER_SECONDS_ENABLED);
                 int timerDotsIndex = cursor.getColumnIndex(COLUMN_TIMER_DOTS_TYPE);
+                int notificationEnabledIndex = cursor.getColumnIndex(COLUMN_NOTIFICATION_ENABLED);
+                int navigationTypeIndex = cursor.getColumnIndex(COLUMN_NAVIGATION_TYPE);
 
                 if (idIndex != -1 &&
                         audioBalanceIndex != -1 &&
@@ -100,7 +118,9 @@ public class SettingsDao {
                         networkTypeIndex != -1 &&
 
                         timerSecondsIndex != -1 &&
-                        timerDotsIndex != -1) {
+                        timerDotsIndex != -1 &&
+                        notificationEnabledIndex != -1 &&
+                        navigationTypeIndex != -1) {
 
                     return new Settings(
                             cursor.getInt(idIndex),
@@ -115,7 +135,9 @@ public class SettingsDao {
                             cursor.getInt(networkTypeIndex),
 
                             cursor.getInt(timerSecondsIndex),
-                            cursor.getInt(timerDotsIndex)
+                            cursor.getInt(timerDotsIndex),
+                            cursor.getInt(notificationEnabledIndex),
+                            cursor.getInt(navigationTypeIndex)
                     );
                 }
             }
@@ -136,6 +158,8 @@ public class SettingsDao {
 
         values.put(COLUMN_TIMER_SECONDS_ENABLED, 0);
         values.put(COLUMN_TIMER_DOTS_TYPE, 0);
+        values.put(COLUMN_NOTIFICATION_ENABLED, 1);
+        values.put(COLUMN_NAVIGATION_TYPE, 0);
 
         String selection = COLUMN_USER_ID_SETTINGS + " = ?";
         String[] selectionArgs = {String.valueOf(id)};
@@ -156,6 +180,8 @@ public class SettingsDao {
 
         values.put(COLUMN_TIMER_SECONDS_ENABLED, dto.getTimerSecondsEnabled());
         values.put(COLUMN_TIMER_DOTS_TYPE, dto.getTimerDotsType());
+        values.put(COLUMN_NOTIFICATION_ENABLED, dto.getNotification_enabled());
+        values.put(COLUMN_NAVIGATION_TYPE, dto.getNavigation_type());
 
         db.insertWithOnConflict(TABLE_SETTINGS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
     }

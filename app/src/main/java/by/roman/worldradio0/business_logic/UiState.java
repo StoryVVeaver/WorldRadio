@@ -28,4 +28,7 @@ public class    UiState<T> {
     public static <T> UiState<T> loading() {
         return new UiState<>(Status.LOADING, null, null);
     }
+    public static <T> UiState<T> loading(T data) {
+        return new UiState<>(Status.LOADING, data, null);
+    }
 }

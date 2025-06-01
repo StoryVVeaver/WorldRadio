@@ -33,7 +33,6 @@ public class PlayerService extends Service {
     private static final int NOTIFICATION_ID = 1;
     private boolean isManuallyStopped = false;
 
-    private Settings settings;
     private String currentTrack;
     private String currentStreamUrl;
     private boolean isPlaying = true;
@@ -44,8 +43,6 @@ public class PlayerService extends Service {
     @Inject
     protected UserRepository userRepository;
     @Inject
-    protected SettingsRepository settingsRepository;
-    @Inject
     protected RadioManager radioManager;
     @Inject
     protected NotificationService notificationService;
@@ -54,7 +51,7 @@ public class PlayerService extends Service {
     private final Observer<String> trackObserver = new Observer<>() {
         @Override
         public void onChanged(String newTrack) {
-            if (newTrack != null && notificationService != null && !isManuallyStopped && settings.getNotificationEnabled() == 1) {
+            if (newTrack != null && notificationService != null && !isManuallyStopped) {
                 notificationService.updateTrack(newTrack);
             }
         }
@@ -63,7 +60,7 @@ public class PlayerService extends Service {
     private final Observer<Boolean> stateObserver = new Observer<>() {
         @Override
         public void onChanged(Boolean flag) {
-            if (flag != null && notificationService != null && !isManuallyStopped && settings.getNotificationEnabled() == 1) {
+            if (flag != null && notificationService != null && !isManuallyStopped) {
                 isPlaying = flag;
                 notificationService.updatePlaybackState(flag);
             }
@@ -82,7 +79,6 @@ public class PlayerService extends Service {
                 .setId("RadioMediaSession")
                 .build();
 
-        settings = settingsRepository.getSettings();
 
         Log.d("RadioService", "create");
     }
@@ -109,10 +105,8 @@ public class PlayerService extends Service {
                     currentTrack = null;
                     Log.d("RadioService", "Station: " + radioRepository.getPlayingStation().getName());
                     stopForeground(true);
-                    if(settings.getNotificationEnabled() == 1){
-                        startForeground(NOTIFICATION_ID, notificationService.startNotification(currentTrack, isPlaying, radioRepository.getPlayingStation()));
-                        notificationService.updatePlaybackState(true);
-                    }
+                    startForeground(NOTIFICATION_ID, notificationService.startNotification(currentTrack, isPlaying, radioRepository.getPlayingStation()));
+                    notificationService.updatePlaybackState(true);
                     radioRepository.setStatePlayer(true);
                 }
                 break;
@@ -122,9 +116,7 @@ public class PlayerService extends Service {
                 break;
             case ACTION_STOP:
                 Log.d("RadioService", "stop");
-                if(settings.getNotificationEnabled() == 1){
-                    notificationService.stopNotification();
-                }
+                notificationService.stopNotification();
                 radioManager.stop();
                 isManuallyStopped = true;
                 userRepository.setPlayingUUID(null);

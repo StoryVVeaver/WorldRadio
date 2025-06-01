@@ -1,9 +1,7 @@
 package by.roman.worldradio0.business_logic.data.models;
 
-import androidx.navigation.PopUpToBuilder;
-
 public class Settings {
-    private final int userId;
+    private final int id;
     private int audio_balance;
     private int gain_record;
     private int gain_broadcast;
@@ -19,11 +17,11 @@ public class Settings {
     private int navigation_type;
 
 
-    public Settings(int userId,
+    public Settings(int id,
                     int audio_balance, int gain_record, int gain_broadcast, int agc_enabled, int crossfade_enabled, int crossfade_time,
                     int network_type,
-                    int timer_seconds_enabled, int timer_dots_type/*,int notification_enabled, int navigation_type*/) {
-        this.userId = userId;
+                    int timer_seconds_enabled, int timer_dots_type,int notification_enabled, int navigation_type) {
+        this.id = id;
         this.audio_balance = audio_balance;
         this.gain_record = gain_record;
         this.gain_broadcast = gain_broadcast;
@@ -33,12 +31,12 @@ public class Settings {
         this.network_type = network_type;
         this.timer_seconds_enabled = timer_seconds_enabled;
         this.timer_dots_type = timer_dots_type;
-        //this.notification_enabled = notification_enabled;
-        //this.navigation_type = navigation_type;
+        this.notification_enabled = notification_enabled;
+        this.navigation_type = navigation_type;
     }
 
-    public Settings(int userId) {
-        this.userId = userId;
+    public Settings(int id) {
+        this.id = id;
 
         this.audio_balance = 0;
         this.gain_record = 0;
@@ -56,7 +54,7 @@ public class Settings {
     }
 
     // Getters
-    public int getUserId() { return userId; }
+    public int getId() { return id; }
     public int getAudioBalance() {
         return audio_balance;
     }

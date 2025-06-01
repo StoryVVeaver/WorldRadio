@@ -15,19 +15,21 @@ public class SettingsDTO {
 
     public int timerSecondsEnabled;
     public int timerDotsType;
+    public int notification_enabled;
+    public int navigation_type;
 
     public Settings toModel(){
         return new Settings(
                 userId,
                 audioBalance, gainRecord, gainBroadcast, agcEnabled, crossfadeEnabled, crossfadeTime,
                 networkType,
-                timerSecondsEnabled, timerDotsType
+                timerSecondsEnabled, timerDotsType, notification_enabled, navigation_type
         );
 
     }
     public SettingsDTO fromModel(Settings settings) {
         SettingsDTO dto = new SettingsDTO();
-        dto.userId = settings.getUserId();
+        dto.userId = settings.getId();
         dto.audioBalance = settings.getAudioBalance();
         dto.gainRecord = settings.getGainRecord();
         dto.gainBroadcast = settings.getGainBroadcast();
@@ -37,6 +39,8 @@ public class SettingsDTO {
         dto.networkType = settings.getNetworkType();
         dto.timerSecondsEnabled = settings.getTimerSecondsEnabled();
         dto.timerDotsType = settings.getTimerDotsType();
+        dto.notification_enabled = settings.getNotificationEnabled();
+        dto.navigation_type = settings.getNavigationType();
 
         return dto;
     }
@@ -70,5 +74,11 @@ public class SettingsDTO {
     }
     public int getTimerDotsType() {
         return timerDotsType;
+    }
+    public int getNotification_enabled() {
+        return notification_enabled;
+    }
+    public int getNavigation_type() {
+        return navigation_type;
     }
 }

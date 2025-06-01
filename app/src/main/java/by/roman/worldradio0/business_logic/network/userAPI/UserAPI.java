@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Singleton;
 
@@ -42,12 +43,13 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 @Singleton
 public class UserAPI {
     //private static final String API_URL = "http://192.168.43.146:8080/api/v1/user";
-    //private static final String API_URL = "http://192.168.0.85:8080/api/v1/user";
-    private static final String API_URL = "https://shiny-snails-go.loca.lt/api/v1/user";
+    private static final String API_URL = "http://192.168.0.85:8080/api/v1/user";
+    //private static final String API_URL = "https://shiny-snails-go.loca.lt/api/v1/user";
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     public UserAPI(){
 
@@ -323,102 +325,62 @@ public class UserAPI {
             }
         });
     }
-    public void putFilters(Filter filter, PutCallback callback){
-        Gson gson = new Gson();
-        String jsonBody;
-        jsonBody = gson.toJson(filter);
-        Log.d("UserAPI","JSON created" + jsonBody);
-        OkHttpClient client = new OkHttpClient();
-        RequestBody requestBody = RequestBody.create(jsonBody,JSON);
-        Request request = new Request.Builder()
-                .url(API_URL + "/put/filters")
-                .put(requestBody)
-                .build();
-        Log.d("UserAPI","Request created");
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.isSuccessful()){
-                    try (response){
-                        if(response.body() != null){
-                            if(response.body().string().equals("saved")){
-                                callback.onSuccess("saved");
-                            } else callback.onFailure(new Exception(response.body().string()));
-                        } else callback.onFailure(new Exception("error"));
-                    } catch (Exception e) {
-                        callback.onFailure(e);
-                        throw new RuntimeException(e);
-                    }
-                }
-            }
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                callback.onFailure(e);
-            }
-        });
+    public void putFilters(Filter filter, PutCallback callback) {
+        executePutRequest("/put/filters", filter, callback);
     }
-    public void putFavorites(List<FavoriteStation> list, PutCallback callback){
+    public void putFavorites(List<FavoriteStation> list, PutCallback callback) {
+        if (list == null || list.isEmpty()) {
+            callback.onSuccess("saved");
+            return;
+        }
+        executePutRequest("/put/favorites", list, callback);
+    }
+    public void putSettings(Settings settings, PutCallback callback) {
+        executePutRequest("/put/settings", settings, callback);
+    }
+    private <T> void executePutRequest(String endpoint, T data, PutCallback callback) {
         Gson gson = new Gson();
-        String jsonBody;
-        jsonBody = gson.toJson(list);
-        Log.d("UserAPI","JSON created" + jsonBody);
-        OkHttpClient client = new OkHttpClient();
-        RequestBody requestBody = RequestBody.create(jsonBody,JSON);
+        String jsonBody = gson.toJson(data);
+        Log.d("UserAPI " + endpoint, "JSON created " + jsonBody);
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS)
+                .writeTimeout(10, TimeUnit.SECONDS)
+                .build();
+        RequestBody requestBody = RequestBody.create(jsonBody, JSON);
         Request request = new Request.Builder()
-                .url(API_URL + "/put/favorites")
+                .url(API_URL + endpoint)
                 .put(requestBody)
                 .build();
-        Log.d("UserAPI","Request created");
+
+        Log.d("UserAPI " + endpoint, "Request created");
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) {
-                if (response.isSuccessful()){
-                    try (response){
-                        if(response.body() != null){
-                            if(response.body().string().equals("saved")){
-                                callback.onSuccess("saved");
-                            } else callback.onFailure(new Exception(response.body().string()));
-                        } else callback.onFailure(new Exception("error"));
-                    } catch (Exception e) {
-                        callback.onFailure(e);
-                        throw new RuntimeException(e);
+                try (ResponseBody responseBody = response.body()) {
+                    if (!response.isSuccessful()) {
+                        callback.onFailure(new Exception("HTTP error: " + response.code()));
+                        return;
                     }
+
+                    if (responseBody == null) {
+                        callback.onFailure(new Exception("Empty response body"));
+                        return;
+                    }
+
+                    String responseText = responseBody.string();
+                    if ("saved".equals(responseText)) {
+                        callback.onSuccess("saved");
+                    } else {
+                        Log.d("UserAPI " + endpoint, "Response text: " + responseText);
+                        callback.onFailure(new Exception(responseText));
+                    }
+                } catch (Exception e) {
+                    callback.onFailure(e);
                 }
             }
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                callback.onFailure(e);
-            }
-        });
-    }
-    public void putSettings(Settings settings, PutCallback callback){
-        Gson gson = new Gson();
-        String jsonBody;
-        jsonBody = gson.toJson(settings);
-        Log.d("UserAPI","JSON created" + jsonBody);
-        OkHttpClient client = new OkHttpClient();
-        RequestBody requestBody = RequestBody.create(jsonBody,JSON);
-        Request request = new Request.Builder()
-                .url(API_URL + "/put/settings")
-                .put(requestBody)
-                .build();
-        Log.d("UserAPI","Request created");
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) {
-                if (response.isSuccessful()){
-                    try (response){
-                        if(response.body() != null){
-                            if(response.body().string().equals("saved")){
-                                callback.onSuccess("saved");
-                            } else callback.onFailure(new Exception(response.body().string()));
-                        } else callback.onFailure(new Exception("error"));
-                    } catch (Exception e) {
-                        callback.onFailure(e);
-                        throw new RuntimeException(e);
-                    }
-                }
-            }
+
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 callback.onFailure(e);
