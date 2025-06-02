@@ -40,7 +40,7 @@ public class AccountViewModel extends ViewModel {
     private final DataFromRadio dataFromRadio;
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
     private final MutableLiveData<UiState<Boolean>> result = new MutableLiveData<>();
-    private final MutableLiveData<UiState<Boolean>> stationsLoading = new MutableLiveData<>();
+    private final MutableLiveData<UiState<Integer>> stationsLoading = new MutableLiveData<>();
 
     @Inject
     public AccountViewModel(UserRepository userRepository, SettingsRepository settingsRepository,
@@ -56,7 +56,7 @@ public class AccountViewModel extends ViewModel {
     public LiveData<UiState<Boolean>> getUser(){
         return result;
     }
-    public LiveData<UiState<Boolean>> getStationsLoading() {
+    public LiveData<UiState<Integer>> getStationsLoading() {
         return stationsLoading;
     }
     public int isUserHere(){
@@ -114,21 +114,24 @@ public class AccountViewModel extends ViewModel {
     }
     public void loadStations(){
         if(!hasRecords()){
+            stationsLoading.postValue(UiState.loading(0));
             dataFromRadio.getStations(new StationsCallback() {
                 @Override
                 public void onLoading() {
-                    stationsLoading.postValue(UiState.loading());
                 }
                 @Override
                 public void onSuccess(List<RadioStationDTO> stations) {
+                    long i = 0;
                     for (RadioStationDTO dto : stations) {
                         try {
                             radioRepository.addRadioStation(dto);
+                            i++;
+                            stationsLoading.postValue(UiState.loading((int) (i * 100) / stations.size()));
                         } catch (Exception e) {
                             Log.e("DB", "Ошибка при добавлении: " + dto.getName(), e);
                             stationsLoading.postValue(UiState.error("Уведомите разработчика о ошибке загрузки"));
                         }
-                        stationsLoading.postValue(UiState.success(true));
+                        stationsLoading.postValue(UiState.success(100));
                     }
                 }
                 @Override
@@ -136,6 +139,6 @@ public class AccountViewModel extends ViewModel {
                     stationsLoading.postValue(UiState.error("Retry load later"));
                 }
             });
-        } else stationsLoading.postValue(UiState.success(true));
+        } else stationsLoading.postValue(UiState.success(100));
     }
 }

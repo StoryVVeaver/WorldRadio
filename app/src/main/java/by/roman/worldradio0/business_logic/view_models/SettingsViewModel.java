@@ -415,7 +415,6 @@ public class SettingsViewModel extends ViewModel {
     public Settings getSettingsModel(){
         return settModel;
     }
-
     @Override
     protected void onCleared() {
         super.onCleared();

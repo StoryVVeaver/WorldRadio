@@ -238,6 +238,14 @@ public class RegistrationFragment extends Fragment {
                 case LOADING:
                     progressBar_loading.setVisibility(VISIBLE);
                     loadingText.setVisibility(VISIBLE);
+                    if(stations.data == 0){
+                        progressBar_loading.setIndeterminate(true);
+                        loadingText.setText("Загрузка данных");
+                    } else {
+                        progressBar_loading.setIndeterminate(false);
+                        loadingText.setText("Сохранение данных");
+                        progressBar_loading.setProgress(stations.data);
+                    }
                     break;
 
                 case SUCCESS:

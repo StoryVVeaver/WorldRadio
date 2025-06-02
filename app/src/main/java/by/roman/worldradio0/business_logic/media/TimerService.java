@@ -1,5 +1,7 @@
 package by.roman.worldradio0.business_logic.media;
 
+import static by.roman.worldradio0.business_logic.player.PlayerService.ACTION_STOP;
+
 import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
@@ -30,6 +32,7 @@ public class TimerService extends Service {
     public static final String EXTRA_TIME_DURATION_MS = "EXTRA_TIME_DURATION_MS";
     public static final String EXTRA_TIME_START = "EXTRA_TIME_START";
     public static final String EXTRA_TIME_PAUSE = "EXTRA_TIME_PAUSE";
+    public static final String EXTRA_TIME_FINISH = "EXTRA_TIME_FINISH";
 
     private Handler handler;
     private Runnable stopRunnable;
@@ -38,6 +41,7 @@ public class TimerService extends Service {
     private long remaining = 0;
     private boolean flag = false;
     private boolean flag2 = false;
+    private boolean finish = true;
 
     @Override
     public void onCreate() {
@@ -85,11 +89,10 @@ public class TimerService extends Service {
 
         stopRunnable = () -> {
             Log.d("TimerService", "Timer expired, stopping playback and service.");
-
+            flag = false;
             Intent stopIntent = new Intent(this, PlayerService.class);
-            stopIntent.setAction("ACTION_STOP_PLAYBACK");
+            stopIntent.setAction(ACTION_STOP);
             startService(stopIntent);
-
         };
         handler.postDelayed(stopRunnable, durationMs);
         flag = true;

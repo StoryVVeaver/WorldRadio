@@ -173,7 +173,8 @@
         <ProgressBar
             android:id="@+id/progressBar_loading_Entrance"
             style="?android:attr/progressBarStyleHorizontal"
-            android:indeterminate="true"
+            android:max="100"
+            android:min="0"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_marginBottom="30dp"
@@ -187,7 +188,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
-            android:text="Загрузка станций"
             android:visibility="invisible"
             app:layout_constraintBottom_toTopOf="@+id/progressBar_loading_Entrance"
             app:layout_constraintEnd_toEndOf="@+id/progressBar_loading_Entrance"

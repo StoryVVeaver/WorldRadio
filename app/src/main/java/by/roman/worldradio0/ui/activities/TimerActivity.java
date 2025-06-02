@@ -45,7 +45,6 @@ public class TimerActivity extends AppCompatActivity {
     private TimerWheelAdapter hourAdapter, minuteAdapter, secondAdapter;
     private CircularTimerView circularTimerView;
     private CountDownTimer countDownTimer;
-    //private SettingsViewModel settingsViewModel;
     private TimerViewModel viewModel;
     private SettingsViewModel settingsViewModel;
 
@@ -62,6 +61,7 @@ public class TimerActivity extends AppCompatActivity {
     private boolean isStart = false;
     private boolean isPaused = false;
     private long timeRemaining = 0L;
+    private boolean isFinished = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

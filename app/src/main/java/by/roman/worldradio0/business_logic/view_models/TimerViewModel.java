@@ -27,6 +27,7 @@ public class TimerViewModel extends ViewModel {
     private MutableLiveData<Long> time_left = new MutableLiveData<>();
     private MutableLiveData<Boolean> flag = new MutableLiveData<>();
     private MutableLiveData<Boolean> flag2 = new MutableLiveData<>();
+    private MutableLiveData<Boolean> finish = new MutableLiveData<>();
     @SuppressLint("StaticFieldLeak")
     private final Context context;
 
@@ -85,4 +86,5 @@ public class TimerViewModel extends ViewModel {
     public MutableLiveData<Boolean> getFlag2() {
         return flag2;
     }
+
 }
