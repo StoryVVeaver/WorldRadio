@@ -6,7 +6,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import javax.inject.Singleton;
 
-import by.roman.worldradio0.business_logic.data.database.FavoriteDao;
+import by.roman.worldradio0.business_logic.data.database.FavoriteStationDao;
+import by.roman.worldradio0.business_logic.data.database.FavoriteTrackDao;
 import by.roman.worldradio0.business_logic.data.database.FilterDao;
 import by.roman.worldradio0.business_logic.data.database.RadioStationDao;
 import by.roman.worldradio0.business_logic.data.database.SQLiteDatabaseManager;
@@ -38,8 +39,13 @@ public class DatabaseModule {
     }
     @Provides
     @Singleton
-    public FavoriteDao provideFavoriteDao(SQLiteDatabase db) {
-        return new FavoriteDao(db);
+    public FavoriteStationDao provideFavoriteStationsDao(SQLiteDatabase db) {
+        return new FavoriteStationDao(db);
+    }
+    @Provides
+    @Singleton
+    public FavoriteTrackDao provideFavoriteTracksDao(SQLiteDatabase db) {
+        return new FavoriteTrackDao(db);
     }
     @Provides
     @Singleton

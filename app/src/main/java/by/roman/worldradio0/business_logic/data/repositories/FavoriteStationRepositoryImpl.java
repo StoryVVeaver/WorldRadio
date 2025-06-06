@@ -5,41 +5,41 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
-import by.roman.worldradio0.business_logic.data.database.FavoriteDao;
+import by.roman.worldradio0.business_logic.data.database.FavoriteStationDao;
 import by.roman.worldradio0.business_logic.data.database.UserDao;
 import by.roman.worldradio0.business_logic.data.models.FavoriteStation;
-import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteRepository;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteStationRepository;
 
-public class FavoriteRepositoryImpl implements FavoriteRepository {
-    private final FavoriteDao favoriteDao;
+public class FavoriteStationRepositoryImpl implements FavoriteStationRepository {
+    private final FavoriteStationDao favoriteStationDao;
     private final UserDao userDao;
-    private final List<OnFavoritesChangedListener> listeners = new ArrayList<>();
-    public FavoriteRepositoryImpl(FavoriteDao favoriteDao, UserDao userDao) {
-        this.favoriteDao = favoriteDao;
+    private final List<OnFavoriteStationsChangedListener> listeners = new ArrayList<>();
+    public FavoriteStationRepositoryImpl(FavoriteStationDao favoriteStationDao, UserDao userDao) {
+        this.favoriteStationDao = favoriteStationDao;
         this.userDao = userDao;
     }
-    public interface OnFavoritesChangedListener {
-        void onFavoritesChanged();
+    public interface OnFavoriteStationsChangedListener {
+        void onFavoriteStationsChanged();
     }
     @Override
-    public void addListener(OnFavoritesChangedListener listener) {
+    public void addListener(OnFavoriteStationsChangedListener listener) {
         if (!listeners.contains(listener)) {
             listeners.add(listener);
         }
     }
     @Override
-    public void removeListener(OnFavoritesChangedListener listener) {
+    public void removeListener(OnFavoriteStationsChangedListener listener) {
         listeners.remove(listener);
     }
     private void notifyFavoritesChanged() {
-        for (OnFavoritesChangedListener listener : new ArrayList<>(listeners)) {
-            listener.onFavoritesChanged();
+        for (OnFavoriteStationsChangedListener listener : new ArrayList<>(listeners)) {
+            listener.onFavoriteStationsChanged();
         }
     }
     @Override
     public void addToFavorite(int id, String UUID){
         try {
-            favoriteDao.addFavorite(id, userDao.getIdUserInSystem(),UUID);
+            favoriteStationDao.addFavorite(id, userDao.getIdUserInSystem(),UUID);
             notifyFavoritesChanged();
         } catch (Exception e) {
             Log.e("FavoriteRepositoryImp","Failed add to favorite: " + e.getMessage());
@@ -48,7 +48,7 @@ public class FavoriteRepositoryImpl implements FavoriteRepository {
     @Override
     public void removeFromFavorite(String UUID){
         try {
-            favoriteDao.removeFavorite(userDao.getIdUserInSystem(),UUID);
+            favoriteStationDao.removeFavorite(userDao.getIdUserInSystem(),UUID);
             notifyFavoritesChanged();
         } catch (Exception e) {
             Log.e("FavoriteRepositoryImp","Failed remove from favorite: " + e.getMessage());
@@ -57,7 +57,7 @@ public class FavoriteRepositoryImpl implements FavoriteRepository {
     @Override
     public boolean isStationFavorite(String UUID){
         try {
-            return favoriteDao.isFavorite(userDao.getIdUserInSystem(),UUID);
+            return favoriteStationDao.isFavorite(userDao.getIdUserInSystem(),UUID);
         } catch (Exception e) {
             Log.e("FavoriteRepositoryImp","Failed check favorite: " + e.getMessage());
             return false;
@@ -66,7 +66,7 @@ public class FavoriteRepositoryImpl implements FavoriteRepository {
     @Override
     public List<String> getFavoritesById(int currentPage, int pagSize){
         try {
-            return favoriteDao.getFavoritesByUser(userDao.getIdUserInSystem(),currentPage,pagSize);
+            return favoriteStationDao.getFavoritesByUser(userDao.getIdUserInSystem(),currentPage,pagSize);
         } catch (Exception e) {
             Log.e("FavoriteRepositoryImpl","Failed get favorites list: " + e.getMessage());
             return null;
@@ -75,7 +75,7 @@ public class FavoriteRepositoryImpl implements FavoriteRepository {
     @Override
     public List<FavoriteStation> getAllFavorites(){
         try {
-            return favoriteDao.getAllFavorites(userDao.getIdUserInSystem());
+            return favoriteStationDao.getAllFavorites(userDao.getIdUserInSystem());
         } catch (Exception e) {
             Log.e("FavoriteRepositoryImpl","Failed get all favorites: " + e.getMessage());
             return null;

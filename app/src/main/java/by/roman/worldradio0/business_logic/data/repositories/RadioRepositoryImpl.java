@@ -8,7 +8,7 @@ import androidx.lifecycle.MutableLiveData;
 import java.util.ArrayList;
 import java.util.List;
 
-import by.roman.worldradio0.business_logic.data.database.FavoriteDao;
+import by.roman.worldradio0.business_logic.data.database.FavoriteStationDao;
 import by.roman.worldradio0.business_logic.data.database.FilterDao;
 import by.roman.worldradio0.business_logic.data.database.RadioStationDao;
 import by.roman.worldradio0.business_logic.data.database.UserDao;
@@ -19,13 +19,13 @@ import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRep
 
 public class RadioRepositoryImpl implements RadioRepository {
     private final RadioStationDao radioStationDao;
-    private final FavoriteDao favoriteDao;
+    private final FavoriteStationDao favoriteStationDao;
     private final UserDao userDao;
     private final FilterDao filterDao;
     private final MutableLiveData<Boolean> showPlayer = new MutableLiveData<>();
-    public RadioRepositoryImpl(RadioStationDao radioStationDao, FavoriteDao favoriteDao, UserDao userDao, FilterDao filterDao) {
+    public RadioRepositoryImpl(RadioStationDao radioStationDao, FavoriteStationDao favoriteStationDao, UserDao userDao, FilterDao filterDao) {
         this.radioStationDao = radioStationDao;
-        this.favoriteDao = favoriteDao;
+        this.favoriteStationDao = favoriteStationDao;
         this.userDao = userDao;
         this.filterDao = filterDao;
     }
@@ -40,7 +40,7 @@ public class RadioRepositoryImpl implements RadioRepository {
     @Override
     public List<RadioStation> getFavoriteStations(int currentPage, int pageSize){
         try {
-            List<String> favoriteUUID = favoriteDao.getFavoritesByUser(userDao.getIdUserInSystem(), currentPage, pageSize);
+            List<String> favoriteUUID = favoriteStationDao.getFavoritesByUser(userDao.getIdUserInSystem(), currentPage, pageSize);
             List<RadioStation> stations = new ArrayList<>();
             for(String i : favoriteUUID){
                 stations.add(radioStationDao.getStationById(i));

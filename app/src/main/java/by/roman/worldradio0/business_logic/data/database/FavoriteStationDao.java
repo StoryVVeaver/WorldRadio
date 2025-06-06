@@ -5,25 +5,20 @@ import static java.lang.String.valueOf;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Build;
 import android.util.Log;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import by.roman.worldradio0.business_logic.data.dto.FavoriteStationDTO;
 import by.roman.worldradio0.business_logic.data.models.FavoriteStation;
 
-public class FavoriteDao {
+public class FavoriteStationDao {
 
-    protected static final String TABLE_FAVORITE = "favorites";
+    protected static final String TABLE_FAVORITE_STATION = "favorites";
     protected static final String COLUMN_ID_FAVORITE = "id";
     protected static final String COLUMN_USER_ID_FAVORITE = "user_id";
     protected static final String COLUMN_STATION_UUID_FAVORITE = "station_id";
-    protected static final String CREATE_TABLE_FAVORITE = "CREATE TABLE " + TABLE_FAVORITE + " (" +
+    protected static final String CREATE_TABLE_FAVORITE_STATION = "CREATE TABLE " + TABLE_FAVORITE_STATION + " (" +
             COLUMN_ID_FAVORITE +           " INTEGER, " +
             COLUMN_USER_ID_FAVORITE +      " INTEGER, " +
             COLUMN_STATION_UUID_FAVORITE + " TEXT, " +
@@ -32,7 +27,7 @@ public class FavoriteDao {
             "FOREIGN KEY (" + COLUMN_STATION_UUID_FAVORITE + ") REFERENCES " + RadioStationDao.TABLE_RADIO_STATION + "(" + RadioStationDao.COLUMN_UUID_STATION + ") ON DELETE CASCADE);";
 
     private final SQLiteDatabase db;
-    public FavoriteDao(SQLiteDatabase db){
+    public FavoriteStationDao(SQLiteDatabase db){
         this.db = db;
     }
     public void addFavorite(int id, int userId, String UUID) {
@@ -40,16 +35,16 @@ public class FavoriteDao {
         values.put(COLUMN_ID_FAVORITE, id);
         values.put(COLUMN_USER_ID_FAVORITE, userId);
         values.put(COLUMN_STATION_UUID_FAVORITE, UUID);
-        db.insertWithOnConflict(TABLE_FAVORITE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+        db.insertWithOnConflict(TABLE_FAVORITE_STATION, null, values, SQLiteDatabase.CONFLICT_REPLACE);
     }
     public void removeFavorite(int userId, String UUID) {
-        db.delete(TABLE_FAVORITE, COLUMN_USER_ID_FAVORITE + " = ? AND "
+        db.delete(TABLE_FAVORITE_STATION, COLUMN_USER_ID_FAVORITE + " = ? AND "
                 + COLUMN_STATION_UUID_FAVORITE + " = ?", new String[]{valueOf(userId), UUID});
     }
     public boolean isFavorite(int userId,String UUID){
         boolean isFavorite = false;
         Cursor cursor = db.query(
-                TABLE_FAVORITE,
+                TABLE_FAVORITE_STATION,
                 new String[]{COLUMN_STATION_UUID_FAVORITE},
                 COLUMN_STATION_UUID_FAVORITE + " = ? AND " +
                         COLUMN_USER_ID_FAVORITE + " = ?",
@@ -67,7 +62,7 @@ public class FavoriteDao {
         List<String> favorites = new ArrayList<>();
         int offset = currentPage * pageSize;
 
-        String query = "SELECT " + COLUMN_STATION_UUID_FAVORITE + " FROM " + TABLE_FAVORITE +
+        String query = "SELECT " + COLUMN_STATION_UUID_FAVORITE + " FROM " + TABLE_FAVORITE_STATION +
                 " WHERE " + COLUMN_USER_ID_FAVORITE + " = ?" +
                 " LIMIT ? OFFSET ?";
 
@@ -91,7 +86,7 @@ public class FavoriteDao {
     }
     public List<FavoriteStation> getAllFavorites(int userId){
         List<FavoriteStation> list = new ArrayList<>();
-        String query = "SELECT * FROM " + TABLE_FAVORITE + " WHERE " + COLUMN_USER_ID_FAVORITE + " = ?";
+        String query = "SELECT * FROM " + TABLE_FAVORITE_STATION + " WHERE " + COLUMN_USER_ID_FAVORITE + " = ?";
         Cursor cursor = db.rawQuery(query, new String[userId]);
         if (cursor != null){
             try (cursor){

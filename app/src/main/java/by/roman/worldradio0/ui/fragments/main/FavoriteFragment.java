@@ -93,7 +93,7 @@ public class FavoriteFragment extends Fragment {
             }
             @Override
             public void onDeleteClick(int position) {
-                viewModel.removeFromFavorite(adapter.getUUID(position));
+                viewModel.removeStationFromFavorite(adapter.getUUID(position));
             }
         });
         adapter.setMode(1);

@@ -18,14 +18,16 @@ public class SQLiteDatabaseManager extends SQLiteOpenHelper {
         db.execSQL(UserDao.CREATE_TABLE_USER);
         db.execSQL(FilterDao.CREATE_TABLE_FILTER);
         db.execSQL(SettingsDao.CREATE_TABLE_SETTINGS);
-        db.execSQL(FavoriteDao.CREATE_TABLE_FAVORITE);
+        db.execSQL(FavoriteStationDao.CREATE_TABLE_FAVORITE_STATION);
+        db.execSQL(FavoriteTrackDao.CREATE_TABLE_FAVORITE_TRACK);
     }
     @Override
     public void onUpgrade(@NonNull SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + RadioStationDao.TABLE_RADIO_STATION);
         db.execSQL("DROP TABLE IF EXISTS " + UserDao.TABLE_USER);
         db.execSQL("DROP TABLE IF EXISTS " + FilterDao.TABLE_FILTER);
-        db.execSQL("DROP TABLE IF EXISTS " + FavoriteDao.TABLE_FAVORITE);
+        db.execSQL("DROP TABLE IF EXISTS " + FavoriteStationDao.TABLE_FAVORITE_STATION);
+        db.execSQL("DROP TABLE IF EXISTS " + FavoriteTrackDao.TABLE_FAVORITE_TRACK);
         db.execSQL("DROP TABLE IF EXISTS " + SettingsDao.TABLE_SETTINGS);
         onCreate(db);
     }

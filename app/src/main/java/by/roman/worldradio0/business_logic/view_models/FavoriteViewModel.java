@@ -6,7 +6,6 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -14,17 +13,22 @@ import java.util.concurrent.Executors;
 import javax.inject.Inject;
 
 import by.roman.worldradio0.business_logic.UiState;
+import by.roman.worldradio0.business_logic.data.models.FavoriteTrack;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
-import by.roman.worldradio0.business_logic.data.repositories.FavoriteRepositoryImpl;
-import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteRepository;
+import by.roman.worldradio0.business_logic.data.repositories.FavoriteStationRepositoryImpl;
+import by.roman.worldradio0.business_logic.data.repositories.FavoriteTrackRepositoryImpl;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteStationRepository;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteTrackRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRepository;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
-public class FavoriteViewModel extends ViewModel implements FavoriteRepositoryImpl.OnFavoritesChangedListener {
+public class FavoriteViewModel extends ViewModel implements FavoriteStationRepositoryImpl.OnFavoriteStationsChangedListener, FavoriteTrackRepositoryImpl.OnFavoriteTracksChangedListener {
     private final RadioRepository radioRepository;
-    private final FavoriteRepository favoriteRepository;
+    private final FavoriteStationRepository favoriteStationRepository;
+    private final FavoriteTrackRepository favoriteTrackRepository;
     private final MutableLiveData<UiState<List<RadioStation>>> favoriteStations = new MutableLiveData<>();
+    private final MutableLiveData<UiState<List<FavoriteTrack>>> favoriteTracks = new MutableLiveData<>();
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
     private int currentPage = 0;
     private boolean isLastPage = false;
@@ -33,16 +37,22 @@ public class FavoriteViewModel extends ViewModel implements FavoriteRepositoryIm
         return isLastPage;
     }
     @Inject
-    public FavoriteViewModel(RadioRepository radioRepository, FavoriteRepository favoriteRepository) {
+    public FavoriteViewModel(RadioRepository radioRepository, FavoriteStationRepository favoriteStationRepository, FavoriteTrackRepository favoriteTrackRepository) {
         this.radioRepository = radioRepository;
-        this.favoriteRepository = favoriteRepository;
-        loadStart();
-        favoriteRepository.addListener(this);
+        this.favoriteTrackRepository = favoriteTrackRepository;
+        this.favoriteStationRepository = favoriteStationRepository;
+        loadStationsStart();
+        loadTracksStart();
+        favoriteStationRepository.addListener(this);
+        favoriteTrackRepository.addListener(this);
     }
     public LiveData<UiState<List<RadioStation>>> getFavoriteStations(){
         return favoriteStations;
     }
-    private void loadStart(){
+    public LiveData<UiState<List<FavoriteTrack>>> getFavoriteTracks(){
+        return favoriteTracks;
+    }
+    private void loadStationsStart(){
         favoriteStations.setValue(UiState.loading());
         executor.execute(() -> {
             try {
@@ -54,19 +64,41 @@ public class FavoriteViewModel extends ViewModel implements FavoriteRepositoryIm
             }
         });
     }
-    public void removeFromFavorite(String UUID){
-        favoriteRepository.removeFromFavorite(UUID);
+    private void loadTracksStart(){
+        favoriteTracks.setValue(UiState.loading());
+        executor.execute(() -> {
+            try {
+                Log.d("FavoriteViewModel","loadStart");
+                List<FavoriteTrack> list = favoriteTrackRepository.getFavorites(currentPage,pageSize);
+                favoriteTracks.postValue(UiState.success(list));
+            } catch (Exception e) {
+                favoriteTracks.postValue(UiState.error("Ошибка загрузки: " + e.getMessage()));
+            }
+        });
+    }
+    public void removeStationFromFavorite(String UUID){
+        favoriteStationRepository.removeFromFavorite(UUID);
+    }
+    public void removeTrackFromFavorite(String track){
+        favoriteTrackRepository.addToFavorite(0, track);
     }
     @Override
     protected void onCleared() {
         super.onCleared();
         executor.shutdown();
-        favoriteRepository.removeListener(this);
+        favoriteStationRepository.removeListener(this);
+        favoriteTrackRepository.removeListener(this);
     }
 
     @Override
-    public void onFavoritesChanged() {
-        Log.d("PlayerViewModel","Trig");
-        loadStart();
+    public void onFavoriteStationsChanged() {
+        Log.d("PlayerViewModel","Trig, stations");
+        loadStationsStart();
+    }
+
+    @Override
+    public void onFavoriteTracksChanged() {
+        Log.d("PlayerViewModel","Trig, tracks");
+        loadTracksStart();
     }
 }

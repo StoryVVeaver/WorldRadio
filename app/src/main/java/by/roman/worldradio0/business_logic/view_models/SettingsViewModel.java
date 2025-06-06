@@ -17,7 +17,6 @@ import static by.roman.worldradio0.business_logic.settings.SettingsKeys.TIMER_DO
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.TIMER_SECONDS_ENABLED;
 import static by.roman.worldradio0.business_logic.settings.SettingsKeys.UPDATE_STATIONS_DATA;
 
-import android.content.Intent;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -48,7 +47,7 @@ import by.roman.worldradio0.business_logic.data.models.settings.child.SliderItem
 import by.roman.worldradio0.business_logic.data.models.settings.child.SwitchItem;
 import by.roman.worldradio0.business_logic.data.models.settings.child.TextButtonItem;
 import by.roman.worldradio0.business_logic.data.models.settings.child.TextItem;
-import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteRepository;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteStationRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FilterRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.SettingsRepository;
@@ -73,7 +72,7 @@ public class SettingsViewModel extends ViewModel {
     private final RadioRepository radioRepository;
     private final UserRepository userRepository;
     private final FilterRepository filterRepository;
-    private final FavoriteRepository favoriteRepository;
+    private final FavoriteStationRepository favoriteStationRepository;
     private final DataFromRadio dataFromRadio;
     private final DataFromUserAPI dataFromUserAPI;
     private Settings settModel;
@@ -84,14 +83,14 @@ public class SettingsViewModel extends ViewModel {
     @Inject
     public SettingsViewModel(@NonNull SettingsRepository settingsRepository, RadioRepository radioRepository, DataFromRadio loadDataFromRadio,
                              DataFromUserAPI dataFromUserAPI, UserRepository userRepository, FilterRepository filterRepository,
-                             FavoriteRepository favoriteRepository){
+                             FavoriteStationRepository favoriteStationRepository){
         this.settingsRepository = settingsRepository;
         this.radioRepository = radioRepository;
         this.dataFromRadio = loadDataFromRadio;
         this.dataFromUserAPI = dataFromUserAPI;
         this.userRepository = userRepository;
         this.filterRepository = filterRepository;
-        this.favoriteRepository = favoriteRepository;
+        this.favoriteStationRepository = favoriteStationRepository;
         settModel = settingsRepository.getSettings();
     }
     public LiveData<Boolean> getTimeToLeave(){
@@ -324,7 +323,7 @@ public class SettingsViewModel extends ViewModel {
             @Override
             public void onSuccess(List<FavoriteStationDTO> favoriteStations) {
                 for (FavoriteStationDTO station : favoriteStations) {
-                    favoriteRepository.addToFavorite(station.getId(), station.getStationUUID());
+                    favoriteStationRepository.addToFavorite(station.getId(), station.getStationUUID());
                 }
                 i++;
                 if(i == 3){
@@ -394,7 +393,7 @@ public class SettingsViewModel extends ViewModel {
                 sendingData.postValue(UiState.error(t.getMessage()));
             }
         }));
-        executor.execute(() -> dataFromUserAPI.putFavorites(favoriteRepository.getAllFavorites(), new PutCallback() {
+        executor.execute(() -> dataFromUserAPI.putFavorites(favoriteStationRepository.getAllFavorites(), new PutCallback() {
             @Override
             public void onSuccess(String t) {
                 if (t.equals("saved")){

@@ -2,13 +2,16 @@ package by.roman.worldradio0.business_logic.hilt.modules;
 
 import javax.inject.Singleton;
 
-import by.roman.worldradio0.business_logic.data.database.FavoriteDao;
+import by.roman.worldradio0.business_logic.data.database.FavoriteStationDao;
+import by.roman.worldradio0.business_logic.data.database.FavoriteTrackDao;
 import by.roman.worldradio0.business_logic.data.database.FilterDao;
 import by.roman.worldradio0.business_logic.data.database.RadioStationDao;
 import by.roman.worldradio0.business_logic.data.database.SettingsDao;
 import by.roman.worldradio0.business_logic.data.database.UserDao;
-import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteRepository;
-import by.roman.worldradio0.business_logic.data.repositories.FavoriteRepositoryImpl;
+import by.roman.worldradio0.business_logic.data.repositories.FavoriteTrackRepositoryImpl;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteStationRepository;
+import by.roman.worldradio0.business_logic.data.repositories.FavoriteStationRepositoryImpl;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteTrackRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FilterRepository;
 import by.roman.worldradio0.business_logic.data.repositories.FilterRepositoryImpl;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRepository;
@@ -28,14 +31,20 @@ public class RepositoryModule {
 
     @Provides
     @Singleton
-    public RadioRepository provideRadioRepository(RadioStationDao radioStationDao, FavoriteDao favoriteDao, UserDao userDao, FilterDao filterDao) {
-        return new RadioRepositoryImpl(radioStationDao, favoriteDao, userDao, filterDao);
+    public RadioRepository provideRadioRepository(RadioStationDao radioStationDao, FavoriteStationDao favoriteStationDao, UserDao userDao, FilterDao filterDao) {
+        return new RadioRepositoryImpl(radioStationDao, favoriteStationDao, userDao, filterDao);
     }
 
     @Provides
     @Singleton
-    public FavoriteRepository provideFavoriteRepository(FavoriteDao favoriteDao, UserDao userDao) {
-        return new FavoriteRepositoryImpl(favoriteDao, userDao);
+    public FavoriteStationRepository provideFavoriteStationRepository(FavoriteStationDao favoriteStationDao, UserDao userDao) {
+        return new FavoriteStationRepositoryImpl(favoriteStationDao, userDao);
+    }
+
+    @Provides
+    @Singleton
+    public FavoriteTrackRepository provideFavoriteTrackRepository(FavoriteTrackDao FavoriteTrackDao, UserDao userDao) {
+        return new FavoriteTrackRepositoryImpl(FavoriteTrackDao,userDao);
     }
 
     @Provides

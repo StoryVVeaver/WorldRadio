@@ -16,11 +16,10 @@ import androidx.media3.common.util.UnstableApi;
 
 import javax.inject.Inject;
 
-import by.roman.worldradio0.business_logic.UiState;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.data.models.Settings;
-import by.roman.worldradio0.business_logic.data.repositories.FavoriteRepositoryImpl;
-import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteRepository;
+import by.roman.worldradio0.business_logic.data.repositories.FavoriteStationRepositoryImpl;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteStationRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.SettingsRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.UserRepository;
@@ -31,12 +30,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 
 @HiltViewModel
-public class PlayerViewModel extends ViewModel implements FavoriteRepositoryImpl.OnFavoritesChangedListener{
+public class PlayerViewModel extends ViewModel implements FavoriteStationRepositoryImpl.OnFavoriteStationsChangedListener {
 
     @SuppressLint("StaticFieldLeak")
     private final Context context;
     private final RadioRepository radioRepository;
-    private final FavoriteRepository favoriteRepository;
+    private final FavoriteStationRepository favoriteStationRepository;
     private final UserRepository userRepository;
     private final SettingsRepository settingsRepository;
     private final MutableLiveData<String> currentTrack = new MutableLiveData<>();
@@ -44,11 +43,11 @@ public class PlayerViewModel extends ViewModel implements FavoriteRepositoryImpl
     private final MutableLiveData<Boolean> isFavorite = new MutableLiveData<>();
     private Settings settings;
     @Inject
-    public PlayerViewModel(@NonNull RadioManager radioManager, FavoriteRepository favoriteRepository, @ApplicationContext Context context, RadioRepository radioRepository, UserRepository userRepository, SettingsRepository settingsRepository) {
+    public PlayerViewModel(@NonNull RadioManager radioManager, FavoriteStationRepository favoriteStationRepository, @ApplicationContext Context context, RadioRepository radioRepository, UserRepository userRepository, SettingsRepository settingsRepository) {
         this.context = context;
         this.radioRepository = radioRepository;
         this.userRepository = userRepository;
-        this.favoriteRepository = favoriteRepository;
+        this.favoriteStationRepository = favoriteStationRepository;
         this.settingsRepository = settingsRepository;
         radioManager.getCurrentTrack().observeForever(track -> {
             if (track != null) {
@@ -62,7 +61,7 @@ public class PlayerViewModel extends ViewModel implements FavoriteRepositoryImpl
                 Log.d("PlayerViewModel","Player status: " + status);
             }
         });
-        favoriteRepository.addListener(this);
+        favoriteStationRepository.addListener(this);
         isFavorite.postValue(isFavorite());
         settings = settingsRepository.getSettings();
     }
@@ -124,21 +123,21 @@ public class PlayerViewModel extends ViewModel implements FavoriteRepositoryImpl
     }
     public void addToFavorite(){
         try {
-            favoriteRepository.addToFavorite(-1, userRepository.getPlayingUUID());
+            favoriteStationRepository.addToFavorite(-1, userRepository.getPlayingUUID());
         } catch (Exception e) {
             Log.e("PlayerVM", "Failed add to favorite");
         }
     }
     public void removeFromFavorite(){
         try {
-            favoriteRepository.removeFromFavorite(userRepository.getPlayingUUID());
+            favoriteStationRepository.removeFromFavorite(userRepository.getPlayingUUID());
         } catch (Exception e) {
             Log.e("PlayerVM", "Failed remove from favorite: " + e.getMessage());
         }
     }
     private boolean isFavorite(){
         try {
-            return favoriteRepository.isStationFavorite(userRepository.getPlayingUUID());
+            return favoriteStationRepository.isStationFavorite(userRepository.getPlayingUUID());
         } catch (Exception e) {
             Log.e("PlayerViewModel", "Failed check is favorite");
             return false;
@@ -161,13 +160,13 @@ public class PlayerViewModel extends ViewModel implements FavoriteRepositoryImpl
         return isFavorite;
     }
     @Override
-    public void onFavoritesChanged() {
+    public void onFavoriteStationsChanged() {
         isFavorite.postValue(isFavorite());
         Log.d("PlayerViewModel","Trig: " + isFavorite());
     }
     @Override
     public void onCleared(){
         super.onCleared();
-        favoriteRepository.removeListener(this);
+        favoriteStationRepository.removeListener(this);
     }
 }
