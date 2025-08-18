@@ -112,12 +112,21 @@
             android:marqueeRepeatLimit="marquee_forever"
             android:scrollHorizontally="true"
             android:singleLine="true"
-            android:text="Track Name"
             android:textSize="18sp"
-            app:layout_constraintEnd_toStartOf="@+id/large_internet"
+            app:layout_constraintEnd_toStartOf="@+id/large_save_unsave_Track"
             app:layout_constraintHorizontal_bias="0.8"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/large_station_name" />
+
+        <ImageView
+            android:id="@+id/large_save_unsave_Track"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/large_track_name"
+            app:layout_constraintStart_toStartOf="@+id/large_internet"
+            app:layout_constraintEnd_toEndOf="@id/large_internet"
+            app:layout_constraintTop_toTopOf="@+id/large_track_name"
+            app:srcCompat="@drawable/unsaved" />
 
         <TextView
             android:id="@+id/large_station_name"

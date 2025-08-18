@@ -101,7 +101,7 @@ public class FilterFragment extends Fragment {
     private void initAll(){
         adapter = new RadioAdapter(getContext(), new RadioAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(int position) {
+            public void onStationItemClick(int position) {
                 if(playerViewModel.isInternetConnected()){
                     if(playerViewModel.checkTypeInternet().equals("ok")){
                         playerViewModel.setPlaying(adapter.getUUID(position));

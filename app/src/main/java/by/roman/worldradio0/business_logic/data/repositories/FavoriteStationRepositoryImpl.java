@@ -42,7 +42,7 @@ public class FavoriteStationRepositoryImpl implements FavoriteStationRepository 
             favoriteStationDao.addFavorite(id, userDao.getIdUserInSystem(),UUID);
             notifyFavoritesChanged();
         } catch (Exception e) {
-            Log.e("FavoriteRepositoryImp","Failed add to favorite: " + e.getMessage());
+            Log.e("FavoriteStationRepositoryImpl","Failed add to favorite: " + e.getMessage());
         }
     }
     @Override
@@ -51,7 +51,7 @@ public class FavoriteStationRepositoryImpl implements FavoriteStationRepository 
             favoriteStationDao.removeFavorite(userDao.getIdUserInSystem(),UUID);
             notifyFavoritesChanged();
         } catch (Exception e) {
-            Log.e("FavoriteRepositoryImp","Failed remove from favorite: " + e.getMessage());
+            Log.e("FavoriteStationRepositoryImpl","Failed remove from favorite: " + e.getMessage());
         }
     }
     @Override
@@ -59,7 +59,7 @@ public class FavoriteStationRepositoryImpl implements FavoriteStationRepository 
         try {
             return favoriteStationDao.isFavorite(userDao.getIdUserInSystem(),UUID);
         } catch (Exception e) {
-            Log.e("FavoriteRepositoryImp","Failed check favorite: " + e.getMessage());
+            Log.e("FavoriteStationRepositoryImpl","Failed check favorite: " + e.getMessage());
             return false;
         }
     }
@@ -68,7 +68,7 @@ public class FavoriteStationRepositoryImpl implements FavoriteStationRepository 
         try {
             return favoriteStationDao.getFavoritesByUser(userDao.getIdUserInSystem(),currentPage,pagSize);
         } catch (Exception e) {
-            Log.e("FavoriteRepositoryImpl","Failed get favorites list: " + e.getMessage());
+            Log.e("FavoriteStationRepositoryImpl","Failed get favorites list: " + e.getMessage());
             return null;
         }
     }
@@ -77,7 +77,7 @@ public class FavoriteStationRepositoryImpl implements FavoriteStationRepository 
         try {
             return favoriteStationDao.getAllFavorites(userDao.getIdUserInSystem());
         } catch (Exception e) {
-            Log.e("FavoriteRepositoryImpl","Failed get all favorites: " + e.getMessage());
+            Log.e("FavoriteStationRepositoryImpl","Failed get all favorites: " + e.getMessage());
             return null;
         }
     }

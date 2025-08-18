@@ -48,8 +48,8 @@ import okhttp3.ResponseBody;
 @Singleton
 public class UserAPI {
     //private static final String API_URL = "http://192.168.43.146:8080/api/v1/user";
-    //private static final String API_URL = "http://192.168.0.85:8080/api/v1/user";
-    private static final String API_URL = "https://552f-144-76-200-45.ngrok-free.app/api/v1/user";
+    private static final String API_URL = "http://192.168.0.85:8080/api/v1/user";
+    //private static final String API_URL = "https://552f-144-76-200-45.ngrok-free.app/api/v1/user";
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     public UserAPI(){
 

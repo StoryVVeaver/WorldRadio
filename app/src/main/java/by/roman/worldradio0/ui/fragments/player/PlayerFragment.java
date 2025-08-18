@@ -38,6 +38,7 @@ public class PlayerFragment extends Fragment {
     private ImageView save_btn;
     private ImageView large_save_btn;
     private ImageView play_pause;
+    private ImageView large_saveTrack;
     private ImageView large_play_pause;
     private ImageView logo;
     private ImageView large_logo;
@@ -52,6 +53,7 @@ public class PlayerFragment extends Fragment {
     private PlayerViewModel viewModel;
     private boolean isPlaying;
     private boolean isFavorite;
+    private boolean isFavoriteTrack;
 
     @Override
     public void onResume(){
@@ -81,6 +83,7 @@ public class PlayerFragment extends Fragment {
         Log.v("CollapsedPlayerFragment","Performance - onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
     }
     private void findAll(@NonNull View view){
+        large_saveTrack = view.findViewById(R.id.large_save_unsave_Track);
         large_internet = view.findViewById(R.id.large_internet);
         close = view.findViewById(R.id.large_back);
         motionLayout = view.findViewById(R.id.motionLayout);
@@ -159,6 +162,10 @@ public class PlayerFragment extends Fragment {
             this.isFavorite = isFavorite;
             fav_icons();
         });
+        viewModel.getIsFavoriteTrack().observe(getViewLifecycleOwner(), isFavoriteTrack -> {
+            this.isFavoriteTrack = isFavoriteTrack;
+            favTrack_icons();
+        });
         if(!viewModel.getCurrentStation().getHomepage().isEmpty()){
             large_internet.setVisibility(VISIBLE);
         } else large_internet.setVisibility(INVISIBLE);
@@ -171,6 +178,7 @@ public class PlayerFragment extends Fragment {
                 .error(AppCompatResources.getDrawable(requireContext(),R.drawable.no_icon))
                 .into(large_logo);
         fav_icons();
+        favTrack_icons();
     }
     private void buttons(){
         icons();
@@ -217,6 +225,14 @@ public class PlayerFragment extends Fragment {
             }
             fav_icons();
         });
+        large_saveTrack.setOnClickListener(v -> {
+            if(isFavoriteTrack){
+                viewModel.removeTrackFromFavorite();
+            } else {
+                viewModel.addTrackToFavorite();
+            }
+            favTrack_icons();
+        });
     }
     private void icons(){
         if (!isPlaying) {
@@ -234,6 +250,13 @@ public class PlayerFragment extends Fragment {
         } else {
             save_btn.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.unsaved));
             large_save_btn.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.unsaved));
+        }
+    }
+    private void favTrack_icons(){
+        if (isFavoriteTrack){
+            large_saveTrack.setImageDrawable(AppCompatResources.getDrawable(requireContext(),R.drawable.fi_ss_star__2_));
+        } else {
+            large_saveTrack.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.unsaved));
         }
     }
     private void openUrlInBrowser(String homepage) {

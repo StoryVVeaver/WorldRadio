@@ -28,7 +28,7 @@ import java.util.List;
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
 
-public class RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class    RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int TYPE_STATION = 0;
     private static final int TYPE_LOADING = 1;
     private int mode = 0;
@@ -38,7 +38,7 @@ public class RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private boolean isLoading = false;
 
     public interface OnItemClickListener {
-        void onItemClick(int position);
+        void onStationItemClick(int position);
         void onDeleteClick(int position);
     }
 
@@ -76,7 +76,8 @@ public class RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             holder.itemView.setOnClickListener(v -> {
                 int pos = holder.getAdapterPosition();
                 if (pos != RecyclerView.NO_POSITION) {
-                    listener.onItemClick(pos);
+                    listener.onStationItemClick(pos);
+                    Log.d("RadioAdapter","play");
                 }
             });
         }

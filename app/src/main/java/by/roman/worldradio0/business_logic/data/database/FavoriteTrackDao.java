@@ -18,10 +18,10 @@ public class FavoriteTrackDao {
     protected static final String COLUMN_USER_ID_TRACK = "userId";
     protected static final String COLUMN_TRACK_TRACK = "track";
     protected static final String CREATE_TABLE_FAVORITE_TRACK = "CREATE TABLE " + TABLE_FAVORITE_TRACK + " (" +
-            COLUMN_ID_TRACK +           " INTEGER, " +
-            COLUMN_USER_ID_TRACK +      " INTEGER, " +
+            COLUMN_ID_TRACK + " INTEGER, " +
+            COLUMN_USER_ID_TRACK + " INTEGER, " +
             COLUMN_TRACK_TRACK + " TEXT, " +
-            "FOREIGN KEY (" + COLUMN_USER_ID_TRACK + ") REFERENCES " + UserDao.TABLE_USER + "(" + UserDao.COLUMN_ID_USER + ") ON DELETE CASCADE;";
+            "FOREIGN KEY (" + COLUMN_USER_ID_TRACK + ") REFERENCES " + UserDao.TABLE_USER + "(" + UserDao.COLUMN_ID_USER + ") ON DELETE CASCADE" + ")";
     protected final SQLiteDatabase db;
 
     public FavoriteTrackDao(SQLiteDatabase db) {
@@ -59,14 +59,13 @@ public class FavoriteTrackDao {
         List<FavoriteTrack> favorites = new ArrayList<>();
         int offset = currentPage * pageSize;
 
-        String query = "SELECT " + COLUMN_TRACK_TRACK + " FROM " + TABLE_FAVORITE_TRACK +
+        String query = "SELECT " + COLUMN_ID_TRACK + ", " + COLUMN_USER_ID_TRACK + ", " + COLUMN_TRACK_TRACK +
+                " FROM " + TABLE_FAVORITE_TRACK +
                 " WHERE " + COLUMN_USER_ID_TRACK + " = ?" +
-                " LIMIT ? OFFSET ?";
+                " LIMIT " + pageSize + " OFFSET " + offset;
 
         Cursor cursor = db.rawQuery(query, new String[]{
                 valueOf(userId),
-                valueOf(pageSize),
-                valueOf(offset)
         });
 
         if (cursor != null) {

@@ -18,6 +18,7 @@ import by.roman.worldradio0.business_logic.data.dto.RadioStationDTO;
 import by.roman.worldradio0.business_logic.data.dto.SettingsDTO;
 import by.roman.worldradio0.business_logic.data.dto.UserDTO;
 import by.roman.worldradio0.business_logic.data.models.Filter;
+import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.data.models.Settings;
 import by.roman.worldradio0.business_logic.data.models.UserRequest;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FilterRepository;
@@ -111,6 +112,9 @@ public class AccountViewModel extends ViewModel {
                 Log.e("AccountViewModel: enter", "Ошибка загрузки данных" + text);
             }
         }));
+    }
+    public void addTest(){
+        //radioRepository.addRadioStation(new RadioStationDTO().fromModel(new RadioStation()));
     }
     public void loadStations(){
         if(!hasRecords()){

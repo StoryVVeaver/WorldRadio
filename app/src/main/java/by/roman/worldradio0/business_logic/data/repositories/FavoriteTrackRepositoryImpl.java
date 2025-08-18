@@ -9,14 +9,13 @@ import java.util.List;
 import by.roman.worldradio0.business_logic.data.database.FavoriteStationDao;
 import by.roman.worldradio0.business_logic.data.database.FavoriteTrackDao;
 import by.roman.worldradio0.business_logic.data.database.UserDao;
-import by.roman.worldradio0.business_logic.data.models.FavoriteStation;
 import by.roman.worldradio0.business_logic.data.models.FavoriteTrack;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteTrackRepository;
 
 public class FavoriteTrackRepositoryImpl implements FavoriteTrackRepository {
     private final FavoriteTrackDao favoriteTrackDao;
     private final UserDao userDao;
-    private final List<FavoriteTrackRepositoryImpl.OnFavoriteTracksChangedListener> listeners = new ArrayList<>();
+    private final List<OnFavoriteTracksChangedListener> listeners = new ArrayList<>();
     public FavoriteTrackRepositoryImpl(FavoriteTrackDao favoriteTrackDao, UserDao userDao) {
         this.favoriteTrackDao = favoriteTrackDao;
         this.userDao = userDao;
@@ -27,7 +26,7 @@ public class FavoriteTrackRepositoryImpl implements FavoriteTrackRepository {
             favoriteTrackDao.addFavorite(id, userDao.getIdUserInSystem(), track);
             notifyFavoritesChanged();
         } catch (Exception e) {
-            Log.e("FavoriteRepositoryImpl","Failed add to favorite: " + e.getMessage());
+            Log.e("FavoriteTrackRepositoryImpl","Failed add to favorite: " + e.getMessage());
         }
     }
 
@@ -37,7 +36,7 @@ public class FavoriteTrackRepositoryImpl implements FavoriteTrackRepository {
             favoriteTrackDao.removeFavorite(userDao.getIdUserInSystem(), track);
             notifyFavoritesChanged();
         } catch (Exception e) {
-            Log.e("FavoriteRepositoryImp","Failed remove from favorite: " + e.getMessage());
+            Log.e("FavoriteTrackRepositoryImpl","Failed remove from favorite: " + e.getMessage());
         }
     }
 
@@ -46,7 +45,7 @@ public class FavoriteTrackRepositoryImpl implements FavoriteTrackRepository {
         try {
             return favoriteTrackDao.isFavorite(userDao.getIdUserInSystem(), track);
         } catch (Exception e) {
-            Log.e("FavoriteRepositoryImpl","Failed check favorite: " + e.getMessage());
+            Log.e("FavoriteTrackRepositoryImpl","Failed check favorite track: " + e.getMessage());
             return false;
         }
     }
@@ -68,13 +67,13 @@ public class FavoriteTrackRepositoryImpl implements FavoriteTrackRepository {
         try {
             return favoriteTrackDao.getFavoritesByUser(userDao.getIdUserInSystem(), currentPage, pageSize);
         } catch (Exception e) {
-            Log.e("FavoriteRepositoryImpl","Failed get favorites list: " + e.getMessage());
+            Log.e("FavoriteTrackRepositoryImpl","Failed get favorites list: " + e.getMessage());
             return null;
         }
     }
 
     private void notifyFavoritesChanged() {
-        for (FavoriteTrackRepositoryImpl.OnFavoriteTracksChangedListener listener : new ArrayList<>(listeners)) {
+        for (OnFavoriteTracksChangedListener listener : new ArrayList<>(listeners)) {
             listener.onFavoriteTracksChanged();
         }
     }

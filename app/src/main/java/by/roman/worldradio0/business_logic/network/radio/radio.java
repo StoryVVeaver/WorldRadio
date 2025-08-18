@@ -24,7 +24,7 @@ import okhttp3.Response;
 
 @Singleton
 public class radio {
-    private static final String API_URL = "http://de2.api.radio-browser.info/json/stations";
+    private static final String API_URL = "http://162.55.180.156/json/stations/topclick/10";
 
 
     public radio() {
