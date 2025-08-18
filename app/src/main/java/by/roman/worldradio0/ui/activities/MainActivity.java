@@ -29,7 +29,6 @@ public class MainActivity extends AppCompatActivity {
     private ViewPager2 viewPager;
     private ViewPagerAdapter adapter;
     private StatePlayerViewModel viewModel;
-    private int currentSelectedItemId = -1;
 
     @SuppressLint("NonConstantResourceId")
     @Override
@@ -63,11 +62,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         bottomNavigationView.setOnItemSelectedListener(item -> {
-            int itemId = item.getItemId();
-            if (itemId == currentSelectedItemId) {
-                return false;
-            }
-            currentSelectedItemId = itemId;
             switch (Objects.requireNonNull(item.getTitle()).toString()) {
                 case "Globe":
                     viewPager.setCurrentItem(0);
