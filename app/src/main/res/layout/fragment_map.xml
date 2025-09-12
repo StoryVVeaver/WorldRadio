@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/map_top_left"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_launcher_background"
+            app:layout_constraintBottom_toTopOf="@+id/map_center_left"
+            app:layout_constraintEnd_toStartOf="@+id/mao_top_center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="spread" />
+
+        <ImageView
+            android:id="@+id/mao_top_center"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_launcher_background"
+            app:layout_constraintBottom_toTopOf="@+id/map_center_center"
+            app:layout_constraintEnd_toStartOf="@+id/map_top_right"
+            app:layout_constraintStart_toEndOf="@+id/map_top_left"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/map_top_right"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_launcher_background"
+            app:layout_constraintBottom_toTopOf="@+id/map_center_right"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/mao_top_center"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Вторая строка -->
+        <ImageView
+            android:id="@+id/map_center_left"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_launcher_background"
+            app:layout_constraintBottom_toTopOf="@+id/map_bottom_left"
+            app:layout_constraintEnd_toStartOf="@+id/map_center_center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/map_top_left" />
+
+        <ImageView
+            android:id="@+id/map_center_center"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_launcher_background"
+            app:layout_constraintBottom_toTopOf="@+id/map_bottom_center"
+            app:layout_constraintEnd_toStartOf="@+id/map_center_right"
+            app:layout_constraintStart_toEndOf="@+id/map_center_left"
+            app:layout_constraintTop_toBottomOf="@+id/mao_top_center" />
+
+        <ImageView
+            android:id="@+id/map_center_right"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_launcher_background"
+            app:layout_constraintBottom_toTopOf="@+id/map_bottom_right"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/map_center_center"
+            app:layout_constraintTop_toBottomOf="@+id/map_top_right" />
+
+        <!-- Третья строка -->
+        <ImageView
+            android:id="@+id/map_bottom_left"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_launcher_background"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/map_bottom_center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/map_center_left" />
+
+        <ImageView
+            android:id="@+id/map_bottom_center"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_launcher_background"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/map_bottom_right"
+            app:layout_constraintStart_toEndOf="@+id/map_bottom_left"
+            app:layout_constraintTop_toBottomOf="@+id/map_center_center" />
+
+        <ImageView
+            android:id="@+id/map_bottom_right"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_launcher_background"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/map_bottom_center"
+            app:layout_constraintTop_toBottomOf="@+id/map_center_right" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

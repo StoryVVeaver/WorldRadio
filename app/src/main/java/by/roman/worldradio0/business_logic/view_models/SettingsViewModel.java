@@ -117,7 +117,7 @@ public class SettingsViewModel extends ViewModel {
             audioItems.add(new SliderItem(GAIN_BROADCAST,"     Эфир:", 0, 100, settModel.getGainBroadcast(),true));
             audioItems.add(new CheckItem(AGC_ENABLED,"AGC: ",settModel.getAgcEnabled() == 1));
             audioItems.add(new CheckWIthSliderItem(CROSSFADE_ENABLED,CROSSFADE_TIME,"Crossfade: ",0, 20,settModel.getCrossfadeTime(),settModel.getCrossfadeEnabled() == 1));
-            //groups.add(new SettingsGroup("Аудио", audioItems));
+            groups.add(new SettingsGroup("Аудио", audioItems));
         } catch (Exception e) {
             Log.e("SettingsViewModel", "Error creating list audio settings");
         }

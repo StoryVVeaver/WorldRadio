@@ -53,6 +53,8 @@ dependencies {
     implementation(libs.media3ui)
     implementation(libs.media)
     implementation(libs.ui.graphics.android)
+    implementation(libs.fragment)
+    implementation(libs.recyclerview)
 
 
     annotationProcessor(libs.glide.compiler)

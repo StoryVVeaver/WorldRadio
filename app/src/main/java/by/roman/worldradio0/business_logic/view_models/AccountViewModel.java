@@ -20,6 +20,7 @@ import by.roman.worldradio0.business_logic.data.dto.UserDTO;
 import by.roman.worldradio0.business_logic.data.models.Filter;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.data.models.Settings;
+import by.roman.worldradio0.business_logic.data.models.User;
 import by.roman.worldradio0.business_logic.data.models.UserRequest;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FilterRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRepository;
@@ -115,6 +116,13 @@ public class AccountViewModel extends ViewModel {
     }
     public void addTest(){
         //radioRepository.addRadioStation(new RadioStationDTO().fromModel(new RadioStation()));
+    }
+    public void useradd(){
+        UserDTO dto = new UserDTO();
+        dto.fromModel(new User(1,"user","user",null,1));
+        userRepository.useradd(dto);
+        settingsRepository.addSettings(new SettingsDTO().fromModel(new Settings(dto.getId())));
+        filterRepository.addFilters(new FilterDTO().fromModel(new Filter(dto.getId(),null,null,null,null,null,0)));
     }
     public void loadStations(){
         if(!hasRecords()){

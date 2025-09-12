@@ -1,6 +1,5 @@
 package by.roman.worldradio0.ui.fragments.main;
 
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -9,11 +8,9 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.util.List;
@@ -22,21 +19,19 @@ import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.adapters.RadioAdapter;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.view_models.FilterViewModel;
-import by.roman.worldradio0.business_logic.view_models.HomeViewModel;
 import by.roman.worldradio0.business_logic.view_models.PlayerViewModel;
-import by.roman.worldradio0.ui.activities.FilterActivity;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class FilterFragment extends Fragment {
-    private FilterViewModel viewModel;
+public class ListFragment extends Fragment {
     private PlayerViewModel playerViewModel;
-    private RadioAdapter adapter;
+    private FilterViewModel viewModel;
     private RecyclerView recyclerView;
-    private ImageView filter;
+    private RadioAdapter adapter;
     private boolean isLoadingNextPage = false;
     private boolean resume = false;
     private boolean activityCalled = false;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,7 +40,6 @@ public class FilterFragment extends Fragment {
     public void onResume(){
         super.onResume();
         if(activityCalled){
-            filter.setEnabled(true);
             resume = true;
             viewModel.setPage(0);
             viewModel.loadStart();
@@ -54,22 +48,16 @@ public class FilterFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_filter, container, false);
+        return inflater.inflate(R.layout.fragment_list, container, false);
     }
     @Override
-    public void onViewCreated(@NonNull View view, Bundle savedInstanceState){
-        super.onViewCreated(view,savedInstanceState);
-
-        long startTime = System.nanoTime();
-        Log.v("FilterFragment: performance", "onViewCreated started");
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         findAllId(view);
         initAll();
-        buttons();
         observeAndLoad();
-        Log.v("FilterFragment: performance", "onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
-
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -88,14 +76,6 @@ public class FilterFragment extends Fragment {
                     }
                 }
             }
-        });
-    }
-    private void buttons(){
-        filter.setOnClickListener(v -> {
-            filter.setEnabled(false);
-            Intent intent = new Intent(getContext(), FilterActivity.class);
-            startActivity(intent);
-            activityCalled = true;
         });
     }
     private void initAll(){
@@ -123,11 +103,10 @@ public class FilterFragment extends Fragment {
         playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
     }
     private void findAllId(View view){
-        recyclerView = view.findViewById(R.id.cardTopView);
-        filter = view.findViewById(R.id.filterButtonView);
+        recyclerView = view.findViewById(R.id.list_recycler);
     }
     private void observeAndLoad() {
-            viewModel.getFilteredStations().observe(getViewLifecycleOwner(), stations -> {
+        viewModel.getFilteredStations().observe(getViewLifecycleOwner(), stations -> {
             switch (stations.status) {
                 case LOADING:
                     if (adapter.getItemCount() > 0) {

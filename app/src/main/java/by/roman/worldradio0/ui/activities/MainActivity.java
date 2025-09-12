@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
         adapter = new ViewPagerAdapter(this);
         viewPager.setAdapter(adapter);
         viewPager.setUserInputEnabled(true);
-        viewPager.setOffscreenPageLimit(4);
+        viewPager.setOffscreenPageLimit(2);
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
@@ -63,26 +63,20 @@ public class MainActivity extends AppCompatActivity {
         });
         bottomNavigationView.setOnItemSelectedListener(item -> {
             switch (Objects.requireNonNull(item.getTitle()).toString()) {
-                case "Globe":
+                case "Favorite":
                     viewPager.setCurrentItem(0);
                     return true;
-                case "Favorite":
+                case "Home":
                     viewPager.setCurrentItem(1);
                     return true;
-                case "Home":
-                    viewPager.setCurrentItem(2);
-                    return true;
-                case "Filter":
-                    viewPager.setCurrentItem(3);
-                    return true;
                 case "Settings":
-                    viewPager.setCurrentItem(4);
+                    viewPager.setCurrentItem(2);
                     return true;
             }
             return false;
         });
         if (savedInstanceState == null) {
-            viewPager.setCurrentItem(2, false);
+            viewPager.setCurrentItem(1, false);
         }
     }
     private void findAllId(){

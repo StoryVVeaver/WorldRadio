@@ -6,8 +6,6 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import by.roman.worldradio0.ui.fragments.main.FavoriteFragment;
-import by.roman.worldradio0.ui.fragments.main.FilterFragment;
-import by.roman.worldradio0.ui.fragments.main.GlobeFragment;
 import by.roman.worldradio0.ui.fragments.main.HomeFragment;
 import by.roman.worldradio0.ui.fragments.main.SettingsFragment;
 
@@ -22,12 +20,8 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
     public Fragment createFragment(int position) {
         switch (position) {
             case 0:
-                return new GlobeFragment();
-            case 1:
                 return new FavoriteFragment();
-            case 3:
-                return new FilterFragment();
-            case 4:
+            case 2:
                 return new SettingsFragment();
             default:
                 return new HomeFragment();
@@ -36,7 +30,7 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
 
     @Override
     public int getItemCount() {
-        return 5;
+        return 3;
     }
 }
 

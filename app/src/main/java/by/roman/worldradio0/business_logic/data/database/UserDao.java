@@ -47,6 +47,7 @@ public class UserDao {
         db.update(TABLE_USER, values, selection, selectionArgs);
     }
     public void addUser(@NonNull UserDTO dto){
+        //TODO проверить, что сюда приходит, тк были нули
         ContentValues values = new ContentValues();
         values.put(COLUMN_ID_USER, dto.getId());
         values.put(COLUMN_LOGIN_USER, dto.getLogin());
