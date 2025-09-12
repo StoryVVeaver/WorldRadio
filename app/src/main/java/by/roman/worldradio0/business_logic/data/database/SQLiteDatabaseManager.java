@@ -20,6 +20,7 @@ public class SQLiteDatabaseManager extends SQLiteOpenHelper {
         db.execSQL(SettingsDao.CREATE_TABLE_SETTINGS);
         db.execSQL(FavoriteStationDao.CREATE_TABLE_FAVORITE_STATION);
         db.execSQL(FavoriteTrackDao.CREATE_TABLE_FAVORITE_TRACK);
+        db.execSQL(HistoryDao.CREATE_TABLE_HISTORY);
     }
     @Override
     public void onUpgrade(@NonNull SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -29,6 +30,7 @@ public class SQLiteDatabaseManager extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + FavoriteStationDao.TABLE_FAVORITE_STATION);
         db.execSQL("DROP TABLE IF EXISTS " + FavoriteTrackDao.TABLE_FAVORITE_TRACK);
         db.execSQL("DROP TABLE IF EXISTS " + SettingsDao.TABLE_SETTINGS);
+        db.execSQL("DROP TABLE IF EXISTS " + HistoryDao.TABLE_HISTORY);
         onCreate(db);
     }
 }

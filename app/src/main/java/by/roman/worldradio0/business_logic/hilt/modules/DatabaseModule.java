@@ -9,6 +9,7 @@ import javax.inject.Singleton;
 import by.roman.worldradio0.business_logic.data.database.FavoriteStationDao;
 import by.roman.worldradio0.business_logic.data.database.FavoriteTrackDao;
 import by.roman.worldradio0.business_logic.data.database.FilterDao;
+import by.roman.worldradio0.business_logic.data.database.HistoryDao;
 import by.roman.worldradio0.business_logic.data.database.RadioStationDao;
 import by.roman.worldradio0.business_logic.data.database.SQLiteDatabaseManager;
 import by.roman.worldradio0.business_logic.data.database.SettingsDao;
@@ -61,6 +62,11 @@ public class DatabaseModule {
     @Singleton
     public SettingsDao provideSettingsDao(SQLiteDatabase db) {
         return new SettingsDao(db);
+    }
+    @Provides
+    @Singleton
+    public HistoryDao provideHistoryDao(SQLiteDatabase db) {
+        return new HistoryDao(db);
     }
 }
 

@@ -5,15 +5,18 @@ import javax.inject.Singleton;
 import by.roman.worldradio0.business_logic.data.database.FavoriteStationDao;
 import by.roman.worldradio0.business_logic.data.database.FavoriteTrackDao;
 import by.roman.worldradio0.business_logic.data.database.FilterDao;
+import by.roman.worldradio0.business_logic.data.database.HistoryDao;
 import by.roman.worldradio0.business_logic.data.database.RadioStationDao;
 import by.roman.worldradio0.business_logic.data.database.SettingsDao;
 import by.roman.worldradio0.business_logic.data.database.UserDao;
 import by.roman.worldradio0.business_logic.data.repositories.FavoriteTrackRepositoryImpl;
+import by.roman.worldradio0.business_logic.data.repositories.HistoryRepositoryImpl;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteStationRepository;
 import by.roman.worldradio0.business_logic.data.repositories.FavoriteStationRepositoryImpl;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteTrackRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FilterRepository;
 import by.roman.worldradio0.business_logic.data.repositories.FilterRepositoryImpl;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.HistoryRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRepository;
 import by.roman.worldradio0.business_logic.data.repositories.RadioRepositoryImpl;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.SettingsRepository;
@@ -63,6 +66,11 @@ public class RepositoryModule {
     @Singleton
     public SettingsRepository provideSettingsRepository(SettingsDao settingsDao, UserDao userDao) {
         return new SettingsRepositoryImpl(settingsDao, userDao);
+    }
+    @Provides
+    @Singleton
+    public HistoryRepository provideSettingsRepository(HistoryDao historyDao, UserDao userDao) {
+        return new HistoryRepositoryImpl(historyDao, userDao);
     }
 }
 
