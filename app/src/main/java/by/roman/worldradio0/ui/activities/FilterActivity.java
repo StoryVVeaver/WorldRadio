@@ -295,4 +295,10 @@ public class FilterActivity extends AppCompatActivity {
         TextView codecFilter = filter_codecView.findViewById(R.id.nameFilter);
         codecFilter.setText("Codec");
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+    }
 }

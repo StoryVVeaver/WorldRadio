@@ -107,8 +107,8 @@ public class    RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
     @SuppressLint("NotifyDataSetChanged")
     public void replaceAll(List<RadioStation> newStations) {
-        stations.clear();
-        stations.addAll(newStations);
+        this.stations.clear();
+        this.stations.addAll(newStations);
         notifyDataSetChanged();
     }
 

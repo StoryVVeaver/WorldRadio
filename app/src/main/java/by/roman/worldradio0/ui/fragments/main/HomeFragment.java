@@ -30,18 +30,24 @@ public class HomeFragment extends Fragment {
     private ConstraintLayout list;
     private ImageView mapImage;
     private ImageView listImage;
+    private boolean isFilter = false;
 
     @Override
     public void onResume(){
         super.onResume();
         timerButton.setEnabled(true);
         filterButton.setEnabled(true);
+        if(isFilter){
+
+            isFilter = false;
+        }
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
+
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -66,6 +72,7 @@ public class HomeFragment extends Fragment {
         });
         filterButton.setOnClickListener(v -> {
             filterButton.setEnabled(false);
+            isFilter = true;
             Intent intent = new Intent(getContext(), FilterActivity.class);
             startActivity(intent);
         });

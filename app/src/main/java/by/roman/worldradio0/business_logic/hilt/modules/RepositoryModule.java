@@ -69,7 +69,7 @@ public class RepositoryModule {
     }
     @Provides
     @Singleton
-    public HistoryRepository provideSettingsRepository(HistoryDao historyDao, UserDao userDao) {
+    public HistoryRepository provideHistoryRepository(HistoryDao historyDao, UserDao userDao) {
         return new HistoryRepositoryImpl(historyDao, userDao);
     }
 }

@@ -27,6 +27,7 @@ import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRep
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.SettingsRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.UserRepository;
 import by.roman.worldradio0.business_logic.network.radio.DataFromRadio;
+import by.roman.worldradio0.business_logic.network.radio.Model;
 import by.roman.worldradio0.business_logic.network.radio.StationsCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.DataFromUserAPI;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.RequestCallback;
@@ -113,9 +114,6 @@ public class AccountViewModel extends ViewModel {
                 Log.e("AccountViewModel: enter", "Ошибка загрузки данных" + text);
             }
         }));
-    }
-    public void addTest(){
-        //radioRepository.addRadioStation(new RadioStationDTO().fromModel(new RadioStation()));
     }
     public void useradd(){
         UserDTO dto = new UserDTO();
