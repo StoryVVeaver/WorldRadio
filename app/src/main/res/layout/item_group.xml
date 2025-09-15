@@ -8,8 +8,10 @@
         android:id="@+id/group_title"
         android:layout_width="0dp"
         android:layout_weight="1"
-        android:textSize="16sp"
-        android:textColor="@color/red"
+        android:textSize="22sp"
+        android:textFontWeight="@integer/material_motion_duration_long_2"
+        android:textColor="@color/white"
+
         android:layout_height="wrap_content" />
 
     <ImageView

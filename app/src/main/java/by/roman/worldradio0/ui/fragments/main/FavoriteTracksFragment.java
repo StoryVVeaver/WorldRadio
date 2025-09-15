@@ -18,7 +18,6 @@ import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.adapters.EndlessRecyclerViewScrollListener;
 import by.roman.worldradio0.business_logic.adapters.TrackAdapter;
 import by.roman.worldradio0.business_logic.view_models.FavoriteViewModel;
-import by.roman.worldradio0.business_logic.view_models.ListViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint

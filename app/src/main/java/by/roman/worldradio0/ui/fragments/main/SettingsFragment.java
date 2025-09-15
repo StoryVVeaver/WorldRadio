@@ -9,6 +9,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -20,6 +21,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -43,6 +45,9 @@ import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class SettingsFragment extends Fragment {
+    private ConstraintLayout history_button;
+    private ImageView log_out_button;
+    private ImageView edit_user_button;
     private RecyclerView recyclerView;
     private TextView textView;
     private TextView text_status;
@@ -70,6 +75,12 @@ public class SettingsFragment extends Fragment {
         findAllId(view);
         initAll();
         observeStatus();
+        log_out_button.setOnClickListener(v -> {
+
+        });
+        edit_user_button.setOnClickListener(v -> {
+
+        });
         Log.v("SettingsFragment: performance", "onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
     }
     private void findAllId(@NonNull View view){
@@ -77,6 +88,8 @@ public class SettingsFragment extends Fragment {
         textView = view.findViewById(R.id.nameAccountView);
         loading = view.findViewById(R.id.progressBar_Settings);
         text_status = view.findViewById(R.id.text_loading_Settings);
+        edit_user_button = view.findViewById(R.id.edit_user_settings);
+        log_out_button = view.findViewById(R.id.log_out_settings);
     }
     @SuppressLint("SetTextI18n")
     private void initAll(){
