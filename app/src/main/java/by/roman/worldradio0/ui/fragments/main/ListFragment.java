@@ -34,7 +34,7 @@ public class ListFragment extends Fragment {
     public void onResume() {
         super.onResume();
         isVisibleToUser = true;
-        viewModel.resetState(); // Сбрасываем состояние ViewModel
+        viewModel.resetState();
         viewModel.loadStart();
     }
 
@@ -73,7 +73,6 @@ public class ListFragment extends Fragment {
 
                     if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount - 5) {
                         isLoadingNextPage = true;
-                        // Откладываем обновление UI на следующий цикл обработки сообщений
                         handler.post(() -> {
                             if (isVisibleToUser && adapter != null) {
                                 adapter.showLoading();
@@ -108,7 +107,6 @@ public class ListFragment extends Fragment {
 
             @Override
             public void onDeleteClick(int position) {
-                // implementation
             }
         });
 
@@ -141,10 +139,8 @@ public class ListFragment extends Fragment {
                         if (isVisibleToUser && adapter != null) {
                             adapter.hideLoading();
                             List<RadioStation> data = stations.data;
-                            // Всегда используем replaceAll для consistency
                             adapter.replaceAll(data);
                             isLoadingNextPage = false;
-                            // Не устанавливаем isLastPage здесь, это делается в ViewModel
                         }
                     });
                     break;
@@ -166,7 +162,6 @@ public class ListFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        // Очищаем все ссылки чтобы избежать memory leaks
         handler.removeCallbacksAndMessages(null);
         recyclerView.setAdapter(null);
     }

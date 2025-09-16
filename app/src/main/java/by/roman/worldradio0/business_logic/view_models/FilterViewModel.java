@@ -127,7 +127,6 @@ public class FilterViewModel extends ViewModel {
                     isLastPage = true;
                     stations.postValue(UiState.success(allStations));
                 } else {
-                    // Создаем новый список вместо изменения существующего
                     List<RadioStation> newList = new ArrayList<>(allStations);
                     newList.addAll(list);
                     allStations = newList;

@@ -55,6 +55,8 @@ dependencies {
     implementation(libs.ui.graphics.android)
     implementation(libs.fragment)
     implementation(libs.recyclerview)
+    implementation(libs.osmdroid)
+    implementation(libs.play.services.maps)
 
 
     annotationProcessor(libs.glide.compiler)
