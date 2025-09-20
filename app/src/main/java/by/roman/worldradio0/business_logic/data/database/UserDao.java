@@ -3,6 +3,7 @@ package by.roman.worldradio0.business_logic.data.database;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -47,9 +48,8 @@ public class UserDao {
         db.update(TABLE_USER, values, selection, selectionArgs);
     }
     public void addUser(@NonNull UserDTO dto){
-        //TODO проверить, что сюда приходит, тк были нули
         ContentValues values = new ContentValues();
-        values.put(COLUMN_ID_USER, dto.getId());
+        //values.put(COLUMN_ID_USER, dto.getId());
         values.put(COLUMN_LOGIN_USER, dto.getLogin());
         values.put(COLUMN_PASSWORD_USER, dto.getPassword());
         values.put(COLUMN_UUID_PLAYING_STATION, dto.getPlaying());

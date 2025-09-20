@@ -10,6 +10,7 @@ import by.roman.worldradio0.business_logic.data.database.FavoriteStationDao;
 import by.roman.worldradio0.business_logic.data.database.FavoriteTrackDao;
 import by.roman.worldradio0.business_logic.data.database.FilterDao;
 import by.roman.worldradio0.business_logic.data.database.HistoryDao;
+import by.roman.worldradio0.business_logic.data.database.MapDao;
 import by.roman.worldradio0.business_logic.data.database.RadioStationDao;
 import by.roman.worldradio0.business_logic.data.database.SQLiteDatabaseManager;
 import by.roman.worldradio0.business_logic.data.database.SettingsDao;
@@ -67,6 +68,11 @@ public class DatabaseModule {
     @Singleton
     public HistoryDao provideHistoryDao(SQLiteDatabase db) {
         return new HistoryDao(db);
+    }
+    @Provides
+    @Singleton
+    public MapDao provideMapDao(SQLiteDatabase db) {
+        return new MapDao(db);
     }
 }
 

@@ -56,7 +56,6 @@ dependencies {
     implementation(libs.fragment)
     implementation(libs.recyclerview)
     implementation(libs.osmdroid)
-    implementation(libs.play.services.maps)
 
 
     annotationProcessor(libs.glide.compiler)

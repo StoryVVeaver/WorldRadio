@@ -1,5 +1,7 @@
 package by.roman.worldradio0.business_logic.data.dto;
 
+import android.util.Log;
+
 import by.roman.worldradio0.business_logic.data.models.User;
 
 public class UserDTO {

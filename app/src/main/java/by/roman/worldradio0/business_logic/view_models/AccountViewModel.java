@@ -117,8 +117,7 @@ public class AccountViewModel extends ViewModel {
     }
     public void useradd(){
         UserDTO dto = new UserDTO();
-        dto.fromModel(new User(1,"user","user",null,1));
-        userRepository.useradd(dto);
+        userRepository.useradd(dto.fromModel(new User(1,"user","user",null,1)));
         settingsRepository.addSettings(new SettingsDTO().fromModel(new Settings(dto.getId())));
         filterRepository.addFilters(new FilterDTO().fromModel(new Filter(dto.getId(),null,null,null,null,null,0)));
     }

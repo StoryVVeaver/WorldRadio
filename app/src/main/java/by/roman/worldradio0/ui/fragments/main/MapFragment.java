@@ -6,7 +6,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +18,12 @@ import android.widget.Toast;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
+import org.osmdroid.events.MapEventsReceiver;
+import org.osmdroid.events.MapListener;
+import org.osmdroid.events.ScrollEvent;
+import org.osmdroid.events.ZoomEvent;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
@@ -23,12 +31,21 @@ import org.osmdroid.views.overlay.Marker;
 import java.util.List;
 
 import by.roman.worldradio0.R;
+import by.roman.worldradio0.business_logic.data.models.MapPoint;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
+import by.roman.worldradio0.business_logic.view_models.MapViewModel;
+import by.roman.worldradio0.ui.elements.view.OptimizedGridClusterer;
 import dagger.hilt.android.AndroidEntryPoint;
 
+//TODO после загрузки станций нужно пперепнуть лист в карте
 @AndroidEntryPoint
-public class MapFragment extends Fragment {
+public class MapFragment extends Fragment implements MapEventsReceiver {
     private MapView map;
+    private MapViewModel viewModel;
+    private OptimizedGridClusterer clusterer;
+    private final Handler clusterHandler = new Handler(Looper.getMainLooper());
+    private final Runnable clusterRunnable = () -> clusterer.clusterAsync();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,7 +54,6 @@ public class MapFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_map, container, false);
     }
 
@@ -45,47 +61,77 @@ public class MapFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         findViewByID(view);
-        initAll();
-
-
-
-
+        initializeMap();
+        viewModel = new ViewModelProvider(this).get(MapViewModel.class);
+        viewModel.loadPoints();
+        getPoints();
     }
 
-    private void findViewByID(View view){
+    private void findViewByID(@NonNull View view){
         map = view.findViewById(R.id.map);
     }
-    private void initAll(){
-        Configuration.getInstance().load(requireContext(), PreferenceManager.getDefaultSharedPreferences(requireContext()));
+    private void initializeMap() {
+        Configuration.getInstance().load(requireContext(),
+                PreferenceManager.getDefaultSharedPreferences(requireContext()));
+
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.setMultiTouchControls(true);
+
         IMapController mapController = map.getController();
-        GeoPoint startPoint = new GeoPoint(55.7558, 37.6173);
-        mapController.setCenter(startPoint);
-        mapController.setZoom(12);
-        addMarkers();
-    }
+        mapController.setZoom(10.0);
+        mapController.setCenter(new GeoPoint(55.7558, 37.6173));
 
-    private void addMarkers(List<RadioStation> station_list) {
+        clusterer = new OptimizedGridClusterer(requireContext(), map);
+        clusterer.setCellSizePx(80);
 
-
-        Marker marker = new Marker(map);
-        for (RadioStation i: station_list){
-
-        }
-        marker.setPosition(new GeoPoint(latitude, longitude));
-        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-        marker.setTitle(title);
-
-        marker.setIcon(AppCompatResources.getDrawable(requireContext(), R.drawable.map_point));
-
-        marker.setOnMarkerClickListener((marker1, mapView) -> {
-            Toast.makeText(requireContext(), marker1.getTitle(), Toast.LENGTH_SHORT).show();
-            return true;
+        map.addMapListener(new MapListener() {
+            @Override
+            public boolean onScroll(ScrollEvent event) {
+                scheduleCluster();
+                return false;
+            }
+            @Override
+            public boolean onZoom(ZoomEvent event) {
+                scheduleCluster();
+                return false;
+            }
         });
-
-        map.getOverlays().add(marker);
-        map.invalidate();
+    }
+    private void getPoints(){
+        viewModel.getListPoints().observe(getViewLifecycleOwner(), points -> {
+            switch (points.status){
+                case SUCCESS:
+                    clusterer.setItems(points.data);
+                    scheduleCluster();
+                    break;
+                case LOADING:
+                case ERROR:
+                    break;
+            }
+        });
+    }
+    private void scheduleCluster() {
+        clusterHandler.removeCallbacks(clusterRunnable);
+        clusterHandler.postDelayed(clusterRunnable, 275);
+    }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (map != null) {
+            map.onDetach();
+        }
+        if (clusterer != null) {
+            clusterer.shutdown();
+        }
     }
 
+    @Override
+    public boolean singleTapConfirmedHelper(GeoPoint p) {
+        return false;
+    }
+
+    @Override
+    public boolean longPressHelper(GeoPoint p) {
+        return false;
+    }
 }

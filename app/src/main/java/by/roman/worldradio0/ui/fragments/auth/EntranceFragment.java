@@ -79,6 +79,7 @@ public class EntranceFragment extends Fragment {
         initAll();
         buttons();
         observeResult();
+        //viewModel.useradd();
         Log.v("EntranceFragment","Performance - onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
     }
     private void findAll(@NonNull View view){

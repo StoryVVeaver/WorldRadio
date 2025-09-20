@@ -1,6 +1,7 @@
 package by.roman.worldradio0.ui.activities;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -58,9 +59,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
+                if (position == 1) {
+                    //viewPager.setUserInputEnabled(false);
+                } else {
+                    viewPager.setUserInputEnabled(true);
+                }
                 bottomNavigationView.getMenu().getItem(position).setChecked(true);
             }
         });
+        
         bottomNavigationView.setOnItemSelectedListener(item -> {
             switch (Objects.requireNonNull(item.getTitle()).toString()) {
                 case "Favorite":
