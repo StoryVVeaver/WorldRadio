@@ -8,10 +8,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import by.roman.worldradio0.business_logic.data.dto.HistoryDTO;
-import by.roman.worldradio0.business_logic.data.models.FavoriteTrack;
 import by.roman.worldradio0.business_logic.data.models.History;
 
 public class HistoryDao {
@@ -42,6 +42,19 @@ public class HistoryDao {
         db.delete(TABLE_HISTORY, COLUMN_USER_ID_HISTORY + " = ? AND "
                 + COLUMN_UUID_STATION_HISTORY + " = ?", new String[]{valueOf(history.getUser_id()), history.getUuid()});
     }
+    public void deleteHistoryByUser(int userId) {
+        try {
+            db.delete(
+                    TABLE_HISTORY,
+                    COLUMN_USER_ID_HISTORY + " = ?",
+                    new String[]{ String.valueOf(userId) }
+            );
+            Log.d("HistoryDao", "History deleted for user " + userId);
+        } catch (Exception e) {
+            Log.e("HistoryDao", "Error deleting history for user " + userId, e);
+        }
+    }
+
     public List<History> getHistoryByUser(int userId, int currentPage, int pageSize) {
         List<History> histories = new ArrayList<>();
         int offset = currentPage * pageSize;
@@ -71,6 +84,7 @@ public class HistoryDao {
                 Log.e("HistoryDao", "Error reading history");
             }
         }
+        Collections.reverse(histories);
         return histories;
     }
 }

@@ -30,7 +30,6 @@ public class FilterViewModel extends ViewModel {
     private final MutableLiveData<UiState<Integer>> count = new MutableLiveData<>();
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
     private final AtomicBoolean isActive = new AtomicBoolean(true);
-
     private int currentPage = 0;
     private boolean isLastPage = false;
     private final int pageSize = 20;

@@ -40,6 +40,7 @@ import by.roman.worldradio0.business_logic.data.models.settings.child.TextItem;
 import by.roman.worldradio0.business_logic.settings.SettingsChangeListener;
 import by.roman.worldradio0.business_logic.view_models.SettingsViewModel;
 import by.roman.worldradio0.ui.activities.AccountActivity;
+import by.roman.worldradio0.ui.activities.HistoryActivity;
 import by.roman.worldradio0.ui.activities.MainActivity;
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -55,6 +56,12 @@ public class SettingsFragment extends Fragment {
     private SettingsViewModel viewModel;
     private Handler handler;
     private Runnable runnable;
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        history_button.setEnabled(true);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -81,6 +88,11 @@ public class SettingsFragment extends Fragment {
         edit_user_button.setOnClickListener(v -> {
 
         });
+        history_button.setOnClickListener(v -> {
+            history_button.setEnabled(false);
+            Intent intent = new Intent(getContext(), HistoryActivity.class);
+            startActivity(intent);
+        });
         Log.v("SettingsFragment: performance", "onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
     }
     private void findAllId(@NonNull View view){
@@ -90,6 +102,7 @@ public class SettingsFragment extends Fragment {
         text_status = view.findViewById(R.id.text_loading_Settings);
         edit_user_button = view.findViewById(R.id.edit_user_settings);
         log_out_button = view.findViewById(R.id.log_out_settings);
+        history_button = view.findViewById(R.id.history_button);
     }
     @SuppressLint("SetTextI18n")
     private void initAll(){

@@ -16,12 +16,15 @@ import androidx.media3.common.util.UnstableApi;
 
 import javax.inject.Inject;
 
+import by.roman.worldradio0.business_logic.data.dto.HistoryDTO;
+import by.roman.worldradio0.business_logic.data.models.History;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.data.models.Settings;
 import by.roman.worldradio0.business_logic.data.repositories.FavoriteStationRepositoryImpl;
 import by.roman.worldradio0.business_logic.data.repositories.FavoriteTrackRepositoryImpl;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteStationRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteTrackRepository;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.HistoryRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.SettingsRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.UserRepository;
@@ -37,6 +40,7 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     @SuppressLint("StaticFieldLeak")
     private final Context context;
     private final RadioRepository radioRepository;
+    private final HistoryRepository historyRepository;
     private final FavoriteStationRepository favoriteStationRepository;
     private final FavoriteTrackRepository favoriteTrackRepository;
     private final UserRepository userRepository;
@@ -47,10 +51,11 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     private final MutableLiveData<Boolean> isFavoriteTrack = new MutableLiveData<>();
     private Settings settings;
     @Inject
-    public PlayerViewModel(@NonNull RadioManager radioManager,FavoriteTrackRepository favoriteTrackRepository, FavoriteStationRepository favoriteStationRepository, @ApplicationContext Context context, RadioRepository radioRepository, UserRepository userRepository, SettingsRepository settingsRepository) {
+    public PlayerViewModel(@NonNull RadioManager radioManager,HistoryRepository historyRepository, FavoriteTrackRepository favoriteTrackRepository, FavoriteStationRepository favoriteStationRepository, @ApplicationContext Context context, RadioRepository radioRepository, UserRepository userRepository, SettingsRepository settingsRepository) {
         this.context = context;
         this.radioRepository = radioRepository;
         this.userRepository = userRepository;
+        this.historyRepository = historyRepository;
         this.favoriteTrackRepository = favoriteTrackRepository;
         this.favoriteStationRepository = favoriteStationRepository;
         this.settingsRepository = settingsRepository;
@@ -111,6 +116,7 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
         Intent intent = new Intent(context, PlayerService.class);
         intent.setAction(PlayerService.ACTION_START);
         intent.putExtra(PlayerService.EXTRA_STREAM_URL, streamUrl);
+        historyRepository.addToHistory(new HistoryDTO().fromModel(new History(userRepository.getUserInSystem(), userRepository.getPlayingUUID())));
         startForegroundService(context, intent);
     }
     @OptIn(markerClass = UnstableApi.class)

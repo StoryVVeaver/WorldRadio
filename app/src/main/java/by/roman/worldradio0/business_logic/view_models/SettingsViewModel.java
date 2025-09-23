@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 
@@ -37,6 +38,8 @@ import by.roman.worldradio0.business_logic.data.dto.FavoriteStationDTO;
 import by.roman.worldradio0.business_logic.data.dto.FilterDTO;
 import by.roman.worldradio0.business_logic.data.dto.RadioStationDTO;
 import by.roman.worldradio0.business_logic.data.dto.SettingsDTO;
+import by.roman.worldradio0.business_logic.data.models.History;
+import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.data.models.Settings;
 import by.roman.worldradio0.business_logic.data.models.User;
 import by.roman.worldradio0.business_logic.data.models.settings.SettingsGroup;
@@ -49,6 +52,7 @@ import by.roman.worldradio0.business_logic.data.models.settings.child.TextButton
 import by.roman.worldradio0.business_logic.data.models.settings.child.TextItem;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteStationRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FilterRepository;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.HistoryRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.SettingsRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.UserRepository;
@@ -67,8 +71,10 @@ public class SettingsViewModel extends ViewModel {
     private final MutableLiveData<UiState<Integer>> count = new MutableLiveData<>();
     private final MutableLiveData<UiState<Boolean>> sendingData = new MutableLiveData<>();
     private final MutableLiveData<UiState<Boolean>> gettingData = new MutableLiveData<>();
+    private final MutableLiveData<UiState<List<RadioStation>>> historyList = new MutableLiveData<>();
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
     private final SettingsRepository settingsRepository;
+    private final HistoryRepository historyRepository;
     private final RadioRepository radioRepository;
     private final UserRepository userRepository;
     private final FilterRepository filterRepository;
@@ -79,13 +85,19 @@ public class SettingsViewModel extends ViewModel {
     private int i = 0;
     private int j = 0;
     private boolean flag_stations = false;
+    private final AtomicBoolean isActive = new AtomicBoolean(true);
+    private int currentPage = 0;
+    private boolean isLastPage = false;
+    private final int pageSize = 20;
+    private List<RadioStation> allStations = new ArrayList<>();
 
     @Inject
-    public SettingsViewModel(@NonNull SettingsRepository settingsRepository, RadioRepository radioRepository, DataFromRadio loadDataFromRadio,
-                             DataFromUserAPI dataFromUserAPI, UserRepository userRepository, FilterRepository filterRepository,
-                             FavoriteStationRepository favoriteStationRepository){
+    public SettingsViewModel(@NonNull SettingsRepository settingsRepository, RadioRepository radioRepository,
+                             DataFromRadio loadDataFromRadio, DataFromUserAPI dataFromUserAPI, HistoryRepository historyRepository,
+                             UserRepository userRepository, FilterRepository filterRepository, FavoriteStationRepository favoriteStationRepository){
         this.settingsRepository = settingsRepository;
         this.radioRepository = radioRepository;
+        this.historyRepository = historyRepository;
         this.dataFromRadio = loadDataFromRadio;
         this.dataFromUserAPI = dataFromUserAPI;
         this.userRepository = userRepository;
@@ -104,6 +116,9 @@ public class SettingsViewModel extends ViewModel {
     }
     public LiveData<UiState<Boolean>> getGettingStatus(){
         return gettingData;
+    }
+    public LiveData<UiState<List<RadioStation>>> getHistoryList(){
+        return historyList;
     }
     public List<SettingsGroup> getSettingsList(){
 
@@ -160,6 +175,91 @@ public class SettingsViewModel extends ViewModel {
     }
     private void setSettings(){
         settingsRepository.setSettings(new SettingsDTO().fromModel(settModel));
+    }
+    public void cancelPendingOperations() {
+        isActive.set(false);
+    }
+    public boolean getIsLastPage() {
+        return isLastPage;
+    }
+    public void resetState() {
+        isActive.set(true);
+        currentPage = 0;
+        isLastPage = false;
+        allStations.clear();
+    }
+    public void deleteAllHistory(){
+        try {
+            historyRepository.removeFromHistoryById(userRepository.getUserInSystem());
+        } catch (Exception e){
+            Log.e("SettingsViewModel", "Delete all history crashed");
+        }
+    }
+    public void loadStart() {
+        if (!isActive.get()) return;
+
+        historyList.setValue(UiState.loading());
+        executor.execute(() -> {
+            if (!isActive.get()) return;
+
+            try {
+                List<RadioStation> list = new ArrayList<>();
+                List <History> history_list = historyRepository.getHistoryList(0, pageSize);
+                for(History i : history_list){
+                    list.add(radioRepository.getStationById(i.getUuid()));
+                }
+                if (!isActive.get()) return;
+
+                if (list.isEmpty()) {
+                    historyList.postValue(UiState.error("Лист пуст"));
+                } else {
+                    allStations = new ArrayList<>(list);
+                    historyList.postValue(UiState.success(allStations));
+                    currentPage = 1;
+                    isLastPage = list.size() < pageSize;
+                }
+            } catch (Exception e) {
+                if (isActive.get()) {
+                    historyList.postValue(UiState.error("Ошибка загрузки: " + e.getMessage()));
+                }
+            }
+        });
+    }
+    public int getPageSize() {
+        return pageSize;
+    }
+    public void loadNextPage() {
+        if (!isActive.get() || isLastPage) return;
+
+        executor.execute(() -> {
+            if (!isActive.get()) return;
+
+            try {
+                List<RadioStation> list = new ArrayList<>();
+                List <History> history_list = historyRepository.getHistoryList(currentPage, pageSize);
+                for(History i : history_list){
+                    list.add(radioRepository.getStationById(i.getUuid()));
+                }
+                if (!isActive.get()) return;
+
+                if (list.isEmpty()) {
+                    isLastPage = true;
+                    historyList.postValue(UiState.success(allStations));
+                } else {
+                    List<RadioStation> newList = new ArrayList<>(allStations);
+                    newList.addAll(list);
+                    allStations = newList;
+
+                    historyList.postValue(UiState.success(allStations));
+                    currentPage++;
+                    isLastPage = list.size() < pageSize;
+                }
+            } catch (Exception e) {
+                if (isActive.get()) {
+                    historyList.postValue(UiState.error("Ошибка загрузки: " + e.getMessage()));
+                }
+            }
+        });
     }
     public User getUserData(){
         try {
@@ -418,5 +518,6 @@ public class SettingsViewModel extends ViewModel {
     protected void onCleared() {
         super.onCleared();
         executor.shutdown();
+        isActive.set(false);
     }
 }

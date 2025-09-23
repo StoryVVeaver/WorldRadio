@@ -35,7 +35,14 @@ public class HistoryRepositoryImpl implements HistoryRepository {
             Log.e("HistoryRepositoryImpl", "Failed remove from history");
         }
     }
-
+    @Override
+    public void removeFromHistoryById(int userId){
+        try {
+            historyDao.deleteHistoryByUser(userId);
+        } catch (Exception e) {
+            Log.e("HistoryRepositoryImpl", "Failed remove by id");
+        }
+    }
     @Override
     public List<History> getHistoryList(int page, int page_size) {
         try {
