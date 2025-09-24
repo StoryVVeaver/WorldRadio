@@ -34,6 +34,8 @@ import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.data.models.MapPoint;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.view_models.MapViewModel;
+import by.roman.worldradio0.business_logic.view_models.PlayerViewModel;
+import by.roman.worldradio0.business_logic.view_models.StateViewModel;
 import by.roman.worldradio0.ui.elements.view.OptimizedGridClusterer;
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -42,6 +44,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class MapFragment extends Fragment implements MapEventsReceiver {
     private MapView map;
     private MapViewModel viewModel;
+    private PlayerViewModel playerViewModel;
     private OptimizedGridClusterer clusterer;
     private final Handler clusterHandler = new Handler(Looper.getMainLooper());
     private final Runnable clusterRunnable = () -> clusterer.clusterAsync();
@@ -63,6 +66,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         findViewByID(view);
         initializeMap();
         viewModel = new ViewModelProvider(this).get(MapViewModel.class);
+        playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
         viewModel.loadPoints();
         getPoints();
     }

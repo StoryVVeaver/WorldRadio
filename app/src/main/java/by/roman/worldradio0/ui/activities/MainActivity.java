@@ -1,8 +1,9 @@
 package by.roman.worldradio0.ui.activities;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,7 +21,7 @@ import java.util.Objects;
 
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.adapters.ViewPagerAdapter;
-import by.roman.worldradio0.business_logic.view_models.StatePlayerViewModel;
+import by.roman.worldradio0.business_logic.view_models.StateViewModel;
 import by.roman.worldradio0.ui.fragments.player.PlayerFragment;
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -29,7 +30,8 @@ public class MainActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavigationView;
     private ViewPager2 viewPager;
     private ViewPagerAdapter adapter;
-    private StatePlayerViewModel viewModel;
+    private StateViewModel viewModel;
+    private boolean isMap = true;
 
     @SuppressLint("NonConstantResourceId")
     @Override
@@ -43,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
         findAllId();
-        viewModel = new ViewModelProvider(this).get(StatePlayerViewModel.class);
+        viewModel = new ViewModelProvider(this).get(StateViewModel.class);
         viewModel.shouldShowPanel().observe(this, show -> {
             if (Boolean.TRUE.equals(show)) {
                 startBottomPlayer();
@@ -55,19 +57,33 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setAdapter(adapter);
         viewPager.setUserInputEnabled(true);
         viewPager.setOffscreenPageLimit(2);
+        viewModel.isMapOpen().observe(this, state -> {
+            boolean mapOpen = Boolean.TRUE.equals(state);
+            isMap = mapOpen;
+            Log.v("main", isMap + " observer");
+
+            int current = viewPager.getCurrentItem();
+            if (current == 1) {
+                viewPager.setUserInputEnabled(!mapOpen);
+                Log.v("main", "applied to viewPager in observer: userInputEnabled=" + (!mapOpen));
+            }
+        });
+
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
+                Log.v("main", isMap + " viewPager");
                 if (position == 1) {
-                    //viewPager.setUserInputEnabled(false);
+                    viewPager.setUserInputEnabled(!isMap);
                 } else {
                     viewPager.setUserInputEnabled(true);
                 }
                 bottomNavigationView.getMenu().getItem(position).setChecked(true);
             }
         });
-        
+
+
         bottomNavigationView.setOnItemSelectedListener(item -> {
             switch (Objects.requireNonNull(item.getTitle()).toString()) {
                 case "Favorite":
