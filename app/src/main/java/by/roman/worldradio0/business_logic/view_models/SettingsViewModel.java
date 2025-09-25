@@ -71,10 +71,8 @@ public class SettingsViewModel extends ViewModel {
     private final MutableLiveData<UiState<Integer>> count = new MutableLiveData<>();
     private final MutableLiveData<UiState<Boolean>> sendingData = new MutableLiveData<>();
     private final MutableLiveData<UiState<Boolean>> gettingData = new MutableLiveData<>();
-    private final MutableLiveData<UiState<List<RadioStation>>> historyList = new MutableLiveData<>();
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
     private final SettingsRepository settingsRepository;
-    private final HistoryRepository historyRepository;
     private final RadioRepository radioRepository;
     private final UserRepository userRepository;
     private final FilterRepository filterRepository;
@@ -85,19 +83,13 @@ public class SettingsViewModel extends ViewModel {
     private int i = 0;
     private int j = 0;
     private boolean flag_stations = false;
-    private final AtomicBoolean isActive = new AtomicBoolean(true);
-    private int currentPage = 0;
-    private boolean isLastPage = false;
-    private final int pageSize = 20;
-    private List<RadioStation> allStations = new ArrayList<>();
 
     @Inject
     public SettingsViewModel(@NonNull SettingsRepository settingsRepository, RadioRepository radioRepository,
-                             DataFromRadio loadDataFromRadio, DataFromUserAPI dataFromUserAPI, HistoryRepository historyRepository,
-                             UserRepository userRepository, FilterRepository filterRepository, FavoriteStationRepository favoriteStationRepository){
+                             DataFromRadio loadDataFromRadio, DataFromUserAPI dataFromUserAPI, UserRepository userRepository,
+                             FilterRepository filterRepository, FavoriteStationRepository favoriteStationRepository){
         this.settingsRepository = settingsRepository;
         this.radioRepository = radioRepository;
-        this.historyRepository = historyRepository;
         this.dataFromRadio = loadDataFromRadio;
         this.dataFromUserAPI = dataFromUserAPI;
         this.userRepository = userRepository;
@@ -117,149 +109,8 @@ public class SettingsViewModel extends ViewModel {
     public LiveData<UiState<Boolean>> getGettingStatus(){
         return gettingData;
     }
-    public LiveData<UiState<List<RadioStation>>> getHistoryList(){
-        return historyList;
-    }
-    public List<SettingsGroup> getSettingsList(){
-
-        List<SettingsGroup> groups = new ArrayList<>();
-
-        try {
-            List<SettingsItem> audioItems = new ArrayList<>();
-            audioItems.add(new SliderItem(AUDIO_BALANCE,"Баланс:",-10, 10,settModel.getAudioBalance(),"L","R",true));
-            audioItems.add(new TextItem("Усиление"));
-            audioItems.add(new SliderItem(GAIN_RECORD,"     Запись:", 0, 100, settModel.getGainRecord(),true));
-            audioItems.add(new SliderItem(GAIN_BROADCAST,"     Эфир:", 0, 100, settModel.getGainBroadcast(),true));
-            audioItems.add(new CheckItem(AGC_ENABLED,"AGC: ",settModel.getAgcEnabled() == 1));
-            audioItems.add(new CheckWIthSliderItem(CROSSFADE_ENABLED,CROSSFADE_TIME,"Crossfade: ",0, 20,settModel.getCrossfadeTime(),settModel.getCrossfadeEnabled() == 1));
-            groups.add(new SettingsGroup("Аудио", audioItems));
-        } catch (Exception e) {
-            Log.e("SettingsViewModel", "Error creating list audio settings");
-        }
-
-        try {
-            List<SettingsItem> networkItems = new ArrayList<>();
-            List<String> network_types = new ArrayList<>();network_types.add("Только Wi-fi");network_types.add("Только мобильная сеть");network_types.add("Любое");
-            networkItems.add(new SwitchItem(NETWORK_TYPE, "Подключение:", network_types,settModel.getNetworkType()));
-            groups.add(new SettingsGroup("Сетевые параметры", networkItems));
-        } catch (Exception e) {
-            Log.e("SettingsViewModel", "Error creating list network settings");
-        }
-
-        try {
-            List<SettingsItem> viewItems = new ArrayList<>();
-            viewItems.add(new CheckItem(TIMER_SECONDS_ENABLED,"Использовать секунды:",settModel.getTimerSecondsEnabled() == 1));
-            List<String> dots_types = new ArrayList<>();dots_types.add("Круг");dots_types.add("Ромб");
-            viewItems.add(new SwitchItem(TIMER_DOTS_TYPE,"Вид разделителя:",dots_types,settModel.getTimerDotsType()));
-            //viewItems.add(new CheckItem(NOTIFICATION_ENABLED,"Показывать уведомление с плеером",settModel.getNotificationEnabled() == 1));
-            List<String> nav_types = new ArrayList<>();nav_types.add("Свайп");nav_types.add("Кнопка");nav_types.add("Свайп и кнопка");
-            viewItems.add(new SwitchItem(NAVIGATION_TYPE,"Вид навигации:",nav_types,settModel.getNavigationType()));
-            groups.add(new SettingsGroup("Оформление", viewItems));
-        } catch (Exception e) {
-            Log.e("SettingsViewModel", "Error creating list view settings");
-        }
-
-        try {
-            List<SettingsItem> dataItems = new ArrayList<>();
-            dataItems.add(new TextButtonItem(GET_USER_DATA, PUT_USER_DATA,"Синхронизация:", "[Загрузить]", "[Выгрузить]"));
-            dataItems.add(new TextButtonItem(UPDATE_STATIONS_DATA,"Станции:", "[Обновить]"));
-            dataItems.add(new TextButtonItem(EXIT_FROM_ACCOUNT,"Выйти из аккаунта", "                "));
-            dataItems.add(new TextButtonItem(DELETE_ACCOUNT,"Удалить аккаунт", "                "));
-            //dataItems.add(new TextButtonItem("9","История:", "[Очистить]")); //TODO
-            groups.add(new SettingsGroup("Данные и аккаунт", dataItems));
-        } catch (Exception e) {
-            Log.e("SettingsViewModel", "Error creating list data settings");
-        }
-
-        return groups;
-    }
     private void setSettings(){
         settingsRepository.setSettings(new SettingsDTO().fromModel(settModel));
-    }
-    public void cancelPendingOperations() {
-        isActive.set(false);
-    }
-    public boolean getIsLastPage() {
-        return isLastPage;
-    }
-    public void resetState() {
-        isActive.set(true);
-        currentPage = 0;
-        isLastPage = false;
-        allStations.clear();
-    }
-    public void deleteAllHistory(){
-        try {
-            historyRepository.removeFromHistoryById(userRepository.getUserInSystem());
-        } catch (Exception e){
-            Log.e("SettingsViewModel", "Delete all history crashed");
-        }
-    }
-    public void loadStart() {
-        if (!isActive.get()) return;
-
-        historyList.setValue(UiState.loading());
-        executor.execute(() -> {
-            if (!isActive.get()) return;
-
-            try {
-                List<RadioStation> list = new ArrayList<>();
-                List <History> history_list = historyRepository.getHistoryList(0, pageSize);
-                for(History i : history_list){
-                    list.add(radioRepository.getStationById(i.getUuid()));
-                }
-                if (!isActive.get()) return;
-
-                if (list.isEmpty()) {
-                    historyList.postValue(UiState.error("Лист пуст"));
-                } else {
-                    allStations = new ArrayList<>(list);
-                    historyList.postValue(UiState.success(allStations));
-                    currentPage = 1;
-                    isLastPage = list.size() < pageSize;
-                }
-            } catch (Exception e) {
-                if (isActive.get()) {
-                    historyList.postValue(UiState.error("Ошибка загрузки: " + e.getMessage()));
-                }
-            }
-        });
-    }
-    public int getPageSize() {
-        return pageSize;
-    }
-    public void loadNextPage() {
-        if (!isActive.get() || isLastPage) return;
-
-        executor.execute(() -> {
-            if (!isActive.get()) return;
-
-            try {
-                List<RadioStation> list = new ArrayList<>();
-                List <History> history_list = historyRepository.getHistoryList(currentPage, pageSize);
-                for(History i : history_list){
-                    list.add(radioRepository.getStationById(i.getUuid()));
-                }
-                if (!isActive.get()) return;
-
-                if (list.isEmpty()) {
-                    isLastPage = true;
-                    historyList.postValue(UiState.success(allStations));
-                } else {
-                    List<RadioStation> newList = new ArrayList<>(allStations);
-                    newList.addAll(list);
-                    allStations = newList;
-
-                    historyList.postValue(UiState.success(allStations));
-                    currentPage++;
-                    isLastPage = list.size() < pageSize;
-                }
-            } catch (Exception e) {
-                if (isActive.get()) {
-                    historyList.postValue(UiState.error("Ошибка загрузки: " + e.getMessage()));
-                }
-            }
-        });
     }
     public User getUserData(){
         try {
@@ -518,6 +369,5 @@ public class SettingsViewModel extends ViewModel {
     protected void onCleared() {
         super.onCleared();
         executor.shutdown();
-        isActive.set(false);
     }
 }

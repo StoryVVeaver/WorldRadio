@@ -12,12 +12,12 @@
         <androidx.cardview.widget.CardView
             android:id="@+id/cardView_home"
             android:layout_width="wrap_content"
-            android:layout_height="45dp"
+            android:layout_height="0dp"
             android:layout_marginStart="20dp"
-            android:layout_marginTop="20dp"
             app:cardCornerRadius="15dp"
+            app:layout_constraintBottom_toBottomOf="@+id/cardView3"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="@+id/cardView3">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -70,27 +70,47 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/timerButtonView"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
             android:layout_marginEnd="15dp"
-            android:padding="10dp"
-            android:src="@drawable/timer_home"
+            app:cardCornerRadius="15dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-            android:id="@+id/filterButtonView"
+            <ImageView
+                android:id="@+id/timerButtonView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/background"
+                android:padding="10dp"
+                android:src="@drawable/timer_home" />
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardView3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
             android:layout_marginEnd="10dp"
-            android:padding="10dp"
-            android:src="@drawable/fi_rs_filter"
-            app:layout_constraintEnd_toStartOf="@+id/timerButtonView"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:cardCornerRadius="15dp"
+            app:layout_constraintEnd_toStartOf="@+id/cardView"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/filterButtonView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/background"
+                android:padding="10dp"
+                android:src="@drawable/fi_rs_filter"
+                app:layout_constraintCircleRadius="10dp" />
+
+        </androidx.cardview.widget.CardView>
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

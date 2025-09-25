@@ -31,9 +31,11 @@
 
         <androidx.cardview.widget.CardView
             android:id="@+id/cardView2"
-            android:layout_width="360dp"
+            android:layout_width="wrap_content"
             android:layout_height="45dp"
+            android:layout_marginStart="10dp"
             android:layout_marginTop="33dp"
+            android:layout_marginEnd="10dp"
             app:cardCornerRadius="15dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -46,7 +48,7 @@
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/entranceMode"
-                    android:layout_width="180dp"
+                    android:layout_width="160dp"
                     android:layout_height="match_parent"
                     android:background="@color/selectedMode">
 
@@ -55,17 +57,17 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/enter"
+                        android:textColor="@color/white"
                         android:textSize="25sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        android:textColor="@color/white"/>
+                        app:layout_constraintTop_toTopOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/registrationMode"
-                    android:layout_width="180dp"
+                    android:layout_width="160dp"
                     android:layout_height="match_parent"
                     android:background="@color/unselectedMode">
 
@@ -74,12 +76,12 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/reg"
+                        android:textColor="@color/unselectedText"
                         android:textSize="25sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        android:textColor="@color/unselectedText"/>
+                        app:layout_constraintTop_toTopOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </LinearLayout>
         </androidx.cardview.widget.CardView>

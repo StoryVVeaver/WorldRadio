@@ -21,6 +21,7 @@ import java.util.List;
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.adapters.RadioAdapter;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
+import by.roman.worldradio0.business_logic.view_models.HistoryViewModel;
 import by.roman.worldradio0.business_logic.view_models.PlayerViewModel;
 import by.roman.worldradio0.business_logic.view_models.SettingsViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
@@ -30,7 +31,7 @@ public class HistoryActivity extends AppCompatActivity {
     private ImageView back;
     private RadioAdapter adapter;
     private RecyclerView recyclerView;
-    private SettingsViewModel viewModel;
+    private HistoryViewModel viewModel;
     private PlayerViewModel playerViewModel;
     private boolean isVisibleToUser = false;
     private boolean isLoadingNextPage = false;
@@ -110,7 +111,7 @@ public class HistoryActivity extends AppCompatActivity {
         deleteAll = findViewById(R.id.deleteAll_history);
     }
     private void initAll(){
-        viewModel = new ViewModelProvider(this).get(SettingsViewModel.class);
+        viewModel = new ViewModelProvider(this).get(HistoryViewModel.class);
         playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
         adapter = new RadioAdapter(this, new RadioAdapter.OnItemClickListener() {
             @Override

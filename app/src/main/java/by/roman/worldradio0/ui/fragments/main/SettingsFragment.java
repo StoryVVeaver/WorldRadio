@@ -25,28 +25,18 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import by.roman.worldradio0.R;
+import by.roman.worldradio0.business_logic.SettingsList;
 import by.roman.worldradio0.business_logic.adapters.SettingsAdapter;
-import by.roman.worldradio0.business_logic.data.models.settings.SettingsGroup;
-import by.roman.worldradio0.business_logic.data.models.settings.SettingsItem;
-import by.roman.worldradio0.business_logic.data.models.settings.child.CheckWIthSliderItem;
-import by.roman.worldradio0.business_logic.data.models.settings.child.SliderItem;
-import by.roman.worldradio0.business_logic.data.models.settings.child.CheckItem;
-import by.roman.worldradio0.business_logic.data.models.settings.child.TextButtonItem;
-import by.roman.worldradio0.business_logic.data.models.settings.child.TextItem;
 import by.roman.worldradio0.business_logic.settings.SettingsChangeListener;
 import by.roman.worldradio0.business_logic.view_models.SettingsViewModel;
 import by.roman.worldradio0.ui.activities.AccountActivity;
 import by.roman.worldradio0.ui.activities.HistoryActivity;
-import by.roman.worldradio0.ui.activities.MainActivity;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class SettingsFragment extends Fragment {
-    private ConstraintLayout history_button;
+    private ImageView history_button;
     private ImageView log_out_button;
     private ImageView edit_user_button;
     private RecyclerView recyclerView;
@@ -107,7 +97,7 @@ public class SettingsFragment extends Fragment {
     @SuppressLint("SetTextI18n")
     private void initAll(){
         viewModel = new ViewModelProvider(this).get(SettingsViewModel.class);
-        SettingsAdapter adapter = new SettingsAdapter(viewModel.getSettingsList(), new SettingsChangeListener() {
+        SettingsAdapter adapter = new SettingsAdapter(SettingsList.getSettingsList(viewModel.getSettingsModel()), new SettingsChangeListener() {
             @Override
             public void onToggleChanged(@NonNull String key, boolean isChecked) {
                 viewModel.toggleChange(key,isChecked);
