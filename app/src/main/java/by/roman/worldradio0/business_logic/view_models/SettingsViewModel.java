@@ -120,6 +120,9 @@ public class SettingsViewModel extends ViewModel {
             return null;
         }
     }
+    public void logOut(){
+        userRepository.exit();
+    }
     public void toggleChange(@NonNull String key, boolean flag){
         switch (key) {
             case AGC_ENABLED:

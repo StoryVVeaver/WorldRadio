@@ -1,5 +1,6 @@
 package by.roman.worldradio0.ui.fragments.main;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -26,28 +27,34 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.Marker;
 
 import java.util.List;
 
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.data.models.MapPoint;
-import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.view_models.MapViewModel;
 import by.roman.worldradio0.business_logic.view_models.PlayerViewModel;
-import by.roman.worldradio0.business_logic.view_models.StateViewModel;
+import by.roman.worldradio0.ui.elements.view.CenterSnapOverlay;
 import by.roman.worldradio0.ui.elements.view.OptimizedGridClusterer;
 import dagger.hilt.android.AndroidEntryPoint;
 
-//TODO после загрузки станций нужно пперепнуть лист в карте
 @AndroidEntryPoint
 public class MapFragment extends Fragment implements MapEventsReceiver {
+    private CenterSnapOverlay centerSnap;
+    private String currentSnappedUuid = null;
     private MapView map;
     private MapViewModel viewModel;
     private PlayerViewModel playerViewModel;
     private OptimizedGridClusterer clusterer;
     private final Handler clusterHandler = new Handler(Looper.getMainLooper());
     private final Runnable clusterRunnable = () -> clusterer.clusterAsync();
+    private final Runnable updateVisibleRunnable = this::updateCenterSnapVisiblePointsImmediate;
+
+    private Drawable centerDrawable;
+    private Drawable centerSnappedDrawable;
+    private Drawable highlightMarkerDrawable;
+
+    private List<MapPoint> allPoints;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -64,9 +71,18 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         findViewByID(view);
+        //TODO отключение магнита через иф
+        centerDrawable = AppCompatResources.getDrawable(requireContext(), R.drawable.delete);
+        centerSnappedDrawable = AppCompatResources.getDrawable(requireContext(), R.drawable.fi_rs_filter);
+
+
+        highlightMarkerDrawable = AppCompatResources.getDrawable(requireContext(), R.drawable.history);
+
         initializeMap();
+
         viewModel = new ViewModelProvider(this).get(MapViewModel.class);
         playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
+
         viewModel.loadPoints();
         getPoints();
     }
@@ -74,6 +90,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
     private void findViewByID(@NonNull View view){
         map = view.findViewById(R.id.map);
     }
+
     private void initializeMap() {
         Configuration.getInstance().load(requireContext(),
                 PreferenceManager.getDefaultSharedPreferences(requireContext()));
@@ -92,21 +109,60 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
             @Override
             public boolean onScroll(ScrollEvent event) {
                 scheduleCluster();
+                scheduleUpdateVisibleForCenterSnap();
                 return false;
             }
             @Override
             public boolean onZoom(ZoomEvent event) {
                 scheduleCluster();
+                scheduleUpdateVisibleForCenterSnap();
                 return false;
             }
         });
+
+
+        centerSnap = new CenterSnapOverlay(map, 256, centerDrawable, centerSnappedDrawable, snapped -> {
+            if (snapped != null) {
+                if (playerViewModel.isInternetConnected()) {
+                    if ("ok".equals(playerViewModel.checkTypeInternet())) {
+                        playerViewModel.setPlaying(snapped.getUuid());
+                        playerViewModel.start();
+                    } else {
+                        Toast.makeText(getContext(), "Not correct internet type!", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(getContext(), "Check internet connection!", Toast.LENGTH_SHORT).show();
+                }
+
+                clusterer.highlightMarkerByUuid(snapped.getUuid(), highlightMarkerDrawable);
+
+                if (currentSnappedUuid != null && !currentSnappedUuid.equals(snapped.getUuid())) {
+                    clusterer.clearHighlightByUuid(currentSnappedUuid);
+                }
+                currentSnappedUuid = snapped.getUuid();
+            } else {
+                if (currentSnappedUuid != null) {
+                    clusterer.clearHighlightByUuid(currentSnappedUuid);
+                    currentSnappedUuid = null;
+                }
+            }
+        });
+        clusterer.setOnClusterMarkerClickListener(mp -> {
+            centerSnap.snapTo(mp, true);
+        });
+
+        map.getOverlays().add(centerSnap);
     }
+
     private void getPoints(){
         viewModel.getListPoints().observe(getViewLifecycleOwner(), points -> {
             switch (points.status){
                 case SUCCESS:
-                    clusterer.setItems(points.data);
+                    allPoints = points.data;
+                    clusterer.setItems(allPoints);
                     scheduleCluster();
+                    //TODO отключение магнита через иф
+                    updateCenterSnapVisiblePointsImmediate();
                     break;
                 case LOADING:
                 case ERROR:
@@ -114,10 +170,12 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
             }
         });
     }
+
     private void scheduleCluster() {
         clusterHandler.removeCallbacks(clusterRunnable);
         clusterHandler.postDelayed(clusterRunnable, 275);
     }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -129,13 +187,31 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         }
     }
 
-    @Override
-    public boolean singleTapConfirmedHelper(GeoPoint p) {
-        return false;
+    private void scheduleUpdateVisibleForCenterSnap() {
+        clusterHandler.removeCallbacks(updateVisibleRunnable);
+        clusterHandler.postDelayed(updateVisibleRunnable, 250);
+        centerSnap.scheduleDelayedSnap();//TODO отключение магнита через иф
+    }
+
+    private void updateCenterSnapVisiblePointsImmediate() {
+        if (allPoints == null) return;
+        BoundingBox bbox = map.getBoundingBox();
+        List<MapPoint> visible = new java.util.ArrayList<>(128);
+        for (MapPoint p : allPoints) {
+            double lat = p.getLatitude();
+            double lon = p.getLongitude();
+            if (lat <= bbox.getLatNorth() && lat >= bbox.getLatSouth()
+                    && lon >= bbox.getLonWest() && lon <= bbox.getLonEast()) {
+                visible.add(p);
+            }
+        }
+        centerSnap.feedVisiblePoints(visible);
+        centerSnap.scheduleDelayedSnap();
     }
 
     @Override
-    public boolean longPressHelper(GeoPoint p) {
-        return false;
-    }
+    public boolean singleTapConfirmedHelper(GeoPoint p) { return false; }
+
+    @Override
+    public boolean longPressHelper(GeoPoint p) { return false; }
 }

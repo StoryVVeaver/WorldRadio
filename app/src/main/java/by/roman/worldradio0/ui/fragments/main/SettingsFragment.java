@@ -73,7 +73,7 @@ public class SettingsFragment extends Fragment {
         initAll();
         observeStatus();
         log_out_button.setOnClickListener(v -> {
-
+            viewModel.logOut();
         });
         edit_user_button.setOnClickListener(v -> {
 
