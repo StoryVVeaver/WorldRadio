@@ -6,7 +6,6 @@ import static android.view.View.VISIBLE;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,11 +33,9 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class MainActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavigationView;
     private ViewPager2 viewPager;
-    private ViewPagerAdapter adapter;
     private StateViewModel viewModel;
     private boolean isMap = true;
 
-    @SuppressLint("NonConstantResourceId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,46 +49,6 @@ public class MainActivity extends AppCompatActivity {
         findAllId();
         initAll();
         observeChanges();
-        viewModel = new ViewModelProvider(this).get(StateViewModel.class);
-        viewModel.shouldShowPanel().observe(this, show -> {
-            if (Boolean.TRUE.equals(show)) {
-                startBottomPlayer();
-            } else {
-                removeBottomPlayer();
-            }
-        });
-        adapter = new ViewPagerAdapter(this);
-        viewPager.setAdapter(adapter);
-        viewPager.setUserInputEnabled(true);
-        viewPager.setOffscreenPageLimit(2);
-        viewModel.isMapOpen().observe(this, state -> {
-            boolean mapOpen = Boolean.TRUE.equals(state);
-            isMap = mapOpen;
-
-            int current = viewPager.getCurrentItem();
-            if (current == 1) {
-                viewPager.setUserInputEnabled(!mapOpen);
-            }
-        });
-        viewModel.openRequest().observe(this, fragment -> {
-            showFullscreenFragment(fragment, fragment.getClass().getSimpleName(), true);
-        });
-        viewModel.closeRequest().observe(this, flag -> {
-            closeFullscreenFragment();
-        });
-        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageSelected(int position) {
-                super.onPageSelected(position);
-                if (position == 1) {
-                    viewPager.setUserInputEnabled(!isMap);
-                } else {
-                    viewPager.setUserInputEnabled(true);
-                }
-                bottomNavigationView.getMenu().getItem(position).setChecked(true);
-            }
-        });
-
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             switch (Objects.requireNonNull(item.getTitle()).toString()) {
@@ -116,10 +73,47 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
     }
     private void initAll(){
-
+        viewModel = new ViewModelProvider(this).get(StateViewModel.class);
+        ViewPagerAdapter adapter = new ViewPagerAdapter(this);
+        viewPager.setAdapter(adapter);
+        viewPager.setUserInputEnabled(true);
+        viewPager.setOffscreenPageLimit(2);
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                if (position == 1) {
+                    viewPager.setUserInputEnabled(!isMap);
+                } else {
+                    viewPager.setUserInputEnabled(true);
+                }
+                bottomNavigationView.getMenu().getItem(position).setChecked(true);
+            }
+        });
     }
     private void observeChanges(){
+        viewModel.shouldShowPanel().observe(this, show -> {
+            if (Boolean.TRUE.equals(show)) {
+                startBottomPlayer();
+            } else {
+                removeBottomPlayer();
+            }
+        });
+        viewModel.isMapOpen().observe(this, state -> {
+            boolean mapOpen = Boolean.TRUE.equals(state);
+            isMap = mapOpen;
 
+            int current = viewPager.getCurrentItem();
+            if (current == 1) {
+                viewPager.setUserInputEnabled(!mapOpen);
+            }
+        });
+        viewModel.openRequest().observe(this, fragment -> {
+            showFullscreenFragment(fragment, fragment.getClass().getSimpleName(), true);
+        });
+        viewModel.closeRequest().observe(this, flag -> {
+            closeFullscreenFragment();
+        });
     }
     private void startBottomPlayer(){
         getSupportFragmentManager()
@@ -151,7 +145,6 @@ public class MainActivity extends AppCompatActivity {
         ft.commit();
         bottomNavigationView.setVisibility(INVISIBLE);
     }
-
     public void closeFullscreenFragment() {
         final FragmentManager fm = getSupportFragmentManager();
 
@@ -186,7 +179,6 @@ public class MainActivity extends AppCompatActivity {
             restoreUi.run();
         }
     }
-
     @Override
     public void onBackPressed() {
         FragmentManager fm = getSupportFragmentManager();
@@ -211,5 +203,4 @@ public class MainActivity extends AppCompatActivity {
             super.onBackPressed();
         }
     }
-
 }
