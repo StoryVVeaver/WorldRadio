@@ -112,8 +112,8 @@ public class ListFragment extends Fragment {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
-        viewModel = new ViewModelProvider(this).get(FilterViewModel.class);
-        playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(FilterViewModel.class);
+        playerViewModel = new ViewModelProvider(requireActivity()).get(PlayerViewModel.class);
     }
 
     private void findAllId(View view) {

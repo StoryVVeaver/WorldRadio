@@ -9,7 +9,6 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -30,8 +29,9 @@ import by.roman.worldradio0.business_logic.SettingsList;
 import by.roman.worldradio0.business_logic.adapters.SettingsAdapter;
 import by.roman.worldradio0.business_logic.settings.SettingsChangeListener;
 import by.roman.worldradio0.business_logic.view_models.SettingsViewModel;
+import by.roman.worldradio0.business_logic.view_models.StateViewModel;
 import by.roman.worldradio0.ui.activities.AccountActivity;
-import by.roman.worldradio0.ui.activities.HistoryActivity;
+import by.roman.worldradio0.ui.fragments.history.HistoryFragment;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -44,13 +44,13 @@ public class SettingsFragment extends Fragment {
     private TextView text_status;
     private ProgressBar loading;
     private SettingsViewModel viewModel;
+    private StateViewModel stateViewModel;
     private Handler handler;
     private Runnable runnable;
 
     @Override
     public void onResume(){
         super.onResume();
-        history_button.setEnabled(true);
     }
 
     @Override
@@ -79,9 +79,7 @@ public class SettingsFragment extends Fragment {
 
         });
         history_button.setOnClickListener(v -> {
-            history_button.setEnabled(false);
-            Intent intent = new Intent(getContext(), HistoryActivity.class);
-            startActivity(intent);
+            stateViewModel.openFullscreen(new HistoryFragment());
         });
         Log.v("SettingsFragment: performance", "onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
     }
@@ -96,7 +94,8 @@ public class SettingsFragment extends Fragment {
     }
     @SuppressLint("SetTextI18n")
     private void initAll(){
-        viewModel = new ViewModelProvider(this).get(SettingsViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(SettingsViewModel.class);
+        stateViewModel = new ViewModelProvider(requireActivity()).get(StateViewModel.class);
         SettingsAdapter adapter = new SettingsAdapter(SettingsList.getSettingsList(viewModel.getSettingsModel()), new SettingsChangeListener() {
             @Override
             public void onToggleChanged(@NonNull String key, boolean isChecked) {

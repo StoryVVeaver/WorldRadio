@@ -1,20 +1,21 @@
-package by.roman.worldradio0.ui.activities;
+package by.roman.worldradio0.ui.fragments.history;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.widget.ImageView;
-import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.os.Handler;
+import android.os.Looper;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -23,27 +24,25 @@ import by.roman.worldradio0.business_logic.adapters.RadioAdapter;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.view_models.HistoryViewModel;
 import by.roman.worldradio0.business_logic.view_models.PlayerViewModel;
-import by.roman.worldradio0.business_logic.view_models.SettingsViewModel;
+import by.roman.worldradio0.business_logic.view_models.StateViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class HistoryActivity extends AppCompatActivity {
+public class HistoryFragment extends Fragment {
     private ImageView back;
     private RadioAdapter adapter;
     private RecyclerView recyclerView;
     private HistoryViewModel viewModel;
     private PlayerViewModel playerViewModel;
+    private StateViewModel stateViewModel;
     private boolean isVisibleToUser = false;
     private boolean isLoadingNextPage = false;
     private ImageView deleteAll;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
-    public void onResume() {
-        super.onResume();
-        isVisibleToUser = true;
-        viewModel.resetState();
-        viewModel.loadStart();
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -55,20 +54,27 @@ public class HistoryActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_history);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-        findAll();
+    public void onResume() {
+        super.onResume();
+        isVisibleToUser = true;
+        viewModel.resetState();
+        viewModel.loadStart();
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_history, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        findAll(view);
         initAll();
         observeAndLoad();
         back.setOnClickListener(v1 -> {
-            finish();
+            stateViewModel.closeFullscreen();
         });
         deleteAll.setOnClickListener(v1 -> {
             adapter.clear();
@@ -105,15 +111,16 @@ public class HistoryActivity extends AppCompatActivity {
         });
     }
 
-    private void findAll(){
-        recyclerView = findViewById(R.id.recycler_history);
-        back = findViewById(R.id.back_history);
-        deleteAll = findViewById(R.id.deleteAll_history);
+    private void findAll(View view){
+        recyclerView = view.findViewById(R.id.recycler_history);
+        back = view.findViewById(R.id.back_history);
+        deleteAll = view.findViewById(R.id.deleteAll_history);
     }
     private void initAll(){
         viewModel = new ViewModelProvider(this).get(HistoryViewModel.class);
         playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
-        adapter = new RadioAdapter(this, new RadioAdapter.OnItemClickListener() {
+        stateViewModel = new ViewModelProvider(requireActivity()).get(StateViewModel.class);
+        adapter = new RadioAdapter(requireActivity(), new RadioAdapter.OnItemClickListener() {
             @Override
             public void onStationItemClick(int position) {
                 if (!isVisibleToUser) return;
@@ -123,10 +130,10 @@ public class HistoryActivity extends AppCompatActivity {
                         playerViewModel.setPlaying(adapter.getUUID(position));
                         playerViewModel.start();
                     } else {
-                        Toast.makeText(getBaseContext(), "Not correct internet type!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireActivity(), "Not correct internet type!", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(getBaseContext(), "Check internet connection!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireActivity(), "Check internet connection!", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -134,11 +141,11 @@ public class HistoryActivity extends AppCompatActivity {
             public void onDeleteClick(int position) {
             }
         });
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireActivity()));
         recyclerView.setAdapter(adapter);
     }
     private void observeAndLoad(){
-        viewModel.getHistoryList().observe(this, list -> {
+        viewModel.getHistoryList().observe(getViewLifecycleOwner(), list -> {
             switch (list.status){
                 case LOADING:
                     if (adapter.getItemCount() > 0) {
@@ -165,9 +172,9 @@ public class HistoryActivity extends AppCompatActivity {
                             adapter.hideLoading();
                             if (!list.message.isEmpty() && !list.message.equals("")) {
                                 if(list.message.equals("Лист пуст")){
-                                    Toast.makeText(this, "В истории ничего нет", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(requireActivity(), "В истории ничего нет", Toast.LENGTH_SHORT).show();
                                 } else {
-                                    Toast.makeText(this, list.message, Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(requireActivity(), list.message, Toast.LENGTH_SHORT).show();
                                 }
                             }
                             isLoadingNextPage = false;
@@ -178,8 +185,8 @@ public class HistoryActivity extends AppCompatActivity {
         });
     }
     @Override
-    public void onDestroy() { //onDestroyView
-        super.onDestroy();
+    public void onDestroyView() {
+        super.onDestroyView();
         handler.removeCallbacksAndMessages(null);
         recyclerView.setAdapter(null);
     }

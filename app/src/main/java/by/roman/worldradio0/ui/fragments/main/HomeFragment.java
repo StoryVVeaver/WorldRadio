@@ -20,8 +20,8 @@ import android.widget.ImageView;
 
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.view_models.StateViewModel;
-import by.roman.worldradio0.ui.activities.FilterActivity;
-import by.roman.worldradio0.ui.activities.TimerActivity;
+import by.roman.worldradio0.ui.fragments.filter.FilterFragment;
+import by.roman.worldradio0.ui.fragments.timer.TimerFragment;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -33,17 +33,11 @@ public class HomeFragment extends Fragment {
     private ConstraintLayout list;
     private ImageView mapImage;
     private ImageView listImage;
-    private boolean isFilter = false;
     private boolean isMap = true;
 
     @Override
     public void onResume(){
         super.onResume();
-        timerButton.setEnabled(true);
-        filterButton.setEnabled(true);
-        if(isFilter){
-            isFilter = false;
-        }
     }
 
     @Override
@@ -70,15 +64,10 @@ public class HomeFragment extends Fragment {
 
         Log.v("HomeFragment: performance", "onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
         timerButton.setOnClickListener(v -> {
-            timerButton.setEnabled(false);
-            Intent intent = new Intent(getContext(), TimerActivity.class);
-            startActivity(intent);
+            stateViewModel.openFullscreen(new TimerFragment());
         });
         filterButton.setOnClickListener(v -> {
-            filterButton.setEnabled(false);
-            isFilter = true;
-            Intent intent = new Intent(getContext(), FilterActivity.class);
-            startActivity(intent);
+            stateViewModel.openFullscreen(new FilterFragment());
         });
     }
     

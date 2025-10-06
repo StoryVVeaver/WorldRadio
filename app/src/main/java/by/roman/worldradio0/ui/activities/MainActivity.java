@@ -1,9 +1,12 @@
 package by.roman.worldradio0.ui.activities;
 
+import static android.view.View.GONE;
+import static android.view.View.INVISIBLE;
+import static android.view.View.VISIBLE;
+
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,6 +15,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -45,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
         findAllId();
+        initAll();
+        observeChanges();
         viewModel = new ViewModelProvider(this).get(StateViewModel.class);
         viewModel.shouldShowPanel().observe(this, show -> {
             if (Boolean.TRUE.equals(show)) {
@@ -60,20 +67,22 @@ public class MainActivity extends AppCompatActivity {
         viewModel.isMapOpen().observe(this, state -> {
             boolean mapOpen = Boolean.TRUE.equals(state);
             isMap = mapOpen;
-            Log.v("main", isMap + " observer");
 
             int current = viewPager.getCurrentItem();
             if (current == 1) {
                 viewPager.setUserInputEnabled(!mapOpen);
-                Log.v("main", "applied to viewPager in observer: userInputEnabled=" + (!mapOpen));
             }
         });
-
+        viewModel.openRequest().observe(this, fragment -> {
+            showFullscreenFragment(fragment, fragment.getClass().getSimpleName(), true);
+        });
+        viewModel.closeRequest().observe(this, flag -> {
+            closeFullscreenFragment();
+        });
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
-                Log.v("main", isMap + " viewPager");
                 if (position == 1) {
                     viewPager.setUserInputEnabled(!isMap);
                 } else {
@@ -106,6 +115,12 @@ public class MainActivity extends AppCompatActivity {
         viewPager = findViewById(R.id.viewPager);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
     }
+    private void initAll(){
+
+    }
+    private void observeChanges(){
+
+    }
     private void startBottomPlayer(){
         getSupportFragmentManager()
                 .beginTransaction()
@@ -123,4 +138,78 @@ public class MainActivity extends AppCompatActivity {
                     .commit();
         }
     }
+    public void showFullscreenFragment(Fragment fragment, String tag, boolean addToBackStack) {
+        viewPager.setUserInputEnabled(false);
+        findViewById(R.id.fullscreen_container).setVisibility(VISIBLE);
+
+        FragmentTransaction ft = getSupportFragmentManager()
+                .beginTransaction()
+                .setReorderingAllowed(true)
+                .setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
+                .replace(R.id.fullscreen_container, fragment, tag);
+        if (addToBackStack) ft.addToBackStack(tag);
+        ft.commit();
+        bottomNavigationView.setVisibility(INVISIBLE);
+    }
+
+    public void closeFullscreenFragment() {
+        final FragmentManager fm = getSupportFragmentManager();
+
+        Runnable restoreUi = () -> {
+            findViewById(R.id.fullscreen_container).setVisibility(GONE);
+            bottomNavigationView.setVisibility(VISIBLE);
+            if (viewPager.getCurrentItem() == 1) {
+                viewPager.setUserInputEnabled(!isMap);
+            } else {
+                viewPager.setUserInputEnabled(true);
+            }
+        };
+
+        if (fm.getBackStackEntryCount() > 0) {
+            fm.popBackStack();
+            fm.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+                @Override
+                public void onBackStackChanged() {
+                    if (fm.getBackStackEntryCount() == 0) {
+                        restoreUi.run();
+                        fm.removeOnBackStackChangedListener(this);
+                    }
+                }
+            });
+        } else {
+            Fragment fragment = fm.findFragmentById(R.id.fullscreen_container);
+            if (fragment != null) {
+                fm.beginTransaction()
+                        .remove(fragment)
+                        .commitNow();
+            }
+            restoreUi.run();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        FragmentManager fm = getSupportFragmentManager();
+        if (fm.getBackStackEntryCount() > 0) {
+            fm.popBackStack();
+            fm.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+                @Override
+                public void onBackStackChanged() {
+                    if (fm.getBackStackEntryCount() == 0) {
+                        findViewById(R.id.fullscreen_container).setVisibility(GONE);
+                        bottomNavigationView.setVisibility(VISIBLE);
+                        if (viewPager.getCurrentItem() == 1) {
+                            viewPager.setUserInputEnabled(!isMap);
+                        } else {
+                            viewPager.setUserInputEnabled(true);
+                        }
+                        fm.removeOnBackStackChangedListener(this);
+                    }
+                }
+            });
+        } else {
+            super.onBackPressed();
+        }
+    }
+
 }

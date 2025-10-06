@@ -38,7 +38,7 @@ public class AccountActivity extends AppCompatActivity {
             return;
         }
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_account);
+        setContentView(R.layout.account_activity);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);

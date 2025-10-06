@@ -1,27 +1,25 @@
-package by.roman.worldradio0.ui.activities;
+package by.roman.worldradio0.ui.fragments.filter;
 
 import static android.view.View.INVISIBLE;
-import static android.view.View.NO_ID;
 import static android.view.View.VISIBLE;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.lifecycle.ViewModelProvider;
-
 import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 
 import java.util.List;
@@ -30,10 +28,12 @@ import java.util.Objects;
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.data.models.Filter;
 import by.roman.worldradio0.business_logic.view_models.FilterViewModel;
+import by.roman.worldradio0.business_logic.view_models.StateViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class FilterActivity extends AppCompatActivity {
+public class FilterFragment extends Fragment {
+
     private MaterialAutoCompleteTextView actvCountry;
     private MaterialAutoCompleteTextView actvTags;
     private MaterialAutoCompleteTextView actvLang;
@@ -47,6 +47,7 @@ public class FilterActivity extends AppCompatActivity {
     private TextView deleteName;
     private TextView countText;
     private FilterViewModel viewModel;
+    private StateViewModel stateViewModel;
     private Filter filter;
     private Chip chip1;
     private Chip chip2;
@@ -54,18 +55,22 @@ public class FilterActivity extends AppCompatActivity {
     private int pos;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_filter);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_filter, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         long startTime = System.nanoTime();
         Log.v("FilterActivity: performance", "onCreated started");
-        findAllId();
+        findAllId(view);
         initAll();
         observeAndLoad();
         buttons();
@@ -73,6 +78,7 @@ public class FilterActivity extends AppCompatActivity {
         Log.v("FilterActivity: performance", "onCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
         //TODO asynch loading
     }
+
     private void fillFields(){
         try{
             if(filter.getLang() != null){
@@ -129,7 +135,7 @@ public class FilterActivity extends AppCompatActivity {
                 viewModel.setFilters(filter);
             });
             backButton.setOnClickListener(v -> {
-                finish();
+                stateViewModel.closeFullscreen();
             });
             deleteCountry.setOnClickListener(v -> {
                 filter.setCountry(null);
@@ -202,7 +208,7 @@ public class FilterActivity extends AppCompatActivity {
     }
     @SuppressLint("SetTextI18n")
     private void observeAndLoad() {
-        viewModel.getCountFilteredStations().observe(this, count -> {
+        viewModel.getCountFilteredStations().observe(getViewLifecycleOwner(), count -> {
             if (count == null) return;
             switch (count.status) {
                 case LOADING:
@@ -218,7 +224,7 @@ public class FilterActivity extends AppCompatActivity {
         viewModel.loadCount();
 
     }
-    private void setupAutoComplete(@NonNull MaterialAutoCompleteTextView actv,List<String> list, int type){
+    private void setupAutoComplete(@NonNull MaterialAutoCompleteTextView actv, List<String> list, int type){
         ArrayAdapter<String> adapter = new ArrayAdapter<>(actv.getContext(), android.R.layout.simple_dropdown_item_1line, list);
         actv.setAdapter(adapter);
 
@@ -231,6 +237,7 @@ public class FilterActivity extends AppCompatActivity {
     private void initAll(){
         try {
             viewModel = new ViewModelProvider(this).get(FilterViewModel.class);
+            stateViewModel = new ViewModelProvider(requireActivity()).get(StateViewModel.class);
             filter = viewModel.getFilters();
             setupAutoComplete(actvCountry,viewModel.getCountries(),1);
             setupAutoComplete(actvTags,viewModel.getTags(),2);
@@ -258,22 +265,22 @@ public class FilterActivity extends AppCompatActivity {
         }
     }
     @SuppressLint("SetTextI18n")
-    private void findAllId(){
-        chip1 = findViewById(R.id.chipAlphabet);
-        chip2 = findViewById(R.id.chipRating);
-        chip3 = findViewById(R.id.chipBitrate);
-        View filter_countryView = findViewById(R.id.filterCountry);
-        View filter_tagsView = findViewById(R.id.filterTags);
-        View filter_langView = findViewById(R.id.filterLanguage);
-        View filter_nameView = findViewById(R.id.filterName);
-        View filter_codecView = findViewById(R.id.filterCodec);
+    private void findAllId(View view){
+        chip1 = view.findViewById(R.id.chipAlphabet);
+        chip2 = view.findViewById(R.id.chipRating);
+        chip3 = view.findViewById(R.id.chipBitrate);
+        View filter_countryView = view.findViewById(R.id.filterCountry);
+        View filter_tagsView = view.findViewById(R.id.filterTags);
+        View filter_langView = view.findViewById(R.id.filterLanguage);
+        View filter_nameView = view.findViewById(R.id.filterName);
+        View filter_codecView = view.findViewById(R.id.filterCodec);
         actvCountry = filter_countryView.findViewById(R.id.autoComplete);
         actvTags = filter_tagsView.findViewById(R.id.autoComplete);
         actvLang = filter_langView.findViewById(R.id.autoComplete);
         actvName = filter_nameView.findViewById(R.id.autoComplete);
         actvCodec = filter_codecView.findViewById(R.id.autoComplete);
-        backButton = findViewById(R.id.btnBack);
-        countText = findViewById(R.id.StationCount);
+        backButton = view.findViewById(R.id.btnBack);
+        countText = view.findViewById(R.id.StationCount);
         deleteCountry = filter_countryView.findViewById(R.id.delete);
         deleteCountry.setVisibility(INVISIBLE);
         deleteTags = filter_tagsView.findViewById(R.id.delete);
@@ -294,11 +301,5 @@ public class FilterActivity extends AppCompatActivity {
         nameFilter.setText("Name");
         TextView codecFilter = filter_codecView.findViewById(R.id.nameFilter);
         codecFilter.setText("Codec");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
     }
 }
