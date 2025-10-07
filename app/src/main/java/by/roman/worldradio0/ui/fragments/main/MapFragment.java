@@ -1,5 +1,7 @@
 package by.roman.worldradio0.ui.fragments.main;
 
+import android.annotation.SuppressLint;
+import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
@@ -13,6 +15,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -49,7 +52,6 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
     private final Handler clusterHandler = new Handler(Looper.getMainLooper());
     private final Runnable clusterRunnable = () -> clusterer.clusterAsync();
     private final Runnable updateVisibleRunnable = this::updateCenterSnapVisiblePointsImmediate;
-
     private Drawable centerDrawable;
     private Drawable centerSnappedDrawable;
     private Drawable highlightMarkerDrawable;
@@ -71,11 +73,9 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         findViewByID(view);
-        //TODO отключение магнита через иф
+
         centerDrawable = AppCompatResources.getDrawable(requireContext(), R.drawable.delete);
         centerSnappedDrawable = AppCompatResources.getDrawable(requireContext(), R.drawable.fi_rs_filter);
-
-
         highlightMarkerDrawable = AppCompatResources.getDrawable(requireContext(), R.drawable.history);
 
         initializeMap();
@@ -91,6 +91,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         map = view.findViewById(R.id.map);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void initializeMap() {
         Configuration.getInstance().load(requireContext(),
                 PreferenceManager.getDefaultSharedPreferences(requireContext()));
@@ -120,7 +121,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
             }
         });
 
-
+        // create overlay (initially DISABLED so start won't snap)
         centerSnap = new CenterSnapOverlay(map, 256, centerDrawable, centerSnappedDrawable, snapped -> {
             if (snapped != null) {
                 if (playerViewModel.isInternetConnected()) {
@@ -147,8 +148,27 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
                 }
             }
         });
+
+        centerSnap.setSnapEnabled(false);
+
+        Drawable markerDrawable = AppCompatResources.getDrawable(requireContext(), R.drawable.map_point);
+        int iconH = (markerDrawable != null && markerDrawable.getIntrinsicHeight() > 0)
+                ? markerDrawable.getIntrinsicHeight()
+                : map.getWidth() / 12;
+        Point defaultIconOffset = new Point(0, - (iconH / 2));
+        centerSnap.setDefaultIconOffset(defaultIconOffset);
+
+        // cluster marker click -> enable snap (if not) and snap to point
         clusterer.setOnClusterMarkerClickListener(mp -> {
+            if (!centerSnap.isSnapEnabled()) centerSnap.setSnapEnabled(true);
             centerSnap.snapTo(mp, true);
+        });
+        // enable snap after first user touch on map (prevents startup sticky behavior)
+        map.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                if (!centerSnap.isSnapEnabled()) centerSnap.setSnapEnabled(true);
+            }
+            return false;
         });
 
         map.getOverlays().add(centerSnap);
@@ -161,7 +181,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
                     allPoints = points.data;
                     clusterer.setItems(allPoints);
                     scheduleCluster();
-                    //TODO отключение магнита через иф
+                    // do not call scheduleDelayedSnap here so startup won't snap
                     updateCenterSnapVisiblePointsImmediate();
                     break;
                 case LOADING:
@@ -190,7 +210,8 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
     private void scheduleUpdateVisibleForCenterSnap() {
         clusterHandler.removeCallbacks(updateVisibleRunnable);
         clusterHandler.postDelayed(updateVisibleRunnable, 250);
-        centerSnap.scheduleDelayedSnap();//TODO отключение магнита через иф
+        // scheduleDelayedSnap will no-op if snap disabled
+        centerSnap.scheduleDelayedSnap();
     }
 
     private void updateCenterSnapVisiblePointsImmediate() {
@@ -206,7 +227,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
             }
         }
         centerSnap.feedVisiblePoints(visible);
-        centerSnap.scheduleDelayedSnap();
+        // we intentionally do not call centerSnap.scheduleDelayedSnap() here to avoid startup snap
     }
 
     @Override
@@ -214,4 +235,5 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
 
     @Override
     public boolean longPressHelper(GeoPoint p) { return false; }
+
 }

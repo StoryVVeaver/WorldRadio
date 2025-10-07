@@ -1,5 +1,9 @@
 package by.roman.worldradio0.ui.fragments.main;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -47,12 +51,21 @@ public class FavoriteTracksFragment extends Fragment {
     private void findAll(@NonNull View view){
         recyclerView = view.findViewById(R.id.recyclerView_FavoriteTracks);
     }
+
     private void initAll(){
         LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext());
         recyclerView.setLayoutManager(layoutManager);
 
-        adapter = new TrackAdapter(new java.util.ArrayList<>(), position -> {
-            viewModel.removeTrackFromFavorite(adapter.getTrack(position));
+        adapter = new TrackAdapter(new java.util.ArrayList<>(), new TrackAdapter.OnTrackClickListener() {
+            @Override
+            public void onDeleteClick(int position) {
+                viewModel.removeTrackFromFavorite(adapter.getTrack(position));
+            }
+
+            @Override
+            public void onBrowseClick(int position) {
+                searchInBrowser(requireActivity(), adapter.getTrack(position));
+            }
         });
         recyclerView.setAdapter(adapter);
 
@@ -84,4 +97,21 @@ public class FavoriteTracksFragment extends Fragment {
 
         viewModel.loadTrackNextPage();
     }
+    @SuppressLint("QueryPermissionsNeeded")
+    public void searchInBrowser(Context context, String query) {
+        try {
+            String encodedQuery = Uri.encode(query);
+            String url = "https://www.google.com/search?q=" + encodedQuery;
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            if (intent.resolveActivity(context.getPackageManager()) != null) {
+                context.startActivity(intent);
+            } else {
+                Toast.makeText(context, "Нет доступного браузера", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(context, "Ошибка при открытии браузера", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
+    }
+
 }
