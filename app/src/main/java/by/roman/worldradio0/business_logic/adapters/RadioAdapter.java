@@ -202,5 +202,4 @@ public class    RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             loadingContainer.animate().alpha(1f).setDuration(300).start();
         }
     }
-
 }

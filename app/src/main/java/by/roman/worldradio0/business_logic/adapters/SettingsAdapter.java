@@ -384,4 +384,3 @@ public class SettingsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 }
-

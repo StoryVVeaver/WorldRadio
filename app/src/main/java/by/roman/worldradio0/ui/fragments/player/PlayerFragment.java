@@ -333,15 +333,15 @@ public class PlayerFragment extends Fragment {
         if(isMap){
             viewModel.requestSnapNearest();
         } else {
-            viewModel.playNext();
+            //viewModel.requestSnapPrevious();
         }
     }
     private void onSwipeRight() {
         Log.v("BottomPlayer", "Right");
         if(isMap){
-            viewModel.playPreviousFromHistory();
+            viewModel.requestSnapPrevious();
         } else {
-            viewModel.playPrevious();
+            //viewModel.playPrevious();
         }
     }
 }

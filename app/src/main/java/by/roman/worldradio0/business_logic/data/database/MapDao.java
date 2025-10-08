@@ -53,5 +53,41 @@ public class MapDao {
         }
         return result;
     }
+    public MapPoint getPointByUuid(String uuid) {
+        Cursor cursor = null;
+        try {
+            String selection = RadioStationDao.COLUMN_UUID_STATION + " = ? AND "
+                    + RadioStationDao.COLUMN_GEO_LATITUDE_STATION + " IS NOT NULL AND "
+                    + RadioStationDao.COLUMN_GEO_LONGITUDE_STATION + " IS NOT NULL AND "
+                    + "ABS(" + RadioStationDao.COLUMN_GEO_LATITUDE_STATION + ") > 1e-9 AND "
+                    + "ABS(" + RadioStationDao.COLUMN_GEO_LONGITUDE_STATION + ") > 1e-9";
+
+            String[] selectionArgs = { uuid };
+
+            cursor = db.query(
+                    RadioStationDao.TABLE_RADIO_STATION,
+                    new String[] {
+                            RadioStationDao.COLUMN_UUID_STATION,
+                            RadioStationDao.COLUMN_GEO_LONGITUDE_STATION,
+                            RadioStationDao.COLUMN_GEO_LATITUDE_STATION
+                    },
+                    selection,
+                    selectionArgs,
+                    null,
+                    null,
+                    null,
+                    "1" // Ограничение на 1 запись
+            );
+
+            if (cursor != null && cursor.moveToFirst()) {
+                double lat = cursor.getDouble(cursor.getColumnIndexOrThrow(RadioStationDao.COLUMN_GEO_LATITUDE_STATION));
+                double lon = cursor.getDouble(cursor.getColumnIndexOrThrow(RadioStationDao.COLUMN_GEO_LONGITUDE_STATION));
+                return new MapPoint(lat, lon, uuid);
+            }
+            return null;
+        } finally {
+            if (cursor != null) cursor.close();
+        }
+    }
 
 }

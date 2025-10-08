@@ -44,7 +44,14 @@ public class MapViewModel extends ViewModel {
             Log.e("MapViewModel", "ERROR: " + e.getMessage());
         }
     }
-
+    public MapPoint getMapPointByUUID(String uuid){
+        try {
+            return repository.getPointByUUID(uuid);
+        } catch (Exception e) {
+            Log.e("MapViewModel", "ERROR: " + e.getMessage());
+            return null;
+        }
+    }
 
 
     @Override

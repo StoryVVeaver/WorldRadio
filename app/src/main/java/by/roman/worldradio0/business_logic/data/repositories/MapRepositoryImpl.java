@@ -27,4 +27,14 @@ public class MapRepositoryImpl implements MapRepository {
             return null;
         }
     }
+
+    @Override
+    public MapPoint getPointByUUID(String uuid) {
+        try {
+            return mapDao.getPointByUuid(uuid);
+        } catch (Exception e) {
+            Log.e("MapRepositoryImpl", "ERROR: " + e.getMessage());
+            return null;
+        }
+    }
 }

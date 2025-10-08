@@ -192,7 +192,11 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
             }
         });
         playerViewModel.getSnapNearestEvent().observe(getViewLifecycleOwner(), event -> {
-            snapToNearestAndPlay();
+            snapToNearest();
+        });
+        playerViewModel.getSnapPrevious().observe(getViewLifecycleOwner(), event -> {
+            Log.v("MapFragment", "snapToPrevious");
+            snapToPrevious();
         });
         playerViewModel.getIsPlaying().observe(getViewLifecycleOwner(), status -> {
             if(status == false){
@@ -200,7 +204,6 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
                 centerSnap.clearSnapped();
                 currentSnappedUuid = null;
                 previousSnappedUuid = null;
-                Log.v("MapFragment", "cleared highlight");
             }
         });
     }
@@ -241,7 +244,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         }
         centerSnap.feedVisiblePoints(visible);
     }
-    private void snapToNearestAndPlay() {
+    private void snapToNearest() {
         if (allPoints == null || allPoints.isEmpty() || map == null) return;
 
         BoundingBox bbox = map.getBoundingBox();
@@ -296,12 +299,16 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         Log.v("MapFragment", "from " + snappedUuid + " to " + nearest.getUuid());
         centerSnap.snapTo(target, true, true);
     }
-
-
-
-
-
-
+    private void snapToPrevious(){
+        if(previousSnappedUuid != null){
+            MapPoint point = viewModel.getMapPointByUUID(previousSnappedUuid);
+            currentSnappedUuid = previousSnappedUuid;
+            previousSnappedUuid = null;
+            centerSnap.snapTo(point, true, true);
+        } else {
+            Toast.makeText(requireActivity(), "Нет информации о прошлой станции", Toast.LENGTH_SHORT).show();
+        }
+    }
     @Override
     public boolean singleTapConfirmedHelper(GeoPoint p) { return false; }
 //Log.v("MapFragment", "from " + centerSnap.getSnappedPoint().getUuid() + " to " + nearest.getUuid());

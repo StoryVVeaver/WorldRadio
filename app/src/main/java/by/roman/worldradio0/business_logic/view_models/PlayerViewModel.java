@@ -52,7 +52,8 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     private final MutableLiveData<Boolean> isPlaying = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isFavorite = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isFavoriteTrack = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> snapNearestEvent = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> snapNearest = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> snapPrevious = new MutableLiveData<>();
     private Settings settings;
     @Inject
     public PlayerViewModel(@NonNull RadioManager radioManager,HistoryRepository historyRepository, FavoriteTrackRepository favoriteTrackRepository, FavoriteStationRepository favoriteStationRepository, @ApplicationContext Context context, RadioRepository radioRepository, UserRepository userRepository, SettingsRepository settingsRepository) {
@@ -202,7 +203,10 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
         }
     }
     public void requestSnapNearest() {
-        snapNearestEvent.postValue(true);
+        snapNearest.postValue(true);
+    }
+    public void requestSnapPrevious() {
+        snapPrevious.postValue(true);
     }
     public RadioStation getCurrentStation(){
         return radioRepository.getPlayingStation();
@@ -217,7 +221,10 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
         return isFavoriteTrack;
     }
     public LiveData<Boolean> getSnapNearestEvent() {
-        return snapNearestEvent;
+        return snapNearest;
+    }
+    public LiveData<Boolean> getSnapPrevious() {
+        return snapPrevious;
     }
     @Override
     public void onFavoriteTracksChanged() {
