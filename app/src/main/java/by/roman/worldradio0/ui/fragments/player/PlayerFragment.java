@@ -30,6 +30,7 @@ import com.bumptech.glide.Glide;
 
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.view_models.PlayerViewModel;
+import by.roman.worldradio0.business_logic.view_models.StateViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -51,9 +52,11 @@ public class PlayerFragment extends Fragment {
     private CardView bottomPlayer;
     private ConstraintLayout largePlayer;
     private PlayerViewModel viewModel;
+    private StateViewModel stateViewModel;
     private boolean isPlaying;
     private boolean isFavorite;
     private boolean isFavoriteTrack;
+    private boolean isMap = true;
 
     @Override
     public void onResume(){
@@ -104,29 +107,46 @@ public class PlayerFragment extends Fragment {
         bottomPlayer = view.findViewById(R.id.bottomPlayer);
         largePlayer = view.findViewById(R.id.large_player);
     }
+
     @SuppressLint("ClickableViewAccessibility")
     private void initAll(){
-        viewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(PlayerViewModel.class);
+        stateViewModel = new ViewModelProvider(requireActivity()).get(StateViewModel.class);
+
+        final int MIN_SWIPE_DISTANCE = 60;
+        final int MAX_TAP_MOVEMENT = 12;
 
         largePlayer.setOnTouchListener(new View.OnTouchListener() {
             private float startY;
+            private float startX;
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
+                switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
                         startY = event.getY();
+                        startX = event.getX();
                         return true;
                     case MotionEvent.ACTION_UP:
                         float endY = event.getY();
+                        float endX = event.getX();
                         float diffY = endY - startY;
-                        int minSwipeDistance = 20;
+                        float diffX = endX - startX;
 
-                        if (Math.abs(diffY) > minSwipeDistance) {
-                            if (diffY > 0) {
+                        if (Math.abs(diffY) > Math.abs(diffX)) {
+                            if (diffY > MIN_SWIPE_DISTANCE) {
                                 motionLayout.transitionToStart();
-                            } else {
-                                //motionLayout.transitionToEnd();
+                                return true;
+                            }
+                            return true;
+                        } else {
+                            if (Math.abs(diffX) > MIN_SWIPE_DISTANCE) {
+                                if (diffX < 0) {
+                                    onSwipeLeft();
+                                } else {
+                                    onSwipeRight();
+                                }
+                                return true;
                             }
                         }
                         return true;
@@ -135,17 +155,55 @@ public class PlayerFragment extends Fragment {
             }
         });
 
-        bottomPlayer.setOnTouchListener((v, event) -> {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    return true;
-                case MotionEvent.ACTION_UP:
-                    motionLayout.transitionToEnd();
-                    return true;
+        bottomPlayer.setOnTouchListener(new View.OnTouchListener() {
+            private float startY;
+            private float startX;
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getActionMasked()) {
+                    case MotionEvent.ACTION_DOWN:
+                        startY = event.getY();
+                        startX = event.getX();
+                        return true;
+                    case MotionEvent.ACTION_UP:
+                        float endY = event.getY();
+                        float endX = event.getX();
+                        float diffY = endY - startY;
+                        float diffX = endX - startX;
+
+                        if (Math.abs(diffY) > Math.abs(diffX)) {
+                            if (diffY < MIN_SWIPE_DISTANCE) {
+                                motionLayout.transitionToEnd();
+                                return true;
+                            } else if (diffY > MIN_SWIPE_DISTANCE) {
+                                viewModel.stop();
+                                return true;
+                            } else {
+                                motionLayout.transitionToEnd();
+                                return true;
+                            }
+                        } else {
+                            if (Math.abs(diffX) > MIN_SWIPE_DISTANCE) {
+                                if (diffX < 0) {
+                                    onSwipeLeft();
+                                } else {
+                                    onSwipeRight();
+                                }
+                                return true;
+                            } else {
+                                return true;
+                            }
+                        }
+                    case MotionEvent.ACTION_MOVE:
+                        // можно добавить feedback по прогрессу свайпа
+                        return true;
+                }
+                return false;
             }
-            return false;
         });
     }
+
     @SuppressLint("SetTextI18n")
     private void putData(@NonNull View view){
         station.setText(viewModel.getCurrentStation().getName());
@@ -166,6 +224,9 @@ public class PlayerFragment extends Fragment {
             this.isFavoriteTrack = isFavoriteTrack;
             favTrack_icons();
         });
+        stateViewModel.isMapOpen().observe(getViewLifecycleOwner(), flag -> {
+            this.isMap = flag;
+        });
         if(!viewModel.getCurrentStation().getHomepage().isEmpty()){
             large_internet.setVisibility(VISIBLE);
         } else large_internet.setVisibility(INVISIBLE);
@@ -180,9 +241,10 @@ public class PlayerFragment extends Fragment {
         fav_icons();
         favTrack_icons();
     }
+
     private void buttons(){
         icons();
-        largePlayer.setOnClickListener(v -> {});
+
         large_internet.setOnClickListener(v -> {
             openUrlInBrowser(viewModel.getCurrentStation().getHomepage());
             large_internet.setEnabled(false);
@@ -206,9 +268,7 @@ public class PlayerFragment extends Fragment {
         close.setOnClickListener(v -> {
             motionLayout.transitionToStart();
         });
-        bottomPlayer.setOnClickListener(v -> {
-            motionLayout.transitionToEnd();
-        });
+
         save_btn.setOnClickListener(v -> {
             if (isFavorite){
                 viewModel.removeFromFavorite();
@@ -264,8 +324,24 @@ public class PlayerFragment extends Fragment {
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(homepage));
             startActivity(browserIntent);
         } catch (ActivityNotFoundException e) {
-            Toast.makeText(requireContext(), "No browser found to open the URL", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Браузер не обнаружен", Toast.LENGTH_SHORT).show();
             Log.e("BottomPlayer", "Error opening URL: " + e.getMessage());
+        }
+    }
+    private void onSwipeLeft() {
+        Log.v("BottomPlayer", "Left, isMap: " + isMap);
+        if(isMap){
+            viewModel.requestSnapNearest();
+        } else {
+            viewModel.playNext();
+        }
+    }
+    private void onSwipeRight() {
+        Log.v("BottomPlayer", "Right");
+        if(isMap){
+            viewModel.playPreviousFromHistory();
+        } else {
+            viewModel.playPrevious();
         }
     }
 }

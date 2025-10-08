@@ -14,6 +14,7 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -29,7 +30,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class HistoryFragment extends Fragment {
-    private ImageView back;
+    private ImageButton back;
     private RadioAdapter adapter;
     private RecyclerView recyclerView;
     private HistoryViewModel viewModel;
@@ -37,7 +38,7 @@ public class HistoryFragment extends Fragment {
     private StateViewModel stateViewModel;
     private boolean isVisibleToUser = false;
     private boolean isLoadingNextPage = false;
-    private ImageView deleteAll;
+    private ImageButton deleteAll;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     @Override

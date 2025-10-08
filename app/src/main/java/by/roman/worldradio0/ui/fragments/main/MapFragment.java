@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModelProvider;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -31,6 +32,7 @@ import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import by.roman.worldradio0.R;
@@ -55,7 +57,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
     private Drawable centerDrawable;
     private Drawable centerSnappedDrawable;
     private Drawable highlightMarkerDrawable;
-
+    private String previousSnappedUuid = null;
     private List<MapPoint> allPoints;
 
     @Override
@@ -80,11 +82,11 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
 
         initializeMap();
 
-        viewModel = new ViewModelProvider(this).get(MapViewModel.class);
-        playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(MapViewModel.class);
+        playerViewModel = new ViewModelProvider(requireActivity()).get(PlayerViewModel.class);
 
         viewModel.loadPoints();
-        getPoints();
+        observeData();
     }
 
     private void findViewByID(@NonNull View view){
@@ -121,9 +123,11 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
             }
         });
 
-        // create overlay (initially DISABLED so start won't snap)
         centerSnap = new CenterSnapOverlay(map, 256, centerDrawable, centerSnappedDrawable, snapped -> {
             if (snapped != null) {
+                if (currentSnappedUuid != null && !currentSnappedUuid.equals(snapped.getUuid())) {
+                    previousSnappedUuid = currentSnappedUuid;
+                }
                 if (playerViewModel.isInternetConnected()) {
                     if ("ok".equals(playerViewModel.checkTypeInternet())) {
                         playerViewModel.setPlaying(snapped.getUuid());
@@ -134,7 +138,6 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
                 } else {
                     Toast.makeText(getContext(), "Check internet connection!", Toast.LENGTH_SHORT).show();
                 }
-
                 clusterer.highlightMarkerByUuid(snapped.getUuid(), highlightMarkerDrawable);
 
                 if (currentSnappedUuid != null && !currentSnappedUuid.equals(snapped.getUuid())) {
@@ -143,6 +146,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
                 currentSnappedUuid = snapped.getUuid();
             } else {
                 if (currentSnappedUuid != null) {
+                    previousSnappedUuid = currentSnappedUuid;
                     clusterer.clearHighlightByUuid(currentSnappedUuid);
                     currentSnappedUuid = null;
                 }
@@ -173,20 +177,30 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
 
         map.getOverlays().add(centerSnap);
     }
-
-    private void getPoints(){
+    private void observeData(){
         viewModel.getListPoints().observe(getViewLifecycleOwner(), points -> {
             switch (points.status){
                 case SUCCESS:
                     allPoints = points.data;
                     clusterer.setItems(allPoints);
                     scheduleCluster();
-                    // do not call scheduleDelayedSnap here so startup won't snap
                     updateCenterSnapVisiblePointsImmediate();
                     break;
                 case LOADING:
                 case ERROR:
                     break;
+            }
+        });
+        playerViewModel.getSnapNearestEvent().observe(getViewLifecycleOwner(), event -> {
+            snapToNearestAndPlay();
+        });
+        playerViewModel.getIsPlaying().observe(getViewLifecycleOwner(), status -> {
+            if(status == false){
+                clusterer.clearAllHighlights();
+                centerSnap.clearSnapped();
+                currentSnappedUuid = null;
+                previousSnappedUuid = null;
+                Log.v("MapFragment", "cleared highlight");
             }
         });
     }
@@ -210,7 +224,6 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
     private void scheduleUpdateVisibleForCenterSnap() {
         clusterHandler.removeCallbacks(updateVisibleRunnable);
         clusterHandler.postDelayed(updateVisibleRunnable, 250);
-        // scheduleDelayedSnap will no-op if snap disabled
         centerSnap.scheduleDelayedSnap();
     }
 
@@ -227,12 +240,71 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
             }
         }
         centerSnap.feedVisiblePoints(visible);
-        // we intentionally do not call centerSnap.scheduleDelayedSnap() here to avoid startup snap
     }
+    private void snapToNearestAndPlay() {
+        if (allPoints == null || allPoints.isEmpty() || map == null) return;
+
+        BoundingBox bbox = map.getBoundingBox();
+        List<MapPoint> visible = new ArrayList<>(128);
+        for (MapPoint p : allPoints) {
+            double lat = p.getLatitude();
+            double lon = p.getLongitude();
+            if (lat <= bbox.getLatNorth() && lat >= bbox.getLatSouth()
+                    && lon >= bbox.getLonWest() && lon <= bbox.getLonEast()) {
+                visible.add(p);
+            }
+        }
+
+        if (visible.isEmpty()) {
+            Toast.makeText(requireContext(), "Рядом нет радиостанций", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        final int cx = map.getWidth() / 2;
+        final int cy = map.getHeight() / 2;
+
+        MapPoint nearest = null;
+        double bestDist2 = Double.MAX_VALUE;
+        android.graphics.Point tmp = new android.graphics.Point();
+
+        for (MapPoint p : visible) {
+            String uuid = p.getUuid();
+            if (uuid == null) continue;
+            if ((currentSnappedUuid != null && currentSnappedUuid.equals(uuid))
+                    || (previousSnappedUuid != null && previousSnappedUuid.equals(uuid))) {
+                continue;
+            }
+
+            org.osmdroid.util.GeoPoint gp = new org.osmdroid.util.GeoPoint(p.getLatitude(), p.getLongitude());
+            map.getProjection().toPixels(gp, tmp);
+            double dx = tmp.x - cx;
+            double dy = tmp.y - cy;
+            double d2 = dx * dx + dy * dy;
+            if (d2 < bestDist2) {
+                bestDist2 = d2;
+                nearest = p;
+            }
+        }
+
+        if (nearest == null) {
+            Toast.makeText(requireContext(), "Рядом нет других радиостанций", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        final MapPoint target = nearest;
+        String snappedUuid = (centerSnap.getSnappedPoint() != null) ? centerSnap.getSnappedPoint().getUuid() : "null";
+        Log.v("MapFragment", "from " + snappedUuid + " to " + nearest.getUuid());
+        centerSnap.snapTo(target, true, true);
+    }
+
+
+
+
+
 
     @Override
     public boolean singleTapConfirmedHelper(GeoPoint p) { return false; }
-
+//Log.v("MapFragment", "from " + centerSnap.getSnappedPoint().getUuid() + " to " + nearest.getUuid());
     @Override
     public boolean longPressHelper(GeoPoint p) { return false; }
 

@@ -9,13 +9,16 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.OptIn;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.media3.common.util.UnstableApi;
 
 import javax.inject.Inject;
 
+import by.roman.worldradio0.business_logic.UiState;
 import by.roman.worldradio0.business_logic.data.dto.HistoryDTO;
 import by.roman.worldradio0.business_logic.data.models.History;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
@@ -49,6 +52,7 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     private final MutableLiveData<Boolean> isPlaying = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isFavorite = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isFavoriteTrack = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> snapNearestEvent = new MutableLiveData<>();
     private Settings settings;
     @Inject
     public PlayerViewModel(@NonNull RadioManager radioManager,HistoryRepository historyRepository, FavoriteTrackRepository favoriteTrackRepository, FavoriteStationRepository favoriteStationRepository, @ApplicationContext Context context, RadioRepository radioRepository, UserRepository userRepository, SettingsRepository settingsRepository) {
@@ -137,6 +141,15 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
         intent.setAction(PlayerService.ACTION_PAUSE);
         startForegroundService(context, intent);
     }
+    public void playNext(){
+
+    }
+    public void playPrevious(){
+
+    }
+    public void playPreviousFromHistory(){
+
+    }
     public void addToFavorite(){
         try {
             favoriteStationRepository.addToFavorite(-1, userRepository.getPlayingUUID());
@@ -188,6 +201,9 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
             Log.e("DB", "Ошибка при установке: " + UUID, e);
         }
     }
+    public void requestSnapNearest() {
+        snapNearestEvent.postValue(true);
+    }
     public RadioStation getCurrentStation(){
         return radioRepository.getPlayingStation();
     }
@@ -199,6 +215,9 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     }
     public LiveData<Boolean> getIsFavoriteTrack(){
         return isFavoriteTrack;
+    }
+    public LiveData<Boolean> getSnapNearestEvent() {
+        return snapNearestEvent;
     }
     @Override
     public void onFavoriteTracksChanged() {

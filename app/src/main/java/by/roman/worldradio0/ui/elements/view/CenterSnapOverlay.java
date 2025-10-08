@@ -19,15 +19,6 @@ import java.util.List;
 
 import by.roman.worldradio0.business_logic.data.models.MapPoint;
 
-/**
-
- * CenterSnapOverlay — рисует центральный указатель (drawable) и умеет:
- * * искать ближайшую видимую точку (feedVisiblePoints)
- * * отложенно (debounced) примагничиваться к ней через scheduleDelayedSnap()
- * * snapTo(p, animate[, iconOffset]) — принудительно примагнитить
- *
- * Поддерживает включение/выключение магнита через setSnapEnabled(boolean).
- */
 public class CenterSnapOverlay extends Overlay {
     public interface OnSnapListener {
         void onSnap(@Nullable MapPoint snapped);
@@ -35,39 +26,19 @@ public class CenterSnapOverlay extends Overlay {
 
     private final MapView map;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
-
-    // экранная позиция курсора (если null — рисуем в центре экрана)
     private Point circleScreenPos = null;
-
-    // текущая привязка
     private MapPoint snappedPoint = null;
-
-    // порог в пикселях (экранных) для автопримагничивания (используется для поиска кандидата)
     private int snapThresholdPx;
-
-    // видимые точки, которые передаёт фрагмент/кластерер
     private List<MapPoint> visiblePoints;
     private final OnSnapListener listener;
-
-    // drawables для нормального и snapped состояния
     private final Drawable centerDrawable;
     private final Drawable centerSnappedDrawable;
-
-    // анимация перемещения курсора
     private ValueAnimator snapAnimator = null;
-
-    // параметры анимации / таймингов
-    private long snapAnimationMs = 280;       // длительность анимации курсора
-    private long snapProjectionDelayMs = 200; // задержка перед взятием projection после animateTo
-
-    // задержка перед запуском checkSnap (debounce)
+    private long snapAnimationMs = 600;
+    private long snapProjectionDelayMs = 200;
     private long snapDelayMs = 700;
     private final Runnable delayedSnapRunnable = this::checkSnap;
-
-    // флаг включения магнита (по умолчанию выключен — включается вручную из MapFragment при первом касании)
     private boolean enableSnap = false;
-
-    // default icon offset (если нужно центрировать курсор по центру иконки маркера)
     private Point defaultIconOffset = new Point(0, 0);
 
     public CenterSnapOverlay(MapView map,
@@ -81,8 +52,6 @@ public class CenterSnapOverlay extends Overlay {
         this.centerSnappedDrawable = centerSnappedDrawable;
         this.listener = listener;
     }
-
-    // ---------------- public API ----------------
 
     public void setSnapEnabled(boolean enabled) {
         this.enableSnap = enabled;
@@ -112,28 +81,13 @@ public class CenterSnapOverlay extends Overlay {
         this.snapProjectionDelayMs = Math.max(0, ms);
     }
 
-    /**
-
-     * Установить смещение иконки (экранные px), которое нужно применить к projection.toPixels(point).
-     * Например: (0, -iconHeight/2) для anchor=(center,bottom).
-     */
     public void setDefaultIconOffset(@Nullable Point offset) {
         if (offset == null) defaultIconOffset = new Point(0, 0);
         else defaultIconOffset = new Point(offset.x, offset.y);
     }
-
-    /**
-
-     * Передать видимые точки (только те, которые реально видимы на экране).
-     */
     public void feedVisiblePoints(List<MapPoint> points) {
         this.visiblePoints = points;
     }
-
-    /**
-
-     * Вызывать при скролле/зуме с дебаунсом: ставит отложенный запуск checkSnap().
-     */
     public void scheduleDelayedSnap() {
         if (!enableSnap) {
             mainHandler.removeCallbacks(delayedSnapRunnable);
@@ -142,12 +96,6 @@ public class CenterSnapOverlay extends Overlay {
         mainHandler.removeCallbacks(delayedSnapRunnable);
         mainHandler.postDelayed(delayedSnapRunnable, snapDelayMs);
     }
-
-    /**
-
-     * Немедленная проверка ближайшей видимой точки и snap при соответствии порогу.
-     * Может вызываться из UI-потока или через Handler.
-     */
     public void checkSnap() {
         if (!enableSnap) return;
         mainHandler.post(() -> {
@@ -176,11 +124,9 @@ public class CenterSnapOverlay extends Overlay {
 
             if (nearest != null && bestDist2 <= (snapThresholdPx * (double) snapThresholdPx)) {
                 if (snappedPoint != null && snappedPoint.getUuid().equals(nearest.getUuid())) {
-                    // уже привязаны к той же точке
                     return;
                 }
-                // анимированно центрируем карту и курсор (используем defaultIconOffset)
-                snapTo(nearest, true, defaultIconOffset);
+                snapToPoint(nearest, true, defaultIconOffset, false);
             } else {
                 // unsnap
                 if (snappedPoint != null) {
@@ -195,26 +141,20 @@ public class CenterSnapOverlay extends Overlay {
         });
     }
 
-    /**
 
-     * Прокси-метод — без offset, использует defaultIconOffset.
-     */
     public void snapTo(MapPoint p, boolean animate) {
-        snapTo(p, animate, defaultIconOffset);
+        snapToPoint(p, animate, defaultIconOffset, false);
+    }
+    public void snapTo(MapPoint p, boolean animate, boolean ignoreFlag) {
+        snapToPoint(p, animate, defaultIconOffset, ignoreFlag);
     }
 
-    /**
-
-     * Принудительно примагнитить центр к точке с учётом пиксельного смещения (iconOffset).
-     * iconOffset может быть null.
-     */
-    public void snapTo(MapPoint p, boolean animate, @Nullable Point iconOffset) {
+    public void snapToPoint(final MapPoint p, final boolean animate, @Nullable final Point iconOffset, final boolean ignoreSnapFlag) {
         if (p == null) return;
         final Point offset = (iconOffset != null) ? iconOffset : defaultIconOffset;
 
         mainHandler.post(() -> {
-            // если магнит отключен — просто центрируем карту и не меняем состояние snappedPoint
-            if (!enableSnap) {
+            if (!enableSnap && !ignoreSnapFlag) {
                 GeoPoint target = new GeoPoint(p.getLatitude(), p.getLongitude());
                 if (animate) {
                     try { map.getController().animateTo(target); } catch (Exception ignored) { map.getController().setCenter(target); }
@@ -224,51 +164,60 @@ public class CenterSnapOverlay extends Overlay {
                 return;
             }
 
-            if (p.equals(snappedPoint)) return; // уже привязаны
+            if (!ignoreSnapFlag && p.equals(snappedPoint)) return;
 
-            GeoPoint target = new GeoPoint(p.getLatitude(), p.getLongitude());
+            final GeoPoint target = new GeoPoint(p.getLatitude(), p.getLongitude());
 
             if (animate) {
                 try { map.getController().animateTo(target); } catch (Exception ignored) { map.getController().setCenter(target); }
 
-                // подождём немного, чтобы projection обновился (adjustable delay)
                 mainHandler.postDelayed(() -> {
-                    // целевая позиция в пикселях
-                    Point targetPx = new Point();
-                    map.getProjection().toPixels(target, targetPx);
-                    targetPx.offset(offset.x, offset.y);
+                    if (map == null) return;
 
-                    // стартовая позиция для анимации курсора (если уже есть, иначе центр экрана)
-                    Point startPx = (circleScreenPos != null) ? new Point(circleScreenPos.x, circleScreenPos.y)
+                    final Point initialTargetPx = new Point();
+                    map.getProjection().toPixels(target, initialTargetPx);
+                    initialTargetPx.offset(offset.x, offset.y);
+
+                    final Point startPx = (circleScreenPos != null)
+                            ? new Point(circleScreenPos.x, circleScreenPos.y)
                             : new Point(map.getWidth() / 2, map.getHeight() / 2);
 
+                    final Point dynamicTargetPx = new Point(initialTargetPx.x, initialTargetPx.y);
+
                     if (snapAnimator != null && snapAnimator.isRunning()) snapAnimator.cancel();
+
                     snapAnimator = ValueAnimator.ofFloat(0f, 1f);
                     snapAnimator.setDuration(snapAnimationMs);
+
                     snapAnimator.addUpdateListener(animation -> {
                         float f = (float) animation.getAnimatedValue();
-                        int ix = Math.round(startPx.x + (targetPx.x - startPx.x) * f);
-                        int iy = Math.round(startPx.y + (targetPx.y - startPx.y) * f);
+                        try {
+                            map.getProjection().toPixels(target, dynamicTargetPx);
+                            dynamicTargetPx.offset(offset.x, offset.y);
+                        } catch (Exception ignored) {
+                        }
+
+                        int ix = Math.round(startPx.x + (dynamicTargetPx.x - startPx.x) * f);
+                        int iy = Math.round(startPx.y + (dynamicTargetPx.y - startPx.y) * f);
                         circleScreenPos = new Point(ix, iy);
                         map.invalidate();
                     });
+
                     snapAnimator.addListener(new android.animation.AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(android.animation.Animator animation) {
-                            // финализируем точную позицию
-                            map.getProjection().toPixels(target, targetPx);
-                            targetPx.offset(offset.x, offset.y);
-                            circleScreenPos = new Point(targetPx.x, targetPx.y);
+                            circleScreenPos = new Point(dynamicTargetPx.x, dynamicTargetPx.y);
                             snappedPoint = p;
                             if (listener != null) listener.onSnap(p);
                             map.invalidate();
                         }
                     });
+
                     snapAnimator.start();
 
                 }, snapProjectionDelayMs);
+
             } else {
-                // мгновенное центрирование
                 try { map.getController().setCenter(target); } catch (Exception ignored) {}
                 Point targetPx = new Point();
                 map.getProjection().toPixels(target, targetPx);
@@ -278,12 +227,12 @@ public class CenterSnapOverlay extends Overlay {
                 if (listener != null) listener.onSnap(p);
                 map.invalidate();
             }
-
         });
     }
-
+    public void clearSnapped(){
+        snappedPoint = null;
+    }
     public @Nullable MapPoint getSnappedPoint() { return snappedPoint; }
-
     @Override
     public void draw(Canvas canvas, MapView osmv, boolean shadow) {
         if (shadow) return;

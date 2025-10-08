@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import by.roman.worldradio0.R;
@@ -59,7 +60,7 @@ public class TimerFragment extends Fragment {
     private ImageView playButton;
     private ImageView startButton;
     private ImageView stopButton;
-    private ImageView backButton;
+    private ImageButton backButton;
     private ImageView divider1;
     private ImageView divider2;
 

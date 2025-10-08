@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -39,7 +40,7 @@ public class FilterFragment extends Fragment {
     private MaterialAutoCompleteTextView actvLang;
     private MaterialAutoCompleteTextView actvName;
     private MaterialAutoCompleteTextView actvCodec;
-    private ImageView backButton;
+    private ImageButton backButton;
     private TextView deleteCountry;
     private TextView deleteTags;
     private TextView deleteLang;

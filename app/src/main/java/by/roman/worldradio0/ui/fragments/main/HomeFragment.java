@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import by.roman.worldradio0.R;
@@ -27,8 +28,8 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class HomeFragment extends Fragment {
     private StateViewModel stateViewModel;
-    private ImageView timerButton;
-    private ImageView filterButton;
+    private ImageButton timerButton;
+    private ImageButton filterButton;
     private ConstraintLayout map;
     private ConstraintLayout list;
     private ImageView mapImage;

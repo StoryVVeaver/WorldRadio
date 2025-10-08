@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -36,9 +37,9 @@ import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class SettingsFragment extends Fragment {
-    private ImageView history_button;
-    private ImageView log_out_button;
-    private ImageView edit_user_button;
+    private ImageButton history_button;
+    private ImageButton log_out_button;
+    private ImageButton edit_user_button;
     private RecyclerView recyclerView;
     private TextView textView;
     private TextView text_status;
