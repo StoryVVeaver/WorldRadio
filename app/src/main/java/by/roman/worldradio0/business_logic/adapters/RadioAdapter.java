@@ -100,6 +100,16 @@ public class    RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         return (position == stations.size() && isLoading) ? TYPE_LOADING : TYPE_STATION;
     }
 
+    public int findCurrentStation(String uuid){
+        int result = -1;
+        for(int i = 0; i < stations.size(); i++){
+            if(stations.get(i).getStationUuid().equals(uuid)){
+                result = i;
+            }
+        }
+        return result;
+    }
+
     public void addStations(List<RadioStation> newStations) {
         int start = stations.size();
         stations.addAll(newStations);

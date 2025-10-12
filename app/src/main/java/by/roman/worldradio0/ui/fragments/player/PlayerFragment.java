@@ -208,6 +208,14 @@ public class PlayerFragment extends Fragment {
     private void putData(@NonNull View view){
         station.setText(viewModel.getCurrentStation().getName());
         large_station.setText(viewModel.getCurrentStation().getName());
+        Glide.with(view.getContext())
+                .load(viewModel.getCurrentStation().getFavicon())
+                .error(AppCompatResources.getDrawable(requireContext(),R.drawable.no_icon))
+                .into(logo);
+        Glide.with(view.getContext())
+                .load(viewModel.getCurrentStation().getFavicon())
+                .error(AppCompatResources.getDrawable(requireContext(),R.drawable.no_icon))
+                .into(large_logo);
         viewModel.getCurrentTrack().observe(getViewLifecycleOwner(), currentTrack -> {
             track.setText(currentTrack);
             large_track.setText(currentTrack);
@@ -227,17 +235,21 @@ public class PlayerFragment extends Fragment {
         stateViewModel.isMapOpen().observe(getViewLifecycleOwner(), flag -> {
             this.isMap = flag;
         });
+        viewModel.getIsPlayingChanged().observe(getViewLifecycleOwner(), currentStation -> {
+            station.setText(currentStation.getName());
+            large_station.setText(currentStation.getName());
+            Glide.with(view.getContext())
+                    .load(currentStation.getFavicon())
+                    .error(AppCompatResources.getDrawable(requireContext(),R.drawable.no_icon))
+                    .into(logo);
+            Glide.with(view.getContext())
+                    .load(currentStation.getFavicon())
+                    .error(AppCompatResources.getDrawable(requireContext(),R.drawable.no_icon))
+                    .into(large_logo);
+        });
         if(!viewModel.getCurrentStation().getHomepage().isEmpty()){
             large_internet.setVisibility(VISIBLE);
         } else large_internet.setVisibility(INVISIBLE);
-        Glide.with(view.getContext())
-                .load(viewModel.getCurrentStation().getFavicon())
-                .error(AppCompatResources.getDrawable(requireContext(),R.drawable.no_icon))
-                .into(logo);
-        Glide.with(view.getContext())
-                .load(viewModel.getCurrentStation().getFavicon())
-                .error(AppCompatResources.getDrawable(requireContext(),R.drawable.no_icon))
-                .into(large_logo);
         fav_icons();
         favTrack_icons();
     }
@@ -333,7 +345,7 @@ public class PlayerFragment extends Fragment {
         if(isMap){
             viewModel.requestSnapNearest();
         } else {
-            //viewModel.requestSnapPrevious();
+            viewModel.playNext();
         }
     }
     private void onSwipeRight() {
@@ -341,7 +353,7 @@ public class PlayerFragment extends Fragment {
         if(isMap){
             viewModel.requestSnapPrevious();
         } else {
-            //viewModel.playPrevious();
+            viewModel.playPrevious();
         }
     }
 }

@@ -36,6 +36,7 @@ public class PlayerService extends Service {
     private String currentTrack;
     private String currentStreamUrl;
     private boolean isPlaying = true;
+    private boolean isPlayingBefore = false;
     private MediaSession mediaSession;
 
     @Inject
@@ -107,7 +108,10 @@ public class PlayerService extends Service {
                     stopForeground(true);
                     startForeground(NOTIFICATION_ID, notificationService.startNotification(currentTrack, isPlaying, radioRepository.getPlayingStation()));
                     notificationService.updatePlaybackState(true);
-                    radioRepository.setStatePlayer(true);
+                    if(!isPlayingBefore){
+                        radioRepository.setStatePlayer(true);
+                    }
+                    isPlayingBefore = true;
                 }
                 break;
             case ACTION_PAUSE:
@@ -119,6 +123,7 @@ public class PlayerService extends Service {
                 notificationService.stopNotification();
                 radioManager.stop();
                 isManuallyStopped = true;
+                isPlayingBefore = false;
                 userRepository.setPlayingUUID(null);
                 stopForeground(true);
                 radioRepository.setStatePlayer(false);

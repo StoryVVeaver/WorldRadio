@@ -92,17 +92,7 @@ public class ListFragment extends Fragment {
             @Override
             public void onStationItemClick(int position) {
                 if (!isVisibleToUser) return;
-
-                if (playerViewModel.isInternetConnected()) {
-                    if (playerViewModel.checkTypeInternet().equals("ok")) {
-                        playerViewModel.setPlaying(adapter.getUUID(position));
-                        playerViewModel.start();
-                    } else {
-                        Toast.makeText(getContext(), "Not correct internet type!", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Toast.makeText(getContext(), "Check internet connection!", Toast.LENGTH_SHORT).show();
-                }
+                play(adapter.getUUID(position));
             }
 
             @Override
@@ -119,7 +109,18 @@ public class ListFragment extends Fragment {
     private void findAllId(View view) {
         recyclerView = view.findViewById(R.id.list_recycler);
     }
-
+    private void play(String uuid){
+        if (playerViewModel.isInternetConnected()) {
+            if (playerViewModel.checkTypeInternet().equals("ok")) {
+                playerViewModel.setPlaying(uuid);
+                playerViewModel.start();
+            } else {
+                Toast.makeText(getContext(), "Not correct internet type!", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(getContext(), "Check internet connection!", Toast.LENGTH_SHORT).show();
+        }
+    }
     private void observeAndLoad() {
         viewModel.getFilteredStations().observe(getViewLifecycleOwner(), stations -> {
             if (!isVisibleToUser) return;
@@ -155,6 +156,18 @@ public class ListFragment extends Fragment {
                         }
                     });
                     break;
+            }
+        });
+        playerViewModel.getPlayPrevious().observe(getViewLifecycleOwner(), flag -> {
+            int pos = adapter.findCurrentStation(playerViewModel.getCurrentStation().getStationUuid());
+            if(pos > 0){
+                play(adapter.getUUID(pos - 1));
+            }
+        });
+        playerViewModel.getPlayNext().observe(getViewLifecycleOwner(), flag -> {
+            int pos = adapter.findCurrentStation(playerViewModel.getCurrentStation().getStationUuid());
+            if(pos != -1 && pos != adapter.getItemCount()){
+                play(adapter.getUUID(pos + 1));
             }
         });
     }

@@ -50,10 +50,13 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     private final SettingsRepository settingsRepository;
     private final MutableLiveData<String> currentTrack = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isPlaying = new MutableLiveData<>();
+    private final MutableLiveData<RadioStation> isPlayingChanged = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isFavorite = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isFavoriteTrack = new MutableLiveData<>();
     private final MutableLiveData<Boolean> snapNearest = new MutableLiveData<>();
     private final MutableLiveData<Boolean> snapPrevious = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> playNext = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> playPrevious = new MutableLiveData<>();
     private Settings settings;
     @Inject
     public PlayerViewModel(@NonNull RadioManager radioManager,HistoryRepository historyRepository, FavoriteTrackRepository favoriteTrackRepository, FavoriteStationRepository favoriteStationRepository, @ApplicationContext Context context, RadioRepository radioRepository, UserRepository userRepository, SettingsRepository settingsRepository) {
@@ -123,6 +126,7 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
         intent.putExtra(PlayerService.EXTRA_STREAM_URL, streamUrl);
         historyRepository.addToHistory(new HistoryDTO().fromModel(new History(userRepository.getUserInSystem(), userRepository.getPlayingUUID())));
         startForegroundService(context, intent);
+        isPlayingChanged.postValue(getCurrentStation());
     }
     @OptIn(markerClass = UnstableApi.class)
     public void stop(){
@@ -143,13 +147,10 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
         startForegroundService(context, intent);
     }
     public void playNext(){
-
+        playNext.postValue(true);
     }
     public void playPrevious(){
-
-    }
-    public void playPreviousFromHistory(){
-
+        playPrevious.postValue(true);
     }
     public void addToFavorite(){
         try {
@@ -214,6 +215,9 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     public LiveData<Boolean> getIsPlaying(){
         return isPlaying;
     }
+    public LiveData<RadioStation> getIsPlayingChanged(){
+        return isPlayingChanged;
+    }
     public LiveData<Boolean> getIsFavorite(){
         return isFavorite;
     }
@@ -225,6 +229,12 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     }
     public LiveData<Boolean> getSnapPrevious() {
         return snapPrevious;
+    }
+    public LiveData<Boolean> getPlayNext() {
+        return playNext;
+    }
+    public LiveData<Boolean> getPlayPrevious() {
+        return playPrevious;
     }
     @Override
     public void onFavoriteTracksChanged() {
