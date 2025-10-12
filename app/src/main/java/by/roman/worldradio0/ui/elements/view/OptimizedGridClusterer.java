@@ -41,9 +41,8 @@ public class OptimizedGridClusterer {
     private final Context context;
     private final MapView map;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
     private Future<?> runningTask;
-
     private final Map<String, Marker> markerByUuid = new HashMap<>();
     private final Map<String, Drawable> originalIconByUuid = new HashMap<>();
 
@@ -99,9 +98,15 @@ public class OptimizedGridClusterer {
             map.invalidate();
         });
     }
+    private synchronized void ensureExecutorAlive() {
+        if (executor == null || executor.isShutdown() || executor.isTerminated()) {
+            executor = Executors.newSingleThreadExecutor();
+        }
+    }
 
     public void clusterAsync() {
         if (runningTask != null && !runningTask.isDone()) runningTask.cancel(true);
+        ensureExecutorAlive();
 
         final BoundingBox bbox = map.getBoundingBox();
         final double zoom = map.getZoomLevelDouble();
@@ -387,7 +392,16 @@ public class OptimizedGridClusterer {
     }
 
     public void shutdown() {
-        try { runningTask = null; executor.shutdownNow(); } catch (Exception ignored) {}
+        try {
+            pendingHighlightUuid = null;
+            pendingHighlightDrawable = null;
+            mainHandler.removeCallbacksAndMessages(null);
+            if (executor != null) {
+                executor.shutdownNow();
+                executor = null;
+            }
+            runningTask = null;
+        } catch (Exception ignored) {}
         removeClusterMarkersFromMap();
     }
 

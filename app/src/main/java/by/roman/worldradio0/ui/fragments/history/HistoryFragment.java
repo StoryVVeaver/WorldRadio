@@ -116,6 +116,7 @@ public class HistoryFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recycler_history);
         back = view.findViewById(R.id.back_history);
         deleteAll = view.findViewById(R.id.deleteAll_history);
+        back.setEnabled(false);
     }
     private void initAll(){
         viewModel = new ViewModelProvider(this).get(HistoryViewModel.class);
@@ -147,6 +148,7 @@ public class HistoryFragment extends Fragment {
     }
     private void observeAndLoad(){
         viewModel.getHistoryList().observe(getViewLifecycleOwner(), list -> {
+            back.setEnabled(true);
             switch (list.status){
                 case LOADING:
                     if (adapter.getItemCount() > 0) {

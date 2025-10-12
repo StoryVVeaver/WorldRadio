@@ -216,6 +216,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        clusterHandler.removeCallbacks(clusterRunnable);
         if (map != null) {
             map.onDetach();
         }

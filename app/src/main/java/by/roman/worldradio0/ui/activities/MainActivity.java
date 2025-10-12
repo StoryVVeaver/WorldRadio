@@ -6,6 +6,7 @@ import static android.view.View.VISIBLE;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.widget.FrameLayout;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,9 +33,12 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavigationView;
+    private FrameLayout bottomPlayer;
+    private FrameLayout fullscreen;
     private ViewPager2 viewPager;
     private StateViewModel viewModel;
     private boolean isMap = true;
+    private boolean isOpeningFullscreen = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +74,9 @@ public class MainActivity extends AppCompatActivity {
     }
     private void findAllId(){
         viewPager = findViewById(R.id.viewPager);
+        bottomPlayer = findViewById(R.id.bottom_player_container);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        fullscreen = findViewById(R.id.fullscreen_container);
     }
     private void initAll(){
         viewModel = new ViewModelProvider(this).get(StateViewModel.class);
@@ -133,20 +139,33 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     public void showFullscreenFragment(Fragment fragment, String tag, boolean addToBackStack) {
+        if (isOpeningFullscreen) return;
+
+        Fragment existing = getSupportFragmentManager().findFragmentByTag(tag);
+        if (existing != null) return;
+
+        isOpeningFullscreen = true;
+        viewPager.setEnabled(false);
         viewPager.setUserInputEnabled(false);
-        findViewById(R.id.fullscreen_container).setVisibility(VISIBLE);
+        bottomPlayer.setEnabled(false);
+        fullscreen.setVisibility(VISIBLE);
 
         FragmentTransaction ft = getSupportFragmentManager()
                 .beginTransaction()
                 .setReorderingAllowed(true)
                 .setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
                 .replace(R.id.fullscreen_container, fragment, tag);
+
         if (addToBackStack) ft.addToBackStack(tag);
         ft.commit();
+
         bottomNavigationView.setVisibility(INVISIBLE);
+        fullscreen.post(() -> isOpeningFullscreen = false);
     }
     public void closeFullscreenFragment() {
         final FragmentManager fm = getSupportFragmentManager();
+        viewPager.setEnabled(true);
+        bottomPlayer.setEnabled(true);
 
         Runnable restoreUi = () -> {
             findViewById(R.id.fullscreen_container).setVisibility(GONE);
