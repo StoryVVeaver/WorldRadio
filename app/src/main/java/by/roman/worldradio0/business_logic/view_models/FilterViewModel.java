@@ -27,6 +27,11 @@ public class FilterViewModel extends ViewModel {
     private final RadioRepository radioRepository;
     private final FilterRepository filterRepository;
     private final MutableLiveData<UiState<List<RadioStation>>> stations = new MutableLiveData<>();
+    private final MutableLiveData<List<String>> countriesLive = new MutableLiveData<>();
+    private final MutableLiveData<List<String>> languagesLive = new MutableLiveData<>();
+    private final MutableLiveData<List<String>> tagsLive = new MutableLiveData<>();
+    private final MutableLiveData<List<String>> namesLive = new MutableLiveData<>();
+    private final MutableLiveData<List<String>> codecsLive = new MutableLiveData<>();
     private final MutableLiveData<UiState<Integer>> count = new MutableLiveData<>();
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
     private final AtomicBoolean isActive = new AtomicBoolean(true);
@@ -84,7 +89,6 @@ public class FilterViewModel extends ViewModel {
             }
         });
     }
-
     public void loadStart() {
         if (!isActive.get()) return;
 
@@ -111,7 +115,6 @@ public class FilterViewModel extends ViewModel {
             }
         });
     }
-
     public void loadNextPage() {
         if (!isActive.get() || isLastPage) return;
 
@@ -141,48 +144,58 @@ public class FilterViewModel extends ViewModel {
             }
         });
     }
-
     public void cancelPendingOperations() {
         isActive.set(false);
     }
-
     public void resetState() {
         isActive.set(true);
         currentPage = 0;
         isLastPage = false;
         allStations.clear();
     }
+    public void loadAutocompleteData() {
+        executor.execute(() -> {
+            try {
+                List<String> c = radioRepository.getContrives();
+                List<String> l = radioRepository.getLanguage();
+                List<String> t = radioRepository.getTags();
+                List<String> n = radioRepository.getNames();
+                List<String> co = radioRepository.getCodecs();
 
-    public List<String> getCountries() {
-        return radioRepository.getContrives();
+                if (!isActive.get()) return;
+
+                countriesLive.postValue(c != null ? c : new ArrayList<>());
+                languagesLive.postValue(l != null ? l : new ArrayList<>());
+                tagsLive.postValue(t != null ? t : new ArrayList<>());
+                namesLive.postValue(n != null ? n : new ArrayList<>());
+                codecsLive.postValue(co != null ? co : new ArrayList<>());
+            } catch (Exception e) {
+            }
+        });
     }
-
-    public List<String> getLanguage() {
-        return radioRepository.getLanguage();
-    }
-
-    public List<String> getTags() {
-        return radioRepository.getTags();
-    }
-
-    public List<String> getNames() {
-        return radioRepository.getNames();
-    }
-
-    public List<String> getCodecs() {
-        return radioRepository.getCodecs();
-    }
-
     public void setFilters(Filter filter) {
         Log.e("fdsgdmodel", "set");
         filterRepository.setFilters(new FilterDTO().fromModel(filter));
         Log.e("fdsgdmodel", "set");
     }
-
     public Filter getFilters() {
         return filterRepository.getFilters();
     }
-
+    public LiveData<List<String>> getCountriesLive() {
+        return countriesLive;
+    }
+    public LiveData<List<String>> getLanguagesLive() {
+        return languagesLive;
+    }
+    public LiveData<List<String>> getTagsLive() {
+        return tagsLive;
+    }
+    public LiveData<List<String>> getNamesLive() {
+        return namesLive;
+    }
+    public LiveData<List<String>> getCodecsLive() {
+        return codecsLive;
+    }
     @Override
     protected void onCleared() {
         super.onCleared();

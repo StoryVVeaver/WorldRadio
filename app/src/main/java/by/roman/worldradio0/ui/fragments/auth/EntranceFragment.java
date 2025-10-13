@@ -89,7 +89,7 @@ public class EntranceFragment extends Fragment {
         progressBar = view.findViewById(R.id.progressBar_Entrance);
     }
     private void initAll(){
-        viewModel = new ViewModelProvider(this).get(AccountViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(AccountViewModel.class);
     }
     @SuppressLint("SetTextI18n")
     private void buttons(){

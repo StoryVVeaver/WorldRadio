@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import org.osmdroid.api.IMapController;
@@ -59,6 +60,8 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
     private Drawable highlightMarkerDrawable;
     private String previousSnappedUuid = null;
     private List<MapPoint> allPoints;
+    private IMapController mapController;
+    private ImageButton snapOn;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -87,11 +90,29 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
 
         viewModel.loadPoints();
         observeData();
+
+        snapOn.setOnClickListener(v -> {
+            Log.v("map", centerSnap.isSnapEnabled() + " now - set " + !centerSnap.isSnapEnabled());
+            centerSnap.setSnapEnabled(!centerSnap.isSnapEnabled());
+            fav_snap();
+        });
     }
 
     private void findViewByID(@NonNull View view){
         map = view.findViewById(R.id.map);
+        snapOn = view.findViewById(R.id.snapButtonView);
     }
+    private void fav_snap(){
+        if (centerSnap.isSnapEnabled()){
+            snapOn.setImageDrawable(AppCompatResources.getDrawable(requireActivity(), R.drawable.snap));
+        } else {
+            snapOn.setImageDrawable(AppCompatResources.getDrawable(requireActivity(), R.drawable.snap_crossed));
+        }
+    }
+    //TODO синхронизация автоматически листов
+    //TODO настройки пользователя
+    //TODO настройки аудио
+    //TODO настройки вида навигации
 
     @SuppressLint("ClickableViewAccessibility")
     private void initializeMap() {
@@ -101,7 +122,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.setMultiTouchControls(true);
 
-        IMapController mapController = map.getController();
+        mapController = map.getController();
         mapController.setZoom(10.0);
         mapController.setCenter(new GeoPoint(55.7558, 37.6173));
 
@@ -153,7 +174,8 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
             }
         });
 
-        centerSnap.setSnapEnabled(false);
+        centerSnap.setRequireFirstTouch(true);
+        centerSnap.setSnapEnabled(true);
 
         Drawable markerDrawable = AppCompatResources.getDrawable(requireContext(), R.drawable.map_point);
         int iconH = (markerDrawable != null && markerDrawable.getIntrinsicHeight() > 0)
@@ -164,18 +186,18 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
 
         // cluster marker click -> enable snap (if not) and snap to point
         clusterer.setOnClusterMarkerClickListener(mp -> {
-            if (!centerSnap.isSnapEnabled()) centerSnap.setSnapEnabled(true);
-            centerSnap.snapTo(mp, true);
+            centerSnap.snapTo(mp, true, true);
         });
         // enable snap after first user touch on map (prevents startup sticky behavior)
         map.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                if (!centerSnap.isSnapEnabled()) centerSnap.setSnapEnabled(true);
+                centerSnap.notifyUserInteraction();
             }
             return false;
         });
 
         map.getOverlays().add(centerSnap);
+        fav_snap();
     }
     private void observeData(){
         viewModel.getListPoints().observe(getViewLifecycleOwner(), points -> {
@@ -195,7 +217,6 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
             snapToNearest();
         });
         playerViewModel.getSnapPrevious().observe(getViewLifecycleOwner(), event -> {
-            Log.v("MapFragment", "snapToPrevious");
             snapToPrevious();
         });
         playerViewModel.getIsPlaying().observe(getViewLifecycleOwner(), status -> {
@@ -204,6 +225,14 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
                 centerSnap.clearSnapped();
                 currentSnappedUuid = null;
                 previousSnappedUuid = null;
+            }
+        });
+        playerViewModel.getIsPlayingChanged().observe(getViewLifecycleOwner(), station -> {
+            if(map.getZoomLevel() < 10){
+                map.setZoomLevel(10);
+            }
+            if(station.getGeoLat() != 0 && station.getGeoLong() != 0){
+                mapController.setCenter(new GeoPoint(station.getGeoLat(), station.getGeoLong()));
             }
         });
     }
@@ -246,6 +275,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         centerSnap.feedVisiblePoints(visible);
     }
     private void snapToNearest() {
+        //todo странная херня, срабатывают эта и след функции при старте фрагмента
         if (allPoints == null || allPoints.isEmpty() || map == null) return;
 
         BoundingBox bbox = map.getBoundingBox();
@@ -260,7 +290,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         }
 
         if (visible.isEmpty()) {
-            Toast.makeText(requireContext(), "Рядом нет радиостанций", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(requireContext(), "Рядом нет радиостанций", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -307,7 +337,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
             previousSnappedUuid = null;
             centerSnap.snapTo(point, true, true);
         } else {
-            Toast.makeText(requireActivity(), "Нет информации о прошлой станции", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(requireActivity(), "Нет информации о прошлой станции", Toast.LENGTH_SHORT).show();
         }
     }
     @Override

@@ -16,6 +16,8 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.media3.common.util.UnstableApi;
 
+import java.util.Objects;
+
 import javax.inject.Inject;
 
 import by.roman.worldradio0.business_logic.UiState;
@@ -147,10 +149,10 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
         startForegroundService(context, intent);
     }
     public void playNext(){
-        playNext.postValue(true);
+        playNext.postValue(false);
     }
     public void playPrevious(){
-        playPrevious.postValue(true);
+        playPrevious.postValue(false);
     }
     public void addToFavorite(){
         try {
@@ -161,7 +163,10 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     }
     public void addTrackToFavorite(){
         try {
-            favoriteTrackRepository.addToFavorite(-1, getCurrentTrack().getValue());
+            if(!Objects.equals(getCurrentTrack().getValue(), null)) {
+                Log.v("model", getCurrentTrack().getValue() + " ");
+                favoriteTrackRepository.addToFavorite(-1, getCurrentTrack().getValue());
+            }
         } catch (Exception e) {
             Log.e("PlayerVM", "Failed add to favorite");
         }
@@ -180,7 +185,7 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
             Log.e("PlayerVM", "Failed remove from favorite: " + e.getMessage());
         }
     }
-    private boolean isFavoriteTrack(){
+    public boolean isFavoriteTrack(){
         try {
             return favoriteTrackRepository.isStationFavorite(getCurrentTrack().getValue());
         } catch (Exception e) {
@@ -188,7 +193,7 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
             return false;
         }
     }
-    private boolean isFavorite(){
+    public boolean isFavorite(){
         try {
             return favoriteStationRepository.isStationFavorite(userRepository.getPlayingUUID());
         } catch (Exception e) {
@@ -204,10 +209,10 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
         }
     }
     public void requestSnapNearest() {
-        snapNearest.postValue(true);
+        snapNearest.postValue(false);
     }
     public void requestSnapPrevious() {
-        snapPrevious.postValue(true);
+        snapPrevious.postValue(false);
     }
     public RadioStation getCurrentStation(){
         return radioRepository.getPlayingStation();

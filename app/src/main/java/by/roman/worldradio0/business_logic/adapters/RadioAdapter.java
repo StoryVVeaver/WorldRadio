@@ -74,12 +74,12 @@ public class    RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             stationHolder.bind(station);
 
             holder.itemView.setOnClickListener(v -> {
-                int pos = holder.getAdapterPosition();
-                if (pos != RecyclerView.NO_POSITION) {
+                int pos = holder.getBindingAdapterPosition();
+                if (pos != RecyclerView.NO_POSITION && pos < stations.size()) {
                     listener.onStationItemClick(pos);
-                    Log.d("RadioAdapter","play");
                 }
             });
+
         }
     }
 
@@ -88,12 +88,13 @@ public class    RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         return stations.size() + (isLoading ? 1 : 0);
     }
     public String getUUID(int position){
-        if(stations != null){
+        if (position >= 0 && position < stations.size()) {
             return stations.get(position).getStationUuid();
         }
-        Log.e("RadioAdapter","null");
-        return "db93a00f-9191-46ab-9e87-ec9b373b3eee";
+        Log.e("RadioAdapter","getUUID: invalid position " + position + " size=" + stations.size());
+        return null;
     }
+
 
     @Override
     public int getItemViewType(int position) {
@@ -111,16 +112,23 @@ public class    RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     public void addStations(List<RadioStation> newStations) {
-        int start = stations.size();
-        stations.addAll(newStations);
-        notifyItemRangeInserted(start, newStations.size());
+        if (newStations == null || newStations.isEmpty()) return;
+        int start;
+        synchronized (this) {
+            start = stations.size();
+            stations.addAll(new ArrayList<>(newStations));
+        }
+        final int s = start;
+        final int cnt = newStations.size();
+        new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> notifyItemRangeInserted(s, cnt));
     }
-    @SuppressLint("NotifyDataSetChanged")
+
     public void replaceAll(List<RadioStation> newStations) {
-        this.stations.clear();
-        this.stations.addAll(newStations);
-        notifyDataSetChanged();
+        if (newStations == null) newStations = new ArrayList<>();
+        this.stations = new ArrayList<>(newStations);
+        new android.os.Handler(android.os.Looper.getMainLooper()).post(this::notifyDataSetChanged);
     }
+
 
     @SuppressLint("NotifyDataSetChanged")
     public void clear() {
@@ -128,14 +136,17 @@ public class    RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         notifyDataSetChanged();
     }
     public void showLoading() {
+        if (isLoading) return;
         isLoading = true;
-        notifyItemInserted(stations.size());
+        new android.os.Handler(android.os.Looper.getMainLooper()).post(this::notifyDataSetChanged);
     }
 
     public void hideLoading() {
+        if (!isLoading) return;
         isLoading = false;
-        notifyItemRemoved(stations.size());
+        new android.os.Handler(android.os.Looper.getMainLooper()).post(this::notifyDataSetChanged);
     }
+
 
     class StationViewHolder extends RecyclerView.ViewHolder {
         private final TextView nameStation, country, quality;

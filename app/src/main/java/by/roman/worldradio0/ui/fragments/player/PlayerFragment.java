@@ -236,6 +236,10 @@ public class PlayerFragment extends Fragment {
             this.isMap = flag;
         });
         viewModel.getIsPlayingChanged().observe(getViewLifecycleOwner(), currentStation -> {
+            isFavorite = viewModel.isFavorite();
+            isFavoriteTrack = viewModel.isFavoriteTrack();
+            fav_icons();
+            favTrack_icons();
             station.setText(currentStation.getName());
             large_station.setText(currentStation.getName());
             Glide.with(view.getContext())

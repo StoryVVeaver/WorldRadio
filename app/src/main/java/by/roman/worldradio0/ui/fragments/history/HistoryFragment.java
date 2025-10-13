@@ -119,8 +119,8 @@ public class HistoryFragment extends Fragment {
         back.setEnabled(false);
     }
     private void initAll(){
-        viewModel = new ViewModelProvider(this).get(HistoryViewModel.class);
-        playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(HistoryViewModel.class);
+        playerViewModel = new ViewModelProvider(requireActivity()).get(PlayerViewModel.class);
         stateViewModel = new ViewModelProvider(requireActivity()).get(StateViewModel.class);
         adapter = new RadioAdapter(requireActivity(), new RadioAdapter.OnItemClickListener() {
             @Override

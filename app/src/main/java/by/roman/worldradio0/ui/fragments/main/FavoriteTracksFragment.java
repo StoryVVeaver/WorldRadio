@@ -69,7 +69,7 @@ public class FavoriteTracksFragment extends Fragment {
         });
         recyclerView.setAdapter(adapter);
 
-        viewModel = new ViewModelProvider(this).get(FavoriteViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(FavoriteViewModel.class);
 
         EndlessRecyclerViewScrollListener scrollListener = new EndlessRecyclerViewScrollListener(layoutManager) {
             @Override

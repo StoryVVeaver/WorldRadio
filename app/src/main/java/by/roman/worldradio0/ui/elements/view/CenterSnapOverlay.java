@@ -38,8 +38,11 @@ public class CenterSnapOverlay extends Overlay {
     private long snapProjectionDelayMs = 200;
     private long snapDelayMs = 700;
     private final Runnable delayedSnapRunnable = this::checkSnap;
-    private boolean enableSnap = false;
+    private boolean enableSnap = true;
     private Point defaultIconOffset = new Point(0, 0);
+    private boolean requireFirstTouch = true;
+    private boolean activatedByUser = false;
+
 
     public CenterSnapOverlay(MapView map,
                              int snapThresholdPx,
@@ -62,6 +65,25 @@ public class CenterSnapOverlay extends Overlay {
             circleScreenPos = null;
             if (listener != null) listener.onSnap(null);
             map.invalidate();
+        } else {
+            if (!requireFirstTouch) {
+                activatedByUser = true;
+                scheduleDelayedSnap();
+            }
+        }
+    }
+
+    public void setRequireFirstTouch(boolean require) {
+        this.requireFirstTouch = require;
+        if (!require) activatedByUser = true;
+    }
+    public boolean isRequireFirstTouch() {
+        return requireFirstTouch;
+    }
+    public void notifyUserInteraction() {
+        if (!activatedByUser) {
+            activatedByUser = true;
+            if (enableSnap) scheduleDelayedSnap();
         }
     }
 
@@ -93,53 +115,55 @@ public class CenterSnapOverlay extends Overlay {
             mainHandler.removeCallbacks(delayedSnapRunnable);
             return;
         }
+        if (requireFirstTouch && !activatedByUser) {
+            return;
+        }
         mainHandler.removeCallbacks(delayedSnapRunnable);
         mainHandler.postDelayed(delayedSnapRunnable, snapDelayMs);
     }
     public void checkSnap() {
         if (!enableSnap) return;
-        mainHandler.post(() -> {
-            if (map == null) return;
+        if (requireFirstTouch && !activatedByUser) return;
 
-            int cx = map.getWidth() / 2;
-            int cy = map.getHeight() / 2;
+        if (map == null) return;
 
-            MapPoint nearest = null;
-            double bestDist2 = Double.MAX_VALUE;
+        int cx = map.getWidth() / 2;
+        int cy = map.getHeight() / 2;
 
-            if (visiblePoints != null && !visiblePoints.isEmpty()) {
-                Point tmp = new Point();
-                for (MapPoint p : visiblePoints) {
-                    GeoPoint gp = new GeoPoint(p.getLatitude(), p.getLongitude());
-                    map.getProjection().toPixels(gp, tmp);
-                    double dx = tmp.x - cx;
-                    double dy = tmp.y - cy;
-                    double d2 = dx * dx + dy * dy;
-                    if (d2 < bestDist2) {
-                        bestDist2 = d2;
-                        nearest = p;
-                    }
+        MapPoint nearest = null;
+        double bestDist2 = Double.MAX_VALUE;
+
+        if (visiblePoints != null && !visiblePoints.isEmpty()) {
+            Point tmp = new Point();
+            for (MapPoint p : visiblePoints) {
+                GeoPoint gp = new GeoPoint(p.getLatitude(), p.getLongitude());
+                map.getProjection().toPixels(gp, tmp);
+                double dx = tmp.x - cx;
+                double dy = tmp.y - cy;
+                double d2 = dx * dx + dy * dy;
+                if (d2 < bestDist2) {
+                    bestDist2 = d2;
+                    nearest = p;
                 }
             }
+        }
 
-            if (nearest != null && bestDist2 <= (snapThresholdPx * (double) snapThresholdPx)) {
-                if (snappedPoint != null && snappedPoint.getUuid().equals(nearest.getUuid())) {
-                    return;
-                }
-                snapToPoint(nearest, true, defaultIconOffset, false);
-            } else {
-                // unsnap
-                if (snappedPoint != null) {
-                    snappedPoint = null;
-                    if (snapAnimator != null && snapAnimator.isRunning()) snapAnimator.cancel();
-                    circleScreenPos = null;
-                    if (listener != null) listener.onSnap(null);
-                    map.invalidate();
-                }
+        if (nearest != null && bestDist2 <= (snapThresholdPx * (double) snapThresholdPx)) {
+            if (snappedPoint != null && java.util.Objects.equals(snappedPoint.getUuid(), nearest.getUuid())) {
+                return;
             }
-
-        });
+            snapToPoint(nearest, true, defaultIconOffset, false);
+        } else {
+            if (snappedPoint != null) {
+                snappedPoint = null;
+                if (snapAnimator != null && snapAnimator.isRunning()) snapAnimator.cancel();
+                circleScreenPos = null;
+                if (listener != null) listener.onSnap(null);
+                map.invalidate();
+            }
+        }
     }
+
 
 
     public void snapTo(MapPoint p, boolean animate) {
@@ -209,6 +233,13 @@ public class CenterSnapOverlay extends Overlay {
                             circleScreenPos = new Point(dynamicTargetPx.x, dynamicTargetPx.y);
                             snappedPoint = p;
                             if (listener != null) listener.onSnap(p);
+                            map.invalidate();
+                        }
+                        @Override
+                        public void onAnimationCancel(android.animation.Animator animation) {
+                            circleScreenPos = null;
+                            snappedPoint = null;
+                            if (listener != null) listener.onSnap(null);
                             map.invalidate();
                         }
                     });

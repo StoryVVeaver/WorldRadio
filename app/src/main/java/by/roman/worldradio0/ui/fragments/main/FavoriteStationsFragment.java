@@ -77,8 +77,8 @@ public class FavoriteStationsFragment extends Fragment {
             }
         });
         adapter.setMode(1);
-        playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
-        viewModel = new ViewModelProvider(this).get(FavoriteViewModel.class);
+        playerViewModel = new ViewModelProvider(requireActivity()).get(PlayerViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(FavoriteViewModel.class);
         LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);

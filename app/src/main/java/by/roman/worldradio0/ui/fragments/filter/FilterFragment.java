@@ -77,7 +77,6 @@ public class FilterFragment extends Fragment {
         buttons();
         fillFields();
         Log.v("FilterActivity: performance", "onCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
-        //TODO asynch loading
     }
 
     private void fillFields(){
@@ -223,7 +222,22 @@ public class FilterFragment extends Fragment {
             }
         });
         viewModel.loadCount();
-
+        viewModel.getCountriesLive().observe(getViewLifecycleOwner(), list -> {
+            if (list != null) setupAutoComplete(actvCountry, list, 1);
+        });
+        viewModel.getTagsLive().observe(getViewLifecycleOwner(), list -> {
+            if (list != null) setupAutoComplete(actvTags, list, 2);
+        });
+        viewModel.getLanguagesLive().observe(getViewLifecycleOwner(), list -> {
+            if (list != null) setupAutoComplete(actvLang, list, 3);
+        });
+        viewModel.getNamesLive().observe(getViewLifecycleOwner(), list -> {
+            if (list != null) setupAutoComplete(actvName, list, 4);
+        });
+        viewModel.getCodecsLive().observe(getViewLifecycleOwner(), list -> {
+            if (list != null) setupAutoComplete(actvCodec, list, 5);
+        });
+        viewModel.loadAutocompleteData();
     }
     private void setupAutoComplete(@NonNull MaterialAutoCompleteTextView actv, List<String> list, int type){
         ArrayAdapter<String> adapter = new ArrayAdapter<>(actv.getContext(), android.R.layout.simple_dropdown_item_1line, list);
@@ -237,14 +251,9 @@ public class FilterFragment extends Fragment {
     }
     private void initAll(){
         try {
-            viewModel = new ViewModelProvider(this).get(FilterViewModel.class);
+            viewModel = new ViewModelProvider(requireActivity()).get(FilterViewModel.class);
             stateViewModel = new ViewModelProvider(requireActivity()).get(StateViewModel.class);
             filter = viewModel.getFilters();
-            setupAutoComplete(actvCountry,viewModel.getCountries(),1);
-            setupAutoComplete(actvTags,viewModel.getTags(),2);
-            setupAutoComplete(actvLang,viewModel.getLanguage(),3);
-            setupAutoComplete(actvName,viewModel.getNames(),4);
-            setupAutoComplete(actvCodec,viewModel.getCodecs(),5);
             switch (filter.getSort()){
                 case 1:
                     chip1.setChecked(true);

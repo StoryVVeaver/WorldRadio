@@ -43,10 +43,10 @@
                 android:max="100"
                 android:min="0"
                 android:visibility="invisible"
-                app:layout_constraintStart_toEndOf="@+id/edit_user_settings"
+                app:layout_constraintStart_toEndOf="@+id/cardView5943768"
                 app:layout_constraintEnd_toStartOf="@+id/text_loading_Settings"
-                app:layout_constraintTop_toTopOf="@+id/edit_user_settings"
-                app:layout_constraintBottom_toBottomOf="@+id/edit_user_settings"/>
+                app:layout_constraintTop_toTopOf="@+id/cardView5943768"
+                app:layout_constraintBottom_toBottomOf="@+id/cardView5943768"/>
 
             <TextView
                 android:id="@+id/text_loading_Settings"
@@ -57,34 +57,75 @@
                 android:visibility="invisible"
                 android:textSize="14sp"
                 app:layout_constraintStart_toEndOf="@+id/progressBar_Settings"
-                app:layout_constraintEnd_toStartOf="@id/log_out_settings"
+                app:layout_constraintEnd_toStartOf="@id/cardView59437685435"
                 app:layout_constraintTop_toTopOf="@+id/progressBar_Settings"
                 app:layout_constraintBottom_toBottomOf="@+id/progressBar_Settings"/>
 
-
-            <ImageButton
-                android:id="@+id/edit_user_settings"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:layout_marginTop="15dp"
-                android:background="@color/background"
-                android:padding="10dp"
-                android:src="@drawable/fi_rr_settings"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <ImageButton
-                android:id="@+id/log_out_settings"
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardView59437685435"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
                 android:layout_marginEnd="15dp"
                 android:background="@color/background"
-                android:padding="10dp"
-                android:src="@drawable/log_out"
+                app:cardCornerRadius="15dp"
+                app:cardElevation="0dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent">
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/background">
+
+                    <ImageButton
+                        android:id="@+id/log_out_settings"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:padding="10dp"
+                        android:src="@drawable/log_out"
+                        app:tint="@color/white" />
+                </FrameLayout>
+            </androidx.cardview.widget.CardView>
+
+
+
+
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardView5943768"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="15dp"
+                android:background="@color/background"
+                app:cardCornerRadius="15dp"
+                app:cardElevation="0dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/background">
+
+                    <ImageButton
+                        android:id="@+id/edit_user_settings"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:padding="10dp"
+                        android:src="@drawable/fi_rr_settings"
+                        app:tint="@color/white" />
+                </FrameLayout>
+            </androidx.cardview.widget.CardView>
 
             <ImageView
                 android:id="@+id/avatar_settings"
@@ -96,17 +137,36 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageButton
-                android:id="@+id/history_button"
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardView0982434385972"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:padding="10dp"
-                android:src="@drawable/history"
                 android:background="@color/background"
-                app:layout_constraintEnd_toEndOf="@+id/edit_user_settings"
-                app:layout_constraintStart_toStartOf="@+id/edit_user_settings"
-                app:layout_constraintTop_toBottomOf="@+id/edit_user_settings" />
+                app:cardCornerRadius="15dp"
+                app:cardElevation="0dp"
+                app:layout_constraintEnd_toEndOf="@+id/cardView5943768"
+                app:layout_constraintStart_toStartOf="@+id/cardView5943768"
+                app:layout_constraintTop_toBottomOf="@+id/cardView5943768">
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/background">
+
+                    <ImageButton
+                        android:id="@+id/history_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:padding="10dp"
+                        android:src="@drawable/history"
+                        app:tint="@color/white" />
+                </FrameLayout>
+            </androidx.cardview.widget.CardView>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

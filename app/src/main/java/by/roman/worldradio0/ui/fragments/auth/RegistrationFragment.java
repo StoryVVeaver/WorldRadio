@@ -92,7 +92,7 @@ public class RegistrationFragment extends Fragment {
         reg = view.findViewById(R.id.regButton);
     }
     private void initAll(){
-        viewModel = new ViewModelProvider(this).get(AccountViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(AccountViewModel.class);
     }
     @SuppressLint("SetTextI18n")
     private void buttons(){

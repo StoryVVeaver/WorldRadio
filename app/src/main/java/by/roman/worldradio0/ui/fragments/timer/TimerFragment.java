@@ -200,6 +200,9 @@ public class TimerFragment extends Fragment {
                 if (state == TimerState.RUNNING) {
                     return;
                 }
+                if(totalTime == 0) {
+                    return;
+                }
                 updateTotalTimeFromPickers();
                 viewModel.startTimer(totalTime);
                 startCountDown(totalTime);
