@@ -5,12 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import by.roman.radiomanager.models.Favorites;
-import by.roman.radiomanager.models.Filters;
-import by.roman.radiomanager.models.Settings;
-import by.roman.radiomanager.repository.FavoriteRepository;
-import by.roman.radiomanager.repository.FilterRepository;
-import by.roman.radiomanager.repository.SettingsRepository;
+import by.roman.radiomanager.models.*;
+import by.roman.radiomanager.repository.*;
 import by.roman.radiomanager.service.UserPutService;
 import lombok.AllArgsConstructor;
 
@@ -19,51 +15,65 @@ import lombok.AllArgsConstructor;
 public class UserPutServiceImpl implements UserPutService{
     
     @Autowired
-    private final FavoriteRepository favoriteRepository;
+    private FavoriteStationsRepository favoriteStationsRepository;
+
     @Autowired
-    private final FilterRepository filterRepository;
+    private FavoriteTrackRepository favoriteTrackRepository;
+
     @Autowired
-    private final SettingsRepository settingsRepository;
+    private SettingsRepository settingsRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
-    public String saveFilters(Filters filt){
-        try {
-            if(filt == null){
-                return "filt is null";
-            } else {
-                filterRepository.save(filt);
-                return "saved";
-            }
-        } catch (Exception e) {
-            return e.getMessage();
-        }
-    }
-
-    @Override
-    public String saveSettings(Settings sett){
+    public Settings saveSettings(Settings sett){
         try {
             if(sett == null){
-                return "sett is null";
+                return null;
             } else {
-                settingsRepository.save(sett);
-                return "saved";
+                return settingsRepository.save(sett);
             }
         } catch (Exception e) {
-            return e.getMessage();
+            throw e;
         }
     }
 
     @Override
-    public String saveFavorites(List<Favorites> favorites){
+    public List<FavoriteStation> saveFavoriteStations(List<FavoriteStation> favorites){
         try {
             if(favorites == null){
-                return "favorites is null";
+                return null;
             } else {
-                favoriteRepository.saveAll(favorites);
-                return "saved";
+                return favoriteStationsRepository.saveAll(favorites);
             }
         } catch (Exception e) {
-            return e.getMessage();
+            throw e;
+        }
+    }
+    @Override
+    public List<FavoriteTrack> saveFavoriteTracks(List<FavoriteTrack> favorites){
+        try {
+            if(favorites == null){
+                return null;
+            } else {
+                return favoriteTrackRepository.saveAll(favorites);
+            }
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    @Override
+    public User saveUser(User user){
+        try {
+            if(user == null){
+                return null;
+            } else {
+                return userRepository.save(user);
+            }
+        } catch (Exception e) {
+            throw e;
         }
     }
 }

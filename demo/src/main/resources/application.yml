@@ -1,12 +1,12 @@
 spring:
     datasource:
-        url: jdbc:postgresql://localhost:5432/radio_manager
+        url: jdbc:postgresql://localhost/radio_manager
         username: postgres
-        password: 12345678
+        password: 
         driver-class-name: org.postgresql.Driver
     jpa:
         hibernate:
-            ddl-auto: create-drop
+            ddl-auto: update
         database: postgresql
         database-platform: org.hibernate.dialect.PostgreSQLDialect
         show-sql: false

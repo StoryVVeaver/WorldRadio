@@ -2,6 +2,7 @@ package by.roman.radiomanager.controllers;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,11 +29,11 @@ public class UserController {
     public ResponseEntity<?> regUser(@RequestBody UserRequest userRequest) {
         try{
             if(userRequest.getLogin().isEmpty() || userRequest.getPassword().isEmpty()){
-                return ResponseEntity.badRequest().body("Empty request");
+                return ResponseEntity.badRequest().build();
             }
             User user = userService.findRegistredUser(userRequest.getLogin(), userRequest.getPassword());
             if(user == null){
-                return ResponseEntity.badRequest().body("Already exists");
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();
             } else return ResponseEntity.ok(user);
         } catch(Exception e){
             return ResponseEntity.internalServerError().body(e.getMessage());
@@ -43,11 +44,11 @@ public class UserController {
     public ResponseEntity<?> entranceUser(@RequestBody UserRequest userRequest) {
         try {
             if(userRequest.getLogin().isEmpty() || userRequest.getPassword().isEmpty()){
-                return ResponseEntity.ok().body("Empty request");
+                return ResponseEntity.badRequest().build();
             }
             User user = userService.entranceUser(userRequest);
             if(user == null){
-                return ResponseEntity.ok().body("Invalid login data");
+                return ResponseEntity.notFound().build();
             } else return ResponseEntity.ok(user);
            
         } catch (Exception e) {
@@ -56,15 +57,15 @@ public class UserController {
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteUser(@PathVariable Long id) {
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         try {
             String response = userService.deleteUser(id);
             if(response != null){
-                return response;
+                return ResponseEntity.ok(response);
             }
-            return "error";
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
-            return e.getMessage();
+            return ResponseEntity.internalServerError().build();
         }
     }
     

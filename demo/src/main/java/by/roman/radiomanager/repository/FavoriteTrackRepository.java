@@ -5,9 +5,9 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 
-import by.roman.radiomanager.models.Favorites;
+import by.roman.radiomanager.models.FavoriteTrack;
 
 @Component
-public interface FavoriteRepository extends JpaRepository<Favorites, Long>{
-    List<Favorites> findByUserId(Long userId);
+public interface FavoriteTrackRepository extends JpaRepository<FavoriteTrack, Long>{
+    List<FavoriteTrack> findByUserId(Long userId);
 }

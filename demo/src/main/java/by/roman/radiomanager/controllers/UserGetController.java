@@ -5,9 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import by.roman.radiomanager.models.Favorites;
-import by.roman.radiomanager.models.Filters;
-import by.roman.radiomanager.models.Settings;
+import by.roman.radiomanager.models.*;
 import by.roman.radiomanager.service.UserGetService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,18 +15,32 @@ import org.springframework.web.bind.annotation.PathVariable;
 @RestController
 @AllArgsConstructor
 public class UserGetController {
-    
+
     @Autowired
     private final UserGetService userGetService;
 
-    @GetMapping("/favorites/{id}")
-    public ResponseEntity<?> getFavorites(@PathVariable Long id) {
+    @GetMapping("/favoriteStations/{id}")
+    public ResponseEntity<?> getFavoriteStations(@PathVariable Long id) {
         try {
-            List<Favorites> list = userGetService.getFavorites(id);
-            if(list == null){
-                return ResponseEntity.ok().body("Favorites is empty");
-            } else return ResponseEntity.ok(list);
-        } catch (Exception e){
+            List<FavoriteStation> list = userGetService.getFavoriteStations(id);
+            if (list == null) {
+                return ResponseEntity.ok().build();
+            } else
+                return ResponseEntity.ok(list);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/favoriteTracks/{id}")
+    public ResponseEntity<?> getFavoriteTracks(@PathVariable Long id) {
+        try {
+            List<FavoriteTrack> list = userGetService.getFavoriteTracks(id);
+            if (list == null) {
+                return ResponseEntity.ok().build();
+            } else
+                return ResponseEntity.ok(list);
+        } catch (Exception e) {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }
@@ -37,21 +49,10 @@ public class UserGetController {
     public ResponseEntity<?> getSettings(@PathVariable Long id) {
         try {
             Settings sett = userGetService.getSettings(id);
-            if(sett == null){
-                return ResponseEntity.ok().body("Settings is empty");
-            } else return ResponseEntity.ok(sett);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(e.getMessage());
-        }
-    }
-
-    @GetMapping("/filters/{id}")
-    public ResponseEntity<?> getFilters(@PathVariable Long id){
-        try {
-            Filters filt = userGetService.getFilter(id);
-            if(filt == null){
-                return ResponseEntity.ok().body("Filters is empty");
-            } else return ResponseEntity.ok(filt);
+            if (sett == null) {
+                return ResponseEntity.notFound().build();
+            } else
+                return ResponseEntity.ok(sett);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }

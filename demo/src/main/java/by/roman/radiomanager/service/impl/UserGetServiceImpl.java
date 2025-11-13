@@ -5,12 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import by.roman.radiomanager.models.Favorites;
-import by.roman.radiomanager.models.Filters;
-import by.roman.radiomanager.models.Settings;
-import by.roman.radiomanager.repository.FavoriteRepository;
-import by.roman.radiomanager.repository.FilterRepository;
-import by.roman.radiomanager.repository.SettingsRepository;
+import by.roman.radiomanager.models.*;
+import by.roman.radiomanager.repository.*;
 import by.roman.radiomanager.service.UserGetService;
 import lombok.AllArgsConstructor;
 
@@ -19,16 +15,30 @@ import lombok.AllArgsConstructor;
 public class UserGetServiceImpl implements UserGetService{
     
     @Autowired
-    private final FavoriteRepository favoriteRepository;
+    private FavoriteStationsRepository favoriteStationsRepository;
+
     @Autowired
-    private final FilterRepository filterRepository;
+    private FavoriteTrackRepository favoriteTrackRepository;
+
     @Autowired
-    private final SettingsRepository settingsRepository;
+    private SettingsRepository settingsRepository;
 
     @Override
-    public List<Favorites> getFavorites(Long id){
+    public List<FavoriteStation> getFavoriteStations(Long id){
         try {
-            List<Favorites> list = favoriteRepository.findByUserId(id);
+            List<FavoriteStation> list = favoriteStationsRepository.findByUserId(id);
+            if(list == null){
+                return null;
+            } else return list;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Override
+    public List<FavoriteTrack> getFavoriteTracks(Long id){
+        try {
+            List<FavoriteTrack> list = favoriteTrackRepository.findByUserId(id);
             if(list == null){
                 return null;
             } else return list;
@@ -44,18 +54,6 @@ public class UserGetServiceImpl implements UserGetService{
             if(sett == null){
                 return null;
             } else return sett;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-    
-    @Override
-    public Filters getFilter(Long id){
-        try {
-            Filters filt = filterRepository.findFiltersById(id);
-            if(filt == null){
-                return null;
-            } else return filt;
         } catch (Exception e) {
             return null;
         }

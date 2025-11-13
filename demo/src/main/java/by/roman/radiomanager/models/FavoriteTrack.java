@@ -1,5 +1,6 @@
 package by.roman.radiomanager.models;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -7,24 +8,25 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "app_favorites")
-public class Favorites {
+@Table(name = "app_favorites_track")
+public class FavoriteTrack {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;  // Уникальный идентификатор записи
+    private Long id;
     private Long userId;
-    private String uuid;
+    @Column(columnDefinition = "TEXT")
+    private String track;
 
-    public Favorites(Long userId, String uuid) {
+    public FavoriteTrack(Long userId, String track) {
         this.userId = userId;
-        this.uuid = uuid;
+        this.track = track;
     }
 
     public Long getUserId() {
         return userId;
     }
 
-    public String getUuid() {
-        return uuid;
+    public String getTrack() {
+        return track;
     }
 }

@@ -12,11 +12,15 @@ public class User {
     @Id
     @GeneratedValue
     private Long id;
-    @Column(unique = true)
+    @Column(unique = true, columnDefinition = "TEXT")
     private String login;
+    @Column(columnDefinition = "TEXT")
     private String password;
+    @Column(columnDefinition = "TEXT")
     private String station;
-    private int inSystem;
+    @Column(columnDefinition = "TEXT")
+    private String avatar;
+    private int inSystem = 0;
 
     public User() {}
 
@@ -46,5 +50,12 @@ public class User {
 
     public int getInSystem() {
         return inSystem;
+    }
+
+    public String getAvatar(){
+        return avatar;
+    }
+    public void setAvatar(String avatar){
+        this.avatar = avatar;
     }
 }

@@ -2,12 +2,10 @@ package by.roman.radiomanager.service;
 
 import java.util.List;
 
-import by.roman.radiomanager.models.Favorites;
-import by.roman.radiomanager.models.Filters;
-import by.roman.radiomanager.models.Settings;
+import by.roman.radiomanager.models.*;
 
 public interface UserGetService {
-    List<Favorites> getFavorites(Long id);
-    Filters getFilter(Long id);
+    List<FavoriteStation> getFavoriteStations(Long id);
+    List<FavoriteTrack> getFavoriteTracks(Long id);
     Settings getSettings(Long id);
 }
