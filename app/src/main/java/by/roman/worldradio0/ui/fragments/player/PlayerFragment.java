@@ -196,14 +196,13 @@ public class PlayerFragment extends Fragment {
                             }
                         }
                     case MotionEvent.ACTION_MOVE:
-                        // можно добавить feedback по прогрессу свайпа
                         return true;
                 }
                 return false;
             }
         });
     }
-
+//TODO перекрасить фон в соответствии с аватаркой
     @SuppressLint("SetTextI18n")
     private void putData(@NonNull View view){
         station.setText(viewModel.getCurrentStation().getName());

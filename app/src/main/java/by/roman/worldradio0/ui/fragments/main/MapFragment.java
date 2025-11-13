@@ -275,7 +275,6 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         centerSnap.feedVisiblePoints(visible);
     }
     private void snapToNearest() {
-        //todo странная херня, срабатывают эта и след функции при старте фрагмента
         if (allPoints == null || allPoints.isEmpty() || map == null) return;
 
         BoundingBox bbox = map.getBoundingBox();

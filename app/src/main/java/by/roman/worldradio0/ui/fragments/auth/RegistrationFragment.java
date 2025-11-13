@@ -70,7 +70,7 @@ public class RegistrationFragment extends Fragment {
         long startTime = System.nanoTime();
         findAll(view);
         initAll();
-        viewModel.useradd();
+        //viewModel.useradd();
         buttons();
         observeResult();
         Log.v("RegistrationFragment","Performance - onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");

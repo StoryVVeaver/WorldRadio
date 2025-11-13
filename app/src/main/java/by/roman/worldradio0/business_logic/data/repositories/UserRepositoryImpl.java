@@ -15,7 +15,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User getUserData(){
         try {
-            return userDao.getUserData(userDao.getIdUserInSystem());
+            return userDao.getUserData(getUserInSystem());
         } catch (Exception e) {
             Log.e("UserRepositoryImp","Failed get user data");
             return null;
@@ -26,10 +26,21 @@ public class UserRepositoryImpl implements UserRepository {
         try {
             return userDao.isTableEmpty();
         } catch (Exception e) {
-            Log.e("UserRepositoryImpl","Error scanning table");
+            Log.e("UserRepositoryImpl","Error scanning table: " + e.getMessage());
             return true;
         }
     }
+
+    @Override
+    public boolean setUserAvatar(String avatar) {
+        try {
+            return userDao.setUserAvatar(getUserInSystem(), avatar);
+        } catch (Exception e) {
+            Log.e("UserRepositoryImpl", " " + e.getMessage());
+            return false;
+        }
+    }
+
     @Override
     public boolean entrance(User user){
         return false; //TODO
@@ -54,7 +65,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public String getPlayingUUID(){
         try {
-            return userDao.getColumnPlayingUUID(userDao.getIdUserInSystem());
+            return userDao.getColumnPlayingUUID(getUserInSystem());
         } catch (Exception e) {
             Log.e("UserRepositoryImp","Failed get playing UUID");
             return null;
@@ -63,7 +74,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public void setPlayingUUID(String UUID){
         try {
-            userDao.setColumnPlayingUUID(userDao.getIdUserInSystem(),UUID);
+            userDao.setColumnPlayingUUID(getUserInSystem(),UUID);
         } catch (Exception e){
             Log.e("UserRepositoryImp","Failed set playing UUID");
         }
@@ -79,17 +90,18 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public  void removeUser(){
         try {
-            userDao.removeUser(userDao.getIdUserInSystem());
+            userDao.removeUser(getUserInSystem());
         } catch (Exception e) {
             Log.e("UserRepositoryImp","Failed remove user");
         }
     }
     @Override
-    public void exit(){
+    public boolean exit(){
         try {
-            userDao.exit();
+            return userDao.exit();
         } catch (Exception e) {
             Log.e("UserRepositoryImp","Failed exit");
+            return false;
         }
     }
 }

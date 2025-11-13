@@ -44,7 +44,7 @@ public class SettingsList {
             audioItems.add(new SliderItem(GAIN_BROADCAST,"     Эфир:", 0, 100, settings.getGainBroadcast(),true));
             audioItems.add(new CheckItem(AGC_ENABLED,"AGC: ",settings.getAgcEnabled() == 1));
             audioItems.add(new CheckWIthSliderItem(CROSSFADE_ENABLED,CROSSFADE_TIME,"Crossfade: ",0, 20,settings.getCrossfadeTime(),settings.getCrossfadeEnabled() == 1));
-            groups.add(new SettingsGroup("Аудио", audioItems));
+            //groups.add(new SettingsGroup("Аудио", audioItems));
         } catch (Exception e) {
             Log.e("SettingsViewModel", "Error creating list audio settings");
         }
@@ -77,7 +77,6 @@ public class SettingsList {
             dataItems.add(new TextButtonItem(UPDATE_STATIONS_DATA,"Станции:", "[Обновить]"));
             dataItems.add(new TextButtonItem(EXIT_FROM_ACCOUNT,"Выйти из аккаунта", "                "));
             dataItems.add(new TextButtonItem(DELETE_ACCOUNT,"Удалить аккаунт", "                "));
-            //dataItems.add(new TextButtonItem("9","История:", "[Очистить]")); //TODO
             groups.add(new SettingsGroup("Данные и аккаунт", dataItems));
         } catch (Exception e) {
             Log.e("SettingsViewModel", "Error creating list data settings");

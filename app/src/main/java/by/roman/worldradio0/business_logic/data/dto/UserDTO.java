@@ -9,9 +9,10 @@ public class UserDTO {
     private String login;
     private String password;
     private String playing;
+    private String avatar;
     private int inSystem;
     public User toModel(){
-        return new User(id,login,password,playing,inSystem);
+        return new User(id,login,password,playing,inSystem, avatar);
     }
     public UserDTO fromModel(User user){
         UserDTO dto = new UserDTO();
@@ -19,6 +20,7 @@ public class UserDTO {
         dto.login = user.getLogin();
         dto.password = user.getPassword();
         dto.playing = user.getPlaying();
+        dto.avatar = user.getAvatar();
         dto.inSystem = user.getInSystem();
         return dto;
     }
@@ -36,5 +38,8 @@ public class UserDTO {
     }
     public int getInSystem() {
         return inSystem;
+    }
+    public String getAvatar(){
+        return avatar;
     }
 }

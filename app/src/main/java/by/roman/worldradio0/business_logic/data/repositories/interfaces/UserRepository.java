@@ -6,6 +6,7 @@ import by.roman.worldradio0.business_logic.data.models.User;
 public interface UserRepository {
     User getUserData();
     boolean isTableEmpty();
+    boolean setUserAvatar(String avatar);
     boolean entrance(User user);
     int getUserInSystem();
     void setUserInSystem(int id);
@@ -13,5 +14,5 @@ public interface UserRepository {
     void setPlayingUUID(String UUID);
     void useradd(UserDTO dto);
     void removeUser();
-    void exit();
+    boolean exit();
 }

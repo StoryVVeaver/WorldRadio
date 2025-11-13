@@ -11,7 +11,14 @@ public class FilterDTO {
     private String lang;
     private int sort;
     public Filter toModel(){
-        return new Filter(id,name,codec,country, tags,lang,sort);
+        Filter filt = new Filter(id);
+        filt.setName(name);
+        filt.setCodec(codec);
+        filt.setCountry(country);
+        filt.setTag(tags);
+        filt.setLang(lang);
+        filt.setSort(sort);
+        return filt;
     }
     public FilterDTO fromModel(Filter filter){
         FilterDTO dto = new FilterDTO();

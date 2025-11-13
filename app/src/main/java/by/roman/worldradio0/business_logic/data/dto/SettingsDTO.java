@@ -18,13 +18,32 @@ public class SettingsDTO {
     public int notification_enabled;
     public int navigation_type;
 
+    private int par1;
+    private int par2;
+    private int par3;
+    private int par4;
+    private int par5;
+    private int par6;
+    private int par7;
+    private int par8;
+    private int par9;
+    private int par10;
+
     public Settings toModel(){
-        return new Settings(
-                userId,
-                audioBalance, gainRecord, gainBroadcast, agcEnabled, crossfadeEnabled, crossfadeTime,
-                networkType,
-                timerSecondsEnabled, timerDotsType, notification_enabled, navigation_type
-        );
+        Settings sett = new Settings(userId);
+        sett.setAudioBalance(audioBalance);
+        sett.setGainRecord(gainRecord);
+        sett.setGainBroadcast(gainBroadcast);
+        sett.setCrossfadeEnabled(crossfadeEnabled);
+        sett.setCrossfadeTime(crossfadeTime);
+
+        sett.setNetworkType(networkType);
+
+        sett.setTimerSecondsEnabled(timerSecondsEnabled);
+        sett.setTimerDotsType(timerDotsType);
+        sett.setNotificationEnabled(notification_enabled);
+        sett.setNavigationType(navigation_type);
+        return sett;
 
     }
     public SettingsDTO fromModel(Settings settings) {

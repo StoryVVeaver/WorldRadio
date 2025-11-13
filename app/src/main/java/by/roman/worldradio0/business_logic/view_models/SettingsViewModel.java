@@ -67,10 +67,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
 public class SettingsViewModel extends ViewModel {
-    private final MutableLiveData<Boolean> timeToLeave = new MutableLiveData<>();
+    private final MutableLiveData<UiState<Boolean>> timeToLeave = new MutableLiveData<>();
     private final MutableLiveData<UiState<Integer>> count = new MutableLiveData<>();
     private final MutableLiveData<UiState<Boolean>> sendingData = new MutableLiveData<>();
     private final MutableLiveData<UiState<Boolean>> gettingData = new MutableLiveData<>();
+    private final MutableLiveData<UiState<Boolean>> addingAvatar = new MutableLiveData<>();
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
     private final SettingsRepository settingsRepository;
     private final RadioRepository radioRepository;
@@ -97,8 +98,11 @@ public class SettingsViewModel extends ViewModel {
         this.favoriteStationRepository = favoriteStationRepository;
         settModel = settingsRepository.getSettings();
     }
-    public LiveData<Boolean> getTimeToLeave(){
+    public LiveData<UiState<Boolean>> getTimeToLeave(){
         return timeToLeave;
+    }
+    public LiveData<UiState<Boolean>> getAddAvatar(){
+        return addingAvatar;
     }
     public LiveData<UiState<Integer>> getStationsCount(){
         return count;
@@ -121,7 +125,34 @@ public class SettingsViewModel extends ViewModel {
         }
     }
     public void logOut(){
-        userRepository.exit();
+        if(userRepository.exit()){
+            timeToLeave.postValue(UiState.success(true));
+        } else {
+            timeToLeave.postValue(UiState.error(""));
+        }
+    }
+    public void addAvator(String avatar){
+        addingAvatar.postValue(UiState.loading());
+        User user = userRepository.getUserData();
+        user.setAvatar(avatar);
+        Log.v("settVM", user.toString());
+        dataFromUserAPI.putUser(user, new PutCallback() {
+            @Override
+            public void onSuccess(String t) {
+                Log.v("VM", "success");
+                if(userRepository.setUserAvatar(avatar)){
+                    addingAvatar.postValue(UiState.success(true));
+                } else {
+                    addingAvatar.postValue(UiState.error("fail"));
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.e("VM", "fail, " + t.getMessage());
+                addingAvatar.postValue(UiState.error(t.getMessage()));
+            }
+        });
     }
     public void toggleChange(@NonNull String key, boolean flag){
         switch (key) {
@@ -192,13 +223,13 @@ public class SettingsViewModel extends ViewModel {
 
             case EXIT_FROM_ACCOUNT:
                 userRepository.exit();
-                timeToLeave.postValue(true);
+                timeToLeave.postValue(UiState.success(true));
                 break;
 
             case DELETE_ACCOUNT:
                 dataFromUserAPI.deleteUser(userRepository.getUserInSystem());
                 userRepository.removeUser();
-                timeToLeave.postValue(true);
+                timeToLeave.postValue(UiState.success(true));
                 break;
         }
     }
@@ -248,7 +279,6 @@ public class SettingsViewModel extends ViewModel {
             }
             @Override
             public void onLoading(){
-                //TODO загрузка станций
             }
         }));
     }

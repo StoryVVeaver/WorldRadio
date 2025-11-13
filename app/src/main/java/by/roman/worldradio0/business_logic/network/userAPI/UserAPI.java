@@ -48,8 +48,8 @@ import okhttp3.ResponseBody;
 @Singleton
 public class UserAPI {
     //private static final String API_URL = "http://192.168.43.146:8080/api/v1/user";
-    private static final String API_URL = "http://192.168.0.85:8080/api/v1/user";
-    //private static final String API_URL = "https://552f-144-76-200-45.ngrok-free.app/api/v1/user";
+    //private static final String API_URL = "http://192.168.0.86:8080/api/v1/user";
+    private static final String API_URL = "https://kkvxmvg9-8080.euw.devtunnels.ms/api/v1/user";
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     public UserAPI(){
 
@@ -328,6 +328,9 @@ public class UserAPI {
     public void putFilters(Filter filter, PutCallback callback) {
         executePutRequest("/put/filters", filter, callback);
     }
+    public void putUser(User user, PutCallback callback){
+        executePutRequest("/put/user", user, callback);
+    }
     public void putFavorites(List<FavoriteStation> list, PutCallback callback) {
         if (list == null || list.isEmpty()) {
             callback.onSuccess("saved");
@@ -355,10 +358,12 @@ public class UserAPI {
                 .build();
 
         Log.d("UserAPI " + endpoint, "Request created");
+        Log.d("UserAPI " + endpoint, requestBody.toString());
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) {
                 try (ResponseBody responseBody = response.body()) {
+                    Log.v("UserAPI " + endpoint, response.code() + " ");
                     if (!response.isSuccessful()) {
                         callback.onFailure(new Exception("HTTP error: " + response.code()));
                         return;

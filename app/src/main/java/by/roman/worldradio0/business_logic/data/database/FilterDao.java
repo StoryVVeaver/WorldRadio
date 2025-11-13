@@ -61,15 +61,14 @@ public class FilterDao {
                 int tagsIndex = cursor.getColumnIndex(COLUMN_TAGS_FILTER);
                 int sortIndex = cursor.getColumnIndex(COLUMN_SORT_FILTER);
                 if(idIndex != -1 && nameIndex != -1 && codecIndex != -1 && countryIndex != -1 && langIndex != -1 && tagsIndex != -1 && sortIndex != -1){
-                    return new Filter(
-                            cursor.getInt(idIndex),
-                            cursor.getString(nameIndex),
-                            cursor.getString(codecIndex),
-                            cursor.getString(countryIndex),
-                            cursor.getString(langIndex),
-                            cursor.getString(tagsIndex),
-                            cursor.getInt(sortIndex)
-                    );
+                    Filter filter = new Filter(cursor.getInt(idIndex));
+                            filter.setName(cursor.getString(nameIndex));
+                            filter.setCodec(cursor.getString(codecIndex));
+                            filter.setCountry(cursor.getString(countryIndex));
+                            filter.setLang(cursor.getString(langIndex));
+                            filter.setTag(cursor.getString(tagsIndex));
+                            filter.setSort(cursor.getInt(sortIndex));
+                    return filter;
                 }
             }
         }
@@ -89,11 +88,11 @@ public class FilterDao {
     }
     public void removeFilters(int id){
         ContentValues values = new ContentValues();
-        values.put(COLUMN_NAME_FILTER,"null");
-        values.put(COLUMN_CODEC_FILTER,"null");
-        values.put(COLUMN_COUNTRY_FILTER,"null");
-        values.put(COLUMN_LANG_FILTER,"null");
-        values.put(COLUMN_TAGS_FILTER,"null");
+        values.put(COLUMN_NAME_FILTER,"");
+        values.put(COLUMN_CODEC_FILTER,"");
+        values.put(COLUMN_COUNTRY_FILTER,"");
+        values.put(COLUMN_LANG_FILTER,"");
+        values.put(COLUMN_TAGS_FILTER,"");
         values.put(COLUMN_SORT_FILTER,0);
         String selection = COLUMN_USER_ID_FILTER + " = ?";
         String[] selectionArgs = {String.valueOf(id)};

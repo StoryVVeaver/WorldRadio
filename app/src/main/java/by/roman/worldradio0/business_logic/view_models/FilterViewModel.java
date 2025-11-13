@@ -177,6 +177,11 @@ public class FilterViewModel extends ViewModel {
         Log.e("fdsgdmodel", "set");
         filterRepository.setFilters(new FilterDTO().fromModel(filter));
         Log.e("fdsgdmodel", "set");
+        resetState();
+        loadNextPage();
+    }
+    public void clearFilters(){
+        filterRepository.removeFilters();
     }
     public Filter getFilters() {
         return filterRepository.getFilters();

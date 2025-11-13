@@ -7,15 +7,18 @@ import static android.view.View.VISIBLE;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -70,8 +73,12 @@ public class    RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof StationViewHolder) {
             RadioStation station = stations.get(position);
+            boolean isLast = false;
+            if(position + 1 == stations.size()){
+                isLast = true;
+            }
             StationViewHolder stationHolder = (StationViewHolder) holder;
-            stationHolder.bind(station);
+            stationHolder.bind(station, isLast);
 
             holder.itemView.setOnClickListener(v -> {
                 int pos = holder.getBindingAdapterPosition();
@@ -151,6 +158,7 @@ public class    RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     class StationViewHolder extends RecyclerView.ViewHolder {
         private final TextView nameStation, country, quality;
         private final ImageView logoStation, flag, button;
+        private final FrameLayout card;
 
         public StationViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -160,14 +168,25 @@ public class    RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             country = itemView.findViewById(R.id.countryName_CardHome);
             button = itemView.findViewById(R.id.delButton_card);
             quality = itemView.findViewById(R.id.quality_collapsed_player);
+            card = itemView.findViewById(R.id.radio_card);
         }
 
         @SuppressLint("SetTextI18n")
-        void bind(@NonNull RadioStation station) {
+        void bind(@NonNull RadioStation station, boolean isLast) {
             nameStation.setText(station.getName());
             nameStation.setSelected(true);
             country.setText(station.getCountry());
             int bitrate = station.getBitrate();
+            card.setPadding(0, 0, 0, 0);
+
+            if(isLast){
+                int bottomPaddingPx = (int) TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP,
+                        250,
+                        itemView.getResources().getDisplayMetrics()
+                );
+                card.setPadding(0, 0, 0, bottomPaddingPx);
+            }
             if(bitrate > 400){
                 if(bitrate > 5000){
                     bitrate = bitrate / 100;

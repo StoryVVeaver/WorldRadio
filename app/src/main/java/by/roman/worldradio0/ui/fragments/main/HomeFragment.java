@@ -62,7 +62,7 @@ public class HomeFragment extends Fragment {
         stateViewModel = new ViewModelProvider(requireActivity()).get(StateViewModel.class);
         map.setOnClickListener(v1 -> mode(new MapFragment(),0));
         list.setOnClickListener(v1 -> mode(new ListFragment(),1));
-
+        //TODO  перелистывание экранов только по краям карты
         Log.v("HomeFragment: performance", "onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
         timerButton.setOnClickListener(v -> {
             stateViewModel.openFullscreen(new TimerFragment());

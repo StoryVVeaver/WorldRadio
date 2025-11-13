@@ -9,14 +9,14 @@ public class Filter {
     private String lang;
     private int sort;
 
-    public Filter(int id,String name,String codec, String country,String tag,String lang,int sort){
+    public Filter(int id){
         this.id = id;
-        this.name = name;
-        this.codec = codec;
-        this.country = country;
-        this.tag = tag;
-        this.lang = lang;
-        this.sort = sort;
+        this.name = null;
+        this.codec = null;
+        this.country = null;
+        this.tag = null;
+        this.lang = null;
+        this.sort = 0;
     }
 
     // Getters

@@ -122,23 +122,21 @@ public class SettingsDao {
                         notificationEnabledIndex != -1 &&
                         navigationTypeIndex != -1) {
 
-                    return new Settings(
-                            cursor.getInt(idIndex),
+                    Settings sett = new Settings(cursor.getInt(idIndex));
+                    sett.setAudioBalance(cursor.getInt(audioBalanceIndex));
+                    sett.setGainRecord(cursor.getInt(gainRecordIndex));
+                    sett.setGainBroadcast(cursor.getInt(gainBroadcastIndex));
+                    sett.setAgcEnabled(cursor.getInt(agcEnabledIndex));
+                    sett.setCrossfadeEnabled(cursor.getInt(crossfadeEnabledIndex));
+                    sett.setCrossfadeTime(cursor.getInt(crossfadeTimeIndex));
 
-                            cursor.getInt(audioBalanceIndex),
-                            cursor.getInt(gainRecordIndex),
-                            cursor.getInt(gainBroadcastIndex),
-                            cursor.getInt(agcEnabledIndex),
-                            cursor.getInt(crossfadeEnabledIndex),
-                            cursor.getInt(crossfadeTimeIndex),
+                    sett.setNetworkType(cursor.getInt(networkTypeIndex));
 
-                            cursor.getInt(networkTypeIndex),
-
-                            cursor.getInt(timerSecondsIndex),
-                            cursor.getInt(timerDotsIndex),
-                            cursor.getInt(notificationEnabledIndex),
-                            cursor.getInt(navigationTypeIndex)
-                    );
+                    sett.setTimerSecondsEnabled(cursor.getInt(timerSecondsIndex));
+                    sett.setTimerDotsType(cursor.getInt(timerDotsIndex));
+                    sett.setNotificationEnabled(cursor.getInt(notificationEnabledIndex));
+                    sett.setNavigationType(cursor.getInt(navigationTypeIndex));
+                    return sett;
                 }
             }
         }

@@ -5,6 +5,7 @@ import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.FrameLayout;
 
@@ -26,6 +27,7 @@ import java.util.Objects;
 
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.adapters.ViewPagerAdapter;
+import by.roman.worldradio0.business_logic.view_models.AccountViewModel;
 import by.roman.worldradio0.business_logic.view_models.StateViewModel;
 import by.roman.worldradio0.ui.fragments.player.PlayerFragment;
 import dagger.hilt.android.AndroidEntryPoint;
@@ -43,6 +45,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        AccountViewModel viewModel = new ViewModelProvider(this).get(AccountViewModel.class);
+        if(viewModel.isUserHere() == -1){
+            startActivity(new Intent(this, AccountActivity.class));
+            finish();
+            return;
+        }
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -198,6 +206,7 @@ public class MainActivity extends AppCompatActivity {
             restoreUi.run();
         }
     }
+
     @Override
     public void onBackPressed() {
         FragmentManager fm = getSupportFragmentManager();

@@ -20,8 +20,11 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.List;
 import java.util.Objects;
@@ -40,25 +43,14 @@ public class FilterFragment extends Fragment {
     private MaterialAutoCompleteTextView actvLang;
     private MaterialAutoCompleteTextView actvName;
     private MaterialAutoCompleteTextView actvCodec;
-    private ImageButton backButton;
-    private TextView deleteCountry;
-    private TextView deleteTags;
-    private TextView deleteLang;
-    private TextView deleteCodec;
-    private TextView deleteName;
+    private MaterialToolbar toolbar;
     private TextView countText;
+    private MaterialButton btnReset;
     private FilterViewModel viewModel;
     private StateViewModel stateViewModel;
     private Filter filter;
-    private Chip chip1;
-    private Chip chip2;
-    private Chip chip3;
-    private int pos;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
+    private Chip chipAlphabet, chipRating, chipBitrate;
+    private int currentSort = 0;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -69,247 +61,202 @@ public class FilterFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        long startTime = System.nanoTime();
-        Log.v("FilterActivity: performance", "onCreated started");
+
         findAllId(view);
         initAll();
         observeAndLoad();
-        buttons();
+        setupClickListeners();
         fillFields();
-        Log.v("FilterActivity: performance", "onCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
     }
 
-    private void fillFields(){
-        try{
-            if(filter.getLang() != null){
-                actvLang.setText(filter.getLang());
-                deleteLang.setVisibility(VISIBLE);
-            }
-            if (filter.getCountry() != null){
-                actvCountry.setText(filter.getCountry());
-                deleteCountry.setVisibility(VISIBLE);
-            }
-            if (filter.getTag() != null){
-                actvTags.setText(filter.getTag());
-                deleteTags.setVisibility(VISIBLE);
-            }
-            if(filter.getName() != null){
-                actvName.setText(filter.getName());
-                deleteName.setVisibility(VISIBLE);
-            }
-            if(filter.getCodec() != null){
-                actvCodec.setText(filter.getCodec());
-                deleteCodec.setVisibility(VISIBLE);
-            }
-        } catch (Exception e){
-            Log.e("FilterActivity", Objects.requireNonNull(e.getMessage()));
-        }
+    private void findAllId(View view){
+        toolbar = view.findViewById(R.id.toolbar);
+        countText = view.findViewById(R.id.StationCount);
+        btnReset = view.findViewById(R.id.btnReset);
+
+        chipAlphabet = view.findViewById(R.id.chipAlphabet);
+        chipRating = view.findViewById(R.id.chipRating);
+        chipBitrate = view.findViewById(R.id.chipBitrate);
+
+        // Находим AutoCompleteTextView для каждого поля
+        setupAutoCompleteFields(view);
     }
-    private void buttons(){
-        try {
-            chip1.setOnClickListener(v -> {
-                if(pos == 1){
-                    pos = 0;
-                } else pos = 1;
-                chip2.setChecked(false);
-                chip3.setChecked(false);
-                filter.setSort(pos);
-                viewModel.setFilters(filter);
-            });
-            chip2.setOnClickListener(v -> {
-                if(pos == 2){
-                    pos = 0;
-                } else pos = 2;
-                chip1.setChecked(false);
-                chip3.setChecked(false);
-                filter.setSort(pos);
-                viewModel.setFilters(filter);
-            });
-            chip3.setOnClickListener(v -> {
-                if(pos == 3){
-                    pos = 0;
-                } else pos = 3;
-                chip1.setChecked(false);
-                chip2.setChecked(false);
-                filter.setSort(pos);
-                viewModel.setFilters(filter);
-            });
-            backButton.setOnClickListener(v -> {
-                stateViewModel.closeFullscreen();
-            });
-            deleteCountry.setOnClickListener(v -> {
-                filter.setCountry(null);
-                viewModel.setFilters(filter);
-                viewModel.loadCount();
-                actvCountry.setText("");
-                deleteCountry.setVisibility(INVISIBLE);
-            });
-            deleteLang.setOnClickListener(v -> {
-                filter.setLang(null);
-                viewModel.setFilters(filter);
-                viewModel.loadCount();
-                actvLang.setText("");
-                deleteLang.setVisibility(INVISIBLE);
-            });
-            deleteTags.setOnClickListener(v -> {
-                filter.setTag(null);
-                viewModel.setFilters(filter);
-                viewModel.loadCount();
-                actvTags.setText("");
-                deleteTags.setVisibility(INVISIBLE);
-            });
-            deleteName.setOnClickListener(v -> {
-                filter.setName(null);
-                viewModel.setFilters(filter);
-                viewModel.loadCount();
-                actvName.setText("");
-                deleteName.setVisibility(INVISIBLE);
-            });
-            deleteCodec.setOnClickListener(v -> {
-                filter.setCodec(null);
-                viewModel.setFilters(filter);
-                viewModel.loadCount();
-                actvCodec.setText("");
-                deleteCodec.setVisibility(INVISIBLE);
-            });
-        } catch (Exception e) {
-            Log.e("FilterActivity", Objects.requireNonNull(e.getMessage()));
-        }
+
+    private void setupAutoCompleteFields(View view) {
+        // Страна
+        TextInputLayout countryLayout = view.findViewById(R.id.filterCountry).findViewById(R.id.textInputLayout);
+        actvCountry = (MaterialAutoCompleteTextView) countryLayout.getEditText();
+        countryLayout.setHint("Страна");
+
+        // Теги
+        TextInputLayout tagsLayout = view.findViewById(R.id.filterTags).findViewById(R.id.textInputLayout);
+        actvTags = (MaterialAutoCompleteTextView) tagsLayout.getEditText();
+        tagsLayout.setHint("Теги");
+
+        // Язык
+        TextInputLayout langLayout = view.findViewById(R.id.filterLanguage).findViewById(R.id.textInputLayout);
+        actvLang = (MaterialAutoCompleteTextView) langLayout.getEditText();
+        langLayout.setHint("Язык");
+
+        // Название
+        TextInputLayout nameLayout = view.findViewById(R.id.filterName).findViewById(R.id.textInputLayout);
+        actvName = (MaterialAutoCompleteTextView) nameLayout.getEditText();
+        nameLayout.setHint("Название станции");
+
+        // Кодек
+        TextInputLayout codecLayout = view.findViewById(R.id.filterCodec).findViewById(R.id.textInputLayout);
+        actvCodec = (MaterialAutoCompleteTextView) codecLayout.getEditText();
+        codecLayout.setHint("Кодек");
     }
-    private void handleSelection(int type,  String selectedItem) {
-        try {
-            switch (type){
-                case 1:
-                    filter.setCountry(selectedItem);
-                    deleteCountry.setVisibility(VISIBLE);
-                    break;
-                case 2:
-                    filter.setTag(selectedItem);
-                    deleteTags.setVisibility(VISIBLE);
-                    break;
-                case 3:
-                    filter.setLang(selectedItem);
-                    deleteLang.setVisibility(VISIBLE);
-                    break;
-                case 4:
-                    filter.setName(selectedItem);
-                    deleteName.setVisibility(VISIBLE);
-                    break;
-                case 5:
-                    filter.setCodec(selectedItem);
-                    deleteCodec.setVisibility(VISIBLE);
-                    break;
-            }
-            viewModel.setFilters(filter);
-            viewModel.loadCount();
-        } catch (Exception e) {
-            Log.e("FilterActivity", Objects.requireNonNull(e.getMessage()));
-        }
+
+    private void setupClickListeners() {
+        toolbar.setNavigationOnClickListener(v -> {
+            stateViewModel.closeFullscreen();
+        });
+
+        btnReset.setOnClickListener(v -> {
+            resetAllFilters();
+        });
+
+        chipAlphabet.setOnClickListener(v -> handleChipSelection(1));
+        chipRating.setOnClickListener(v -> handleChipSelection(2));
+        chipBitrate.setOnClickListener(v -> handleChipSelection(3));
     }
+
+    private void handleChipSelection(int sortType) {
+        if (currentSort == sortType) {
+            currentSort = 0;
+            chipAlphabet.setChecked(false);
+            chipRating.setChecked(false);
+            chipBitrate.setChecked(false);
+        } else {
+            currentSort = sortType;
+            chipAlphabet.setChecked(sortType == 1);
+            chipRating.setChecked(sortType == 2);
+            chipBitrate.setChecked(sortType == 3);
+        }
+        filter.setSort(currentSort);
+        viewModel.setFilters(filter);
+        viewModel.loadCount();
+    }
+
+    private void resetAllFilters() {
+        actvName.setText("");
+        actvCountry.setText("");
+        actvTags.setText("");
+        actvLang.setText("");
+        actvCodec.setText("");
+
+        currentSort = 0;
+        chipAlphabet.setChecked(false);
+        chipRating.setChecked(false);
+        chipBitrate.setChecked(false);
+        filter.setCodec(null);
+        filter.setName(null);
+        filter.setTag(null);
+        filter.setCountry(null);
+        filter.setLang(null);
+        viewModel.setFilters(filter);
+        viewModel.loadCount();
+    }
+
+    private void handleSelection(String selectedItem, MaterialAutoCompleteTextView actv, String fieldType) {
+        switch (fieldType) {
+            case "country":
+                filter.setCountry(selectedItem);
+                break;
+            case "tags":
+                filter.setTag(selectedItem);
+                break;
+            case "language":
+                filter.setLang(selectedItem);
+                break;
+            case "name":
+                filter.setName(selectedItem);
+                break;
+            case "codec":
+                filter.setCodec(selectedItem);
+                break;
+        }
+        viewModel.setFilters(filter);
+        viewModel.loadCount();
+    }
+
     @SuppressLint("SetTextI18n")
     private void observeAndLoad() {
         viewModel.getCountFilteredStations().observe(getViewLifecycleOwner(), count -> {
             if (count == null) return;
             switch (count.status) {
-                case LOADING:
-                case ERROR:
-                    break;
                 case SUCCESS:
-                    if (count.data != null && countText != null) {
-                        countText.setText("Подходит " + count.data);
+                    if (count.data != null) {
+                        String stationText = count.data + " станций найдено";
+                        countText.setText(stationText);
                     }
                     break;
+                case LOADING:
+                    countText.setText("Загрузка...");
+                    break;
+                case ERROR:
+                    countText.setText("Ошибка");
+                    break;
             }
         });
+
         viewModel.loadCount();
-        viewModel.getCountriesLive().observe(getViewLifecycleOwner(), list -> {
-            if (list != null) setupAutoComplete(actvCountry, list, 1);
-        });
-        viewModel.getTagsLive().observe(getViewLifecycleOwner(), list -> {
-            if (list != null) setupAutoComplete(actvTags, list, 2);
-        });
-        viewModel.getLanguagesLive().observe(getViewLifecycleOwner(), list -> {
-            if (list != null) setupAutoComplete(actvLang, list, 3);
-        });
-        viewModel.getNamesLive().observe(getViewLifecycleOwner(), list -> {
-            if (list != null) setupAutoComplete(actvName, list, 4);
-        });
-        viewModel.getCodecsLive().observe(getViewLifecycleOwner(), list -> {
-            if (list != null) setupAutoComplete(actvCodec, list, 5);
-        });
+
+        // Настройка автодополнения
+        viewModel.getCountriesLive().observe(getViewLifecycleOwner(), list ->
+                setupAutoComplete(actvCountry, list, "country"));
+        viewModel.getTagsLive().observe(getViewLifecycleOwner(), list ->
+                setupAutoComplete(actvTags, list, "tags"));
+        viewModel.getLanguagesLive().observe(getViewLifecycleOwner(), list ->
+                setupAutoComplete(actvLang, list, "language"));
+        viewModel.getNamesLive().observe(getViewLifecycleOwner(), list ->
+                setupAutoComplete(actvName, list, "name"));
+        viewModel.getCodecsLive().observe(getViewLifecycleOwner(), list ->
+                setupAutoComplete(actvCodec, list, "codec"));
+
         viewModel.loadAutocompleteData();
     }
-    private void setupAutoComplete(@NonNull MaterialAutoCompleteTextView actv, List<String> list, int type){
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(actv.getContext(), android.R.layout.simple_dropdown_item_1line, list);
-        actv.setAdapter(adapter);
 
-        actv.setThreshold(2);
+    private void setupAutoComplete(MaterialAutoCompleteTextView actv, List<String> list, String fieldType) {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                requireContext(),
+                android.R.layout.simple_dropdown_item_1line,
+                list
+        );
+        actv.setAdapter(adapter);
+        actv.setThreshold(1);
+
         actv.setOnItemClickListener((parent, view, position, id) -> {
             String selected = (String) parent.getItemAtPosition(position);
-            handleSelection(type, selected);
+            handleSelection(selected, actv, fieldType);
         });
     }
-    private void initAll(){
-        try {
-            viewModel = new ViewModelProvider(requireActivity()).get(FilterViewModel.class);
-            stateViewModel = new ViewModelProvider(requireActivity()).get(StateViewModel.class);
-            filter = viewModel.getFilters();
-            switch (filter.getSort()){
-                case 1:
-                    chip1.setChecked(true);
-                    break;
 
-                case 2:
-                    chip2.setChecked(true);
-                    break;
+    private void initAll() {
+        viewModel = new ViewModelProvider(requireActivity()).get(FilterViewModel.class);
+        stateViewModel = new ViewModelProvider(requireActivity()).get(StateViewModel.class);
+        filter = viewModel.getFilters();
 
-                case 3:
-                    chip3.setChecked(true);
-                    break;
-
-                default:
-                    break;
-            }
-        } catch (Exception e) {
-            Log.e("FilterActivity", Objects.requireNonNull(e.getMessage()));
+        // Восстанавливаем состояние сортировки
+        currentSort = filter.getSort();
+        switch (currentSort) {
+            case 1: chipAlphabet.setChecked(true); break;
+            case 2: chipRating.setChecked(true); break;
+            case 3: chipBitrate.setChecked(true); break;
         }
     }
-    @SuppressLint("SetTextI18n")
-    private void findAllId(View view){
-        chip1 = view.findViewById(R.id.chipAlphabet);
-        chip2 = view.findViewById(R.id.chipRating);
-        chip3 = view.findViewById(R.id.chipBitrate);
-        View filter_countryView = view.findViewById(R.id.filterCountry);
-        View filter_tagsView = view.findViewById(R.id.filterTags);
-        View filter_langView = view.findViewById(R.id.filterLanguage);
-        View filter_nameView = view.findViewById(R.id.filterName);
-        View filter_codecView = view.findViewById(R.id.filterCodec);
-        actvCountry = filter_countryView.findViewById(R.id.autoComplete);
-        actvTags = filter_tagsView.findViewById(R.id.autoComplete);
-        actvLang = filter_langView.findViewById(R.id.autoComplete);
-        actvName = filter_nameView.findViewById(R.id.autoComplete);
-        actvCodec = filter_codecView.findViewById(R.id.autoComplete);
-        backButton = view.findViewById(R.id.btnBack);
-        countText = view.findViewById(R.id.StationCount);
-        deleteCountry = filter_countryView.findViewById(R.id.delete);
-        deleteCountry.setVisibility(INVISIBLE);
-        deleteTags = filter_tagsView.findViewById(R.id.delete);
-        deleteTags.setVisibility(INVISIBLE);
-        deleteLang = filter_langView.findViewById(R.id.delete);
-        deleteLang.setVisibility(INVISIBLE);
-        deleteName = filter_nameView.findViewById(R.id.delete);
-        deleteName.setVisibility(INVISIBLE);
-        deleteCodec = filter_codecView.findViewById(R.id.delete);
-        deleteCodec.setVisibility(INVISIBLE);
-        TextView countryFilter = filter_countryView.findViewById(R.id.nameFilter);
-        countryFilter.setText("Country");
-        TextView tagFilter = filter_tagsView.findViewById(R.id.nameFilter);
-        tagFilter.setText("Tags");
-        TextView langFilter = filter_langView.findViewById(R.id.nameFilter);
-        langFilter.setText("Lang");
-        TextView nameFilter = filter_nameView.findViewById(R.id.nameFilter);
-        nameFilter.setText("Name");
-        TextView codecFilter = filter_codecView.findViewById(R.id.nameFilter);
-        codecFilter.setText("Codec");
+
+    private void fillFields() {
+        try {
+            if (filter.getLang() != null) actvLang.setText(filter.getLang());
+            if (filter.getCountry() != null) actvCountry.setText(filter.getCountry());
+            if (filter.getTag() != null) actvTags.setText(filter.getTag());
+            if (filter.getName() != null) actvName.setText(filter.getName());
+            if (filter.getCodec() != null) actvCodec.setText(filter.getCodec());
+        } catch (Exception e) {
+            Log.e("FilterFragment", "Error filling fields", e);
+        }
     }
 }

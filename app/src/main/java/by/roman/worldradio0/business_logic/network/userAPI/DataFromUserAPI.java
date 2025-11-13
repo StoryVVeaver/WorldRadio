@@ -10,6 +10,7 @@ import by.roman.worldradio0.business_logic.data.dto.UserDTO;
 import by.roman.worldradio0.business_logic.data.models.FavoriteStation;
 import by.roman.worldradio0.business_logic.data.models.Filter;
 import by.roman.worldradio0.business_logic.data.models.Settings;
+import by.roman.worldradio0.business_logic.data.models.User;
 import by.roman.worldradio0.business_logic.data.models.UserRequest;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FavoritesCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FiltersCallback;
@@ -113,6 +114,19 @@ public class DataFromUserAPI {
     }
     public void putFilters(Filter filter, PutCallback callback){
         userAPI.putFilters(filter, new PutCallback() {
+            @Override
+            public void onSuccess(String t) {
+                callback.onSuccess(t);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                callback.onFailure(t);
+            }
+        });
+    }
+    public void putUser(User user, PutCallback callback){
+        userAPI.putUser(user, new PutCallback() {
             @Override
             public void onSuccess(String t) {
                 callback.onSuccess(t);

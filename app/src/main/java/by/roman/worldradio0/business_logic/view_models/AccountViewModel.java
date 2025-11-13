@@ -76,9 +76,10 @@ public class AccountViewModel extends ViewModel {
             public void onSuccess(UserDTO dto) {
                 try {
                     userRepository.useradd(dto);
+
                     userRepository.setUserInSystem(dto.getId());
                     settingsRepository.addSettings(new SettingsDTO().fromModel(new Settings(dto.getId())));
-                    filterRepository.addFilters(new FilterDTO().fromModel(new Filter(dto.getId(),null,null,null,null,null,0)));
+                    filterRepository.addFilters(new FilterDTO().fromModel(new Filter(dto.getId())));
                     result.postValue(UiState.success(true));
                 } catch (Exception e) {
                     result.postValue(UiState.error(e.getMessage()));
@@ -101,7 +102,7 @@ public class AccountViewModel extends ViewModel {
                     userRepository.useradd(dto);
                     userRepository.setUserInSystem(dto.getId());
                     settingsRepository.addSettings(new SettingsDTO().fromModel(new Settings(dto.getId())));
-                    filterRepository.addFilters(new FilterDTO().fromModel(new Filter(dto.getId(),null,null,null,null,null,0)));
+                    filterRepository.addFilters(new FilterDTO().fromModel(new Filter(dto.getId())));
                     result.postValue(UiState.success(true));
                 } catch (Exception e) {
                     result.postValue(UiState.error(e.getMessage()));
@@ -117,9 +118,9 @@ public class AccountViewModel extends ViewModel {
     }
     public void useradd(){
         UserDTO dto = new UserDTO();
-        userRepository.useradd(dto.fromModel(new User(1,"user","user",null,1)));
+        userRepository.useradd(dto.fromModel(new User(1,"user","user",null,1, null)));
         settingsRepository.addSettings(new SettingsDTO().fromModel(new Settings(dto.getId())));
-        filterRepository.addFilters(new FilterDTO().fromModel(new Filter(dto.getId(),null,null,null,null,null,0)));
+        filterRepository.addFilters(new FilterDTO().fromModel(new Filter(dto.getId())));
     }
     public void loadStations(){
         if(!hasRecords()){

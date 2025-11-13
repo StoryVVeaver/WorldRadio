@@ -8,6 +8,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,24 +20,32 @@ import by.roman.worldradio0.business_logic.adapters.RadioAdapter;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.view_models.FilterViewModel;
 import by.roman.worldradio0.business_logic.view_models.PlayerViewModel;
+import by.roman.worldradio0.business_logic.view_models.StateViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class ListFragment extends Fragment {
     private PlayerViewModel playerViewModel;
+    private StateViewModel stateViewModel;
     private FilterViewModel viewModel;
     private RecyclerView recyclerView;
     private RadioAdapter adapter;
     private boolean isLoadingNextPage = false;
     private boolean isVisibleToUser = false;
+    private boolean isFirstLoad = true;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
     public void onResume() {
         super.onResume();
         isVisibleToUser = true;
-        viewModel.resetState();
-        viewModel.loadStart();
+
+        // Загружаем только при первом открытии или если данные сброшены
+        if (isFirstLoad) {
+            viewModel.resetState();
+            viewModel.loadStart();
+            isFirstLoad = false;
+        }
     }
 
     @Override
@@ -43,7 +53,7 @@ public class ListFragment extends Fragment {
         super.onPause();
         isVisibleToUser = false;
         handler.removeCallbacksAndMessages(null);
-        viewModel.cancelPendingOperations();
+        // Не отменяем операции - они могут выполняться в фоне
     }
 
     @Override
@@ -55,32 +65,35 @@ public class ListFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        long startTime = System.nanoTime();
+        Log.v("HomeFragment: performance", "onViewCreated started");
+
         findAllId(view);
         initAll();
         observeAndLoad();
+        setupScrollListener();
 
+        Log.v("HomeFragment: performance", "onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
+    }
+
+    private void setupScrollListener() {
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                if (!isVisibleToUser) return;
+                if (!isVisibleToUser || isLoadingNextPage || viewModel.getIsLastPage()) return;
 
                 LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-                if (layoutManager != null && !isLoadingNextPage && !viewModel.getIsLastPage()) {
+                if (layoutManager != null) {
                     int visibleItemCount = layoutManager.getChildCount();
                     int totalItemCount = layoutManager.getItemCount();
                     int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
 
-                    if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount - 5) {
+                    // Более агрессивная загрузка - начинаем раньше
+                    if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount - 3) {
                         isLoadingNextPage = true;
-                        handler.post(() -> {
-                            if (isVisibleToUser && adapter != null) {
-                                adapter.showLoading();
-                                viewModel.loadNextPage();
-                            } else {
-                                isLoadingNextPage = false;
-                            }
-                        });
+                        adapter.showLoading();
+                        viewModel.loadNextPage();
                     }
                 }
             }
@@ -97,42 +110,51 @@ public class ListFragment extends Fragment {
 
             @Override
             public void onDeleteClick(int position) {
+                // Обработка удаления
             }
         });
 
+        // Оптимизация RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
+        recyclerView.setHasFixedSize(true); // Если все элементы одинаковой высоты
+        recyclerView.setItemViewCacheSize(20); // Кэшируем больше элементов
+
         viewModel = new ViewModelProvider(requireActivity()).get(FilterViewModel.class);
         playerViewModel = new ViewModelProvider(requireActivity()).get(PlayerViewModel.class);
+        stateViewModel = new ViewModelProvider(requireActivity()).get(StateViewModel.class);
     }
 
     private void findAllId(View view) {
         recyclerView = view.findViewById(R.id.list_recycler);
     }
-    private void play(String uuid){
-        if (playerViewModel.isInternetConnected()) {
-            if (playerViewModel.checkTypeInternet().equals("ok")) {
-                playerViewModel.setPlaying(uuid);
-                playerViewModel.start();
-            } else {
-                Toast.makeText(getContext(), "Not correct internet type!", Toast.LENGTH_SHORT).show();
-            }
-        } else {
+
+    private void play(String uuid) {
+        // Оптимизированная проверка интернета
+        if (!playerViewModel.isInternetConnected()) {
             Toast.makeText(getContext(), "Check internet connection!", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        if (!"ok".equals(playerViewModel.checkTypeInternet())) {
+            Toast.makeText(getContext(), "Not correct internet type!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        playerViewModel.setPlaying(uuid);
+        playerViewModel.start();
     }
+
     private void observeAndLoad() {
+        // Оптимизированный observer для станций
         viewModel.getFilteredStations().observe(getViewLifecycleOwner(), stations -> {
             if (!isVisibleToUser) return;
 
             switch (stations.status) {
                 case LOADING:
-                    if (adapter.getItemCount() > 0) {
-                        handler.post(() -> {
-                            if (isVisibleToUser && adapter != null) {
-                                adapter.showLoading();
-                            }
-                        });
+                    // Показываем loading только если список пустой
+                    if (adapter.getItemCount() == 0) {
+                        adapter.showLoading();
                     }
                     break;
                 case SUCCESS:
@@ -140,7 +162,9 @@ public class ListFragment extends Fragment {
                         if (isVisibleToUser && adapter != null) {
                             adapter.hideLoading();
                             List<RadioStation> data = stations.data;
-                            adapter.replaceAll(data);
+                            if (data != null) {
+                                adapter.replaceAll(data);
+                            }
                             isLoadingNextPage = false;
                         }
                     });
@@ -149,7 +173,7 @@ public class ListFragment extends Fragment {
                     handler.post(() -> {
                         if (isVisibleToUser && adapter != null) {
                             adapter.hideLoading();
-                            if (!stations.message.isEmpty() && !stations.message.equals("")) {
+                            if (stations.message != null && !stations.message.isEmpty()) {
                                 Toast.makeText(getContext(), stations.message, Toast.LENGTH_SHORT).show();
                             }
                             isLoadingNextPage = false;
@@ -158,16 +182,25 @@ public class ListFragment extends Fragment {
                     break;
             }
         });
+
+        // Оптимизированные observers для навигации
         playerViewModel.getPlayPrevious().observe(getViewLifecycleOwner(), flag -> {
-            int pos = adapter.findCurrentStation(playerViewModel.getCurrentStation().getStationUuid());
-            if(pos > 0){
-                play(adapter.getUUID(pos - 1));
+            if (flag != null && flag) {
+                String currentUuid = playerViewModel.getCurrentStation().getStationUuid();
+                int pos = adapter.findCurrentStation(currentUuid);
+                if(pos > 0){
+                    play(adapter.getUUID(pos - 1));
+                }
             }
         });
+
         playerViewModel.getPlayNext().observe(getViewLifecycleOwner(), flag -> {
-            int pos = adapter.findCurrentStation(playerViewModel.getCurrentStation().getStationUuid());
-            if(pos != -1 && pos != adapter.getItemCount()){
-                play(adapter.getUUID(pos + 1));
+            if (flag != null && flag) {
+                String currentUuid = playerViewModel.getCurrentStation().getStationUuid();
+                int pos = adapter.findCurrentStation(currentUuid);
+                if(pos != -1 && pos < adapter.getItemCount() - 1){
+                    play(adapter.getUUID(pos + 1));
+                }
             }
         });
     }
@@ -176,6 +209,5 @@ public class ListFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         handler.removeCallbacksAndMessages(null);
-        recyclerView.setAdapter(null);
     }
 }
