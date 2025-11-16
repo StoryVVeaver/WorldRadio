@@ -257,7 +257,7 @@ public class SettingsFragment extends Fragment {
             text_status.setVisibility(INVISIBLE);
             text_status.setTextColor(AppCompatResources.getColorStateList(requireContext(),R.color.white));
         };
-        textView.setText("Hi, " +viewModel.getUserData().getLogin());
+        textView.setText("Добро пожаловать, " +viewModel.getUserData().getLogin());
 
         loadCurrentAvatar();
     }

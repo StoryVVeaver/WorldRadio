@@ -164,8 +164,10 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     public void addTrackToFavorite(){
         try {
             if(!Objects.equals(getCurrentTrack().getValue(), null)) {
-                Log.v("model", getCurrentTrack().getValue() + " ");
-                favoriteTrackRepository.addToFavorite(-1, getCurrentTrack().getValue());
+                if(!getCurrentTrack().getValue().isEmpty()){
+                    Log.v("model", getCurrentTrack().getValue() + " ");
+                    favoriteTrackRepository.addToFavorite(-1, getCurrentTrack().getValue());
+                }
             }
         } catch (Exception e) {
             Log.e("PlayerVM", "Failed add to favorite");

@@ -348,7 +348,7 @@ public class SettingsViewModel extends ViewModel {
             public void onSuccess(String t) {
                 if (t.equals("saved")){
                     j++;
-                    if(j == 3){
+                    if(j == 2){
                         sendingData.postValue(UiState.success(true));
                     }
                 }
@@ -360,29 +360,12 @@ public class SettingsViewModel extends ViewModel {
                 sendingData.postValue(UiState.error(t.getMessage()));
             }
         }));
-        executor.execute(() -> dataFromUserAPI.putFilters(filterRepository.getFilters(), new PutCallback() {
-            @Override
-            public void onSuccess(String t) {
-                if (t.equals("saved")){
-                    j++;
-                    if(j == 3){
-                        sendingData.postValue(UiState.success(true));
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                Log.e("SettingsViewModel: Filters", Objects.requireNonNull(t.getMessage()));
-                sendingData.postValue(UiState.error(t.getMessage()));
-            }
-        }));
         executor.execute(() -> dataFromUserAPI.putFavorites(favoriteStationRepository.getAllFavorites(), new PutCallback() {
             @Override
             public void onSuccess(String t) {
                 if (t.equals("saved")){
                     j++;
-                    if(j == 3){
+                    if(j == 2){
                         sendingData.postValue(UiState.success(true));
                     }
                 }

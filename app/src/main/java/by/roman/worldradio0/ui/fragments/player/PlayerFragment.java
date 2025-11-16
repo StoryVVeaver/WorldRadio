@@ -359,4 +359,5 @@ public class PlayerFragment extends Fragment {
             viewModel.playPrevious();
         }
     }
+    //TODO непонятно почему жесты обрабатываюся ,но не выполняются
 }

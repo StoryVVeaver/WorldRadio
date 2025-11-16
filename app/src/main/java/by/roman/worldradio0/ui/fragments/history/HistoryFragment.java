@@ -1,5 +1,6 @@
 package by.roman.worldradio0.ui.fragments.history;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -78,10 +79,17 @@ public class HistoryFragment extends Fragment {
             stateViewModel.closeFullscreen();
         });
         deleteAll.setOnClickListener(v1 -> {
-            adapter.clear();
-            viewModel.deleteAllHistory();
-            viewModel.resetState();
-            viewModel.loadStart();
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Очиста истории")
+                    .setMessage("Будет очищена вся история прослушивания. Продолжить?")
+                    .setPositiveButton("Да", (dialog, which) -> {
+                        adapter.clear();
+                        viewModel.deleteAllHistory();
+                        viewModel.resetState();
+                        viewModel.loadStart();
+                    })
+                    .setNegativeButton("Нет", null)
+                    .show();
         });
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {

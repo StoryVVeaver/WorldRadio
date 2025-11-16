@@ -68,6 +68,7 @@ public class TimerFragment extends Fragment {
 
     private long totalTime = 0L;
     private long timeRemaining = 0L;
+    private boolean isPaused = false;
 
     private enum TimerState {
         IDLE,
@@ -215,6 +216,7 @@ public class TimerFragment extends Fragment {
                 viewModel.pauseTimer();
                 cancelTimer();
                 setState(TimerState.PAUSED);
+                isPaused = true;
                 break;
             case RESUME:
                 if (state != TimerState.PAUSED) {
@@ -223,9 +225,11 @@ public class TimerFragment extends Fragment {
                 viewModel.resumeTimer();
                 startCountDown(timeRemaining);
                 setState(TimerState.RUNNING);
+                isPaused = false;
                 break;
             case STOP:
                 viewModel.stopTimer();
+                isPaused = false;
                 cancelTimer();
                 setState(TimerState.IDLE);
                 break;
@@ -262,8 +266,11 @@ public class TimerFragment extends Fragment {
     private void updateUiForState(TimerState currentState) {
         switch (currentState) {
             case RUNNING:
-                animateMoveDown(circularTimerView);
+                if(!isPaused){
+                    animateMoveDown(circularTimerView);
+                }
                 time.setVisibility(GONE);
+                fadeInOnResume();
                 startButton.setVisibility(GONE);
                 stopButton.setVisibility(VISIBLE);
                 pauseButton.setVisibility(VISIBLE);

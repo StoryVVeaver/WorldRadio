@@ -31,6 +31,7 @@ public class AccountActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         AccountViewModel viewModel = new ViewModelProvider(this).get(AccountViewModel.class);
         if(viewModel.isUserHere() != -1){
             startActivity(new Intent(this, MainActivity.class));
