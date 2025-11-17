@@ -41,19 +41,27 @@ public class FavoriteStationDao {
         db.delete(TABLE_FAVORITE_STATION, COLUMN_USER_ID_FAVORITE + " = ? AND "
                 + COLUMN_STATION_UUID_FAVORITE + " = ?", new String[]{valueOf(userId), UUID});
     }
-    public boolean isFavorite(int userId,String UUID){
+    public boolean isFavorite(int userId, String UUID) {
         boolean isFavorite = false;
+
+        if (UUID == null) {
+            return false;
+        }
+
         Cursor cursor = db.query(
                 TABLE_FAVORITE_STATION,
                 new String[]{COLUMN_STATION_UUID_FAVORITE},
                 COLUMN_STATION_UUID_FAVORITE + " = ? AND " +
                         COLUMN_USER_ID_FAVORITE + " = ?",
-                new String[]{UUID, valueOf(userId)},
+                new String[]{UUID, String.valueOf(userId)},
                 null, null, null
         );
-        try (cursor) {
-            if (cursor != null && cursor.moveToNext()) {
+
+        if (cursor != null) {
+            try {
                 isFavorite = cursor.getCount() > 0;
+            } finally {
+                cursor.close();
             }
         }
         return isFavorite;
@@ -87,7 +95,9 @@ public class FavoriteStationDao {
     public List<FavoriteStation> getAllFavorites(int userId){
         List<FavoriteStation> list = new ArrayList<>();
         String query = "SELECT * FROM " + TABLE_FAVORITE_STATION + " WHERE " + COLUMN_USER_ID_FAVORITE + " = ?";
-        Cursor cursor = db.rawQuery(query, new String[userId]);
+
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(userId)});
+
         if (cursor != null){
             try (cursor){
                 while (cursor.moveToNext()){

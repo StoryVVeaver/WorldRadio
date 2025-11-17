@@ -13,7 +13,7 @@ public class FavoriteStationDTO {
         FavoriteStationDTO dto = new FavoriteStationDTO();
         dto.id = favoriteStation.getId();
         dto.userId = favoriteStation.getUserId();
-        dto.stationUUID = favoriteStation.getStationUUID();
+        dto.stationUUID = favoriteStation.getUUID();
         return dto;
     }
     public int getId() {

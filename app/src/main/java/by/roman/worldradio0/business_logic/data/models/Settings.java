@@ -1,7 +1,7 @@
 package by.roman.worldradio0.business_logic.data.models;
 
 public class Settings {
-    private final int id;
+    private int id;
     private int audio_balance;
     private int gain_record;
     private int gain_broadcast;
@@ -16,16 +16,7 @@ public class Settings {
     private int notification_enabled;
     private int navigation_type;
 
-    private int par1;
-    private int par2;
-    private int par3;
-    private int par4;
-    private int par5;
-    private int par6;
-    private int par7;
-    private int par8;
-    private int par9;
-    private int par10;
+    private int snap_enabled;
 
     public Settings(int id) {
         this.id = id;
@@ -42,6 +33,30 @@ public class Settings {
         this.timer_dots_type = 0;
         this.notification_enabled = 1;
         this.navigation_type = 0;
+
+        this.snap_enabled = 0;
+    }
+    public Settings(int id,
+                    int audio_balance, int gain_broadcast, int gain_record, int agc_enabled, int crossfade_enabled, int crossfade_time,
+                    int network_type,
+                    int timer_seconds_enabled, int timer_dots_type, int notification_enabled, int navigation_type,
+                    int snap_enabled) {
+        this.id = id;
+        this.audio_balance = audio_balance;
+        this.gain_record = gain_record;
+        this.gain_broadcast = gain_broadcast;
+        this.agc_enabled = agc_enabled;
+        this.crossfade_enabled = crossfade_enabled;
+        this.crossfade_time = crossfade_time;
+
+        this.network_type = network_type;
+
+        this.timer_seconds_enabled = timer_seconds_enabled;
+        this.timer_dots_type = timer_dots_type;
+        this.notification_enabled = notification_enabled;
+        this.navigation_type = navigation_type;
+
+        this.snap_enabled = snap_enabled;
     }
 
     // Getters
@@ -81,6 +96,9 @@ public class Settings {
     }
 
     //Setters
+    public void setId(int id){
+        this.id = id;
+    }
     public void setAudioBalance(int audio_balance) {
         this.audio_balance = audio_balance;
     }
@@ -113,5 +131,11 @@ public class Settings {
     }
     public void setNavigationType(int navigation_type) {
         this.navigation_type = navigation_type;
+    }
+    public int getSnapEnabled() {
+        return snap_enabled;
+    }
+    public void setSnapEnabled(int snap_enabled) {
+        this.snap_enabled = snap_enabled;
     }
 }

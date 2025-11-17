@@ -6,9 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import androidx.annotation.NonNull;
 
-import by.roman.worldradio0.business_logic.data.dto.FilterDTO;
 import by.roman.worldradio0.business_logic.data.dto.SettingsDTO;
-import by.roman.worldradio0.business_logic.data.models.Filter;
 import by.roman.worldradio0.business_logic.data.models.Settings;
 
 public class SettingsDao {
@@ -25,7 +23,8 @@ public class SettingsDao {
     protected static final String COLUMN_TIMER_DOTS_TYPE = "timer_dots_type";
     protected static final String COLUMN_NOTIFICATION_ENABLED = "notification_enabled";
     protected static final String COLUMN_NAVIGATION_TYPE = "navigation_type";
-    protected static final String COLUMN_X = "x";
+    //TODO
+    protected static final String COLUMN_SNAP_ENABLED = "snap_enabled";
     protected static final String COLUMN_Y = "y";
     protected static final String COLUMN_Z = "z";
     protected static final String COLUMN_C = "c";
@@ -43,7 +42,7 @@ public class SettingsDao {
             COLUMN_TIMER_DOTS_TYPE        + " INTEGER, " +
             COLUMN_NOTIFICATION_ENABLED   + " INTEGER, " +
             COLUMN_NAVIGATION_TYPE        + " INTEGER, " +
-            COLUMN_X        + " INTEGER, " +
+            COLUMN_SNAP_ENABLED           + " INTEGER, " +
             COLUMN_Y        + " INTEGER, " +
             COLUMN_Z        + " INTEGER, " +
             COLUMN_C        + " INTEGER, " +
@@ -69,6 +68,8 @@ public class SettingsDao {
         values.put(COLUMN_NOTIFICATION_ENABLED, dto.getNotification_enabled());
         values.put(COLUMN_NAVIGATION_TYPE, dto.getNavigation_type());
 
+        values.put(COLUMN_SNAP_ENABLED, dto.getSnapEnabled());
+
         String selection = COLUMN_USER_ID_SETTINGS + " = ?";
         String[] selectionArgs = {String.valueOf(dto.getUserId())};
 
@@ -80,7 +81,8 @@ public class SettingsDao {
                         COLUMN_USER_ID_SETTINGS,
                         COLUMN_AUDIO_BALANCE, COLUMN_GAIN_RECORD, COLUMN_GAIN_BROADCAST, COLUMN_AGC_ENABLED, COLUMN_CROSSFADE_ENABLED, COLUMN_CROSSFADE_TIME,
                         COLUMN_NETWORK_TYPE,
-                        COLUMN_TIMER_SECONDS_ENABLED, COLUMN_TIMER_DOTS_TYPE, COLUMN_NOTIFICATION_ENABLED, COLUMN_NAVIGATION_TYPE
+                        COLUMN_TIMER_SECONDS_ENABLED, COLUMN_TIMER_DOTS_TYPE, COLUMN_NOTIFICATION_ENABLED, COLUMN_NAVIGATION_TYPE,
+                        COLUMN_SNAP_ENABLED
                 },
                 COLUMN_USER_ID_SETTINGS + " = ?",
                 new String[]{String.valueOf(id)},
@@ -107,6 +109,8 @@ public class SettingsDao {
                 int notificationEnabledIndex = cursor.getColumnIndex(COLUMN_NOTIFICATION_ENABLED);
                 int navigationTypeIndex = cursor.getColumnIndex(COLUMN_NAVIGATION_TYPE);
 
+                int snapEnabledIndex = cursor.getColumnIndex(COLUMN_SNAP_ENABLED);
+
                 if (idIndex != -1 &&
                         audioBalanceIndex != -1 &&
                         gainRecordIndex != -1 &&
@@ -120,7 +124,9 @@ public class SettingsDao {
                         timerSecondsIndex != -1 &&
                         timerDotsIndex != -1 &&
                         notificationEnabledIndex != -1 &&
-                        navigationTypeIndex != -1) {
+                        navigationTypeIndex != -1 &&
+
+                        snapEnabledIndex != -1) {
 
                     Settings sett = new Settings(cursor.getInt(idIndex));
                     sett.setAudioBalance(cursor.getInt(audioBalanceIndex));
@@ -136,6 +142,8 @@ public class SettingsDao {
                     sett.setTimerDotsType(cursor.getInt(timerDotsIndex));
                     sett.setNotificationEnabled(cursor.getInt(notificationEnabledIndex));
                     sett.setNavigationType(cursor.getInt(navigationTypeIndex));
+
+                    sett.setSnapEnabled(cursor.getInt(snapEnabledIndex));
                     return sett;
                 }
             }
@@ -159,6 +167,8 @@ public class SettingsDao {
         values.put(COLUMN_NOTIFICATION_ENABLED, 1);
         values.put(COLUMN_NAVIGATION_TYPE, 0);
 
+        values.put(COLUMN_SNAP_ENABLED, 1);
+
         String selection = COLUMN_USER_ID_SETTINGS + " = ?";
         String[] selectionArgs = {String.valueOf(id)};
         db.update(TABLE_SETTINGS, values, selection, selectionArgs);
@@ -180,6 +190,8 @@ public class SettingsDao {
         values.put(COLUMN_TIMER_DOTS_TYPE, dto.getTimerDotsType());
         values.put(COLUMN_NOTIFICATION_ENABLED, dto.getNotification_enabled());
         values.put(COLUMN_NAVIGATION_TYPE, dto.getNavigation_type());
+
+        values.put(COLUMN_SNAP_ENABLED, dto.getSnapEnabled());
 
         db.insertWithOnConflict(TABLE_SETTINGS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
     }

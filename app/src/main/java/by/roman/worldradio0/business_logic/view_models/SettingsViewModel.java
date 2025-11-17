@@ -24,43 +24,28 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 
 import by.roman.worldradio0.business_logic.UiState;
 import by.roman.worldradio0.business_logic.data.dto.FavoriteStationDTO;
-import by.roman.worldradio0.business_logic.data.dto.FilterDTO;
 import by.roman.worldradio0.business_logic.data.dto.RadioStationDTO;
 import by.roman.worldradio0.business_logic.data.dto.SettingsDTO;
-import by.roman.worldradio0.business_logic.data.models.History;
-import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.data.models.Settings;
 import by.roman.worldradio0.business_logic.data.models.User;
-import by.roman.worldradio0.business_logic.data.models.settings.SettingsGroup;
-import by.roman.worldradio0.business_logic.data.models.settings.SettingsItem;
-import by.roman.worldradio0.business_logic.data.models.settings.child.CheckItem;
-import by.roman.worldradio0.business_logic.data.models.settings.child.CheckWIthSliderItem;
-import by.roman.worldradio0.business_logic.data.models.settings.child.SliderItem;
-import by.roman.worldradio0.business_logic.data.models.settings.child.SwitchItem;
-import by.roman.worldradio0.business_logic.data.models.settings.child.TextButtonItem;
-import by.roman.worldradio0.business_logic.data.models.settings.child.TextItem;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteStationRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FilterRepository;
-import by.roman.worldradio0.business_logic.data.repositories.interfaces.HistoryRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.SettingsRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.UserRepository;
 import by.roman.worldradio0.business_logic.network.radio.DataFromRadio;
 import by.roman.worldradio0.business_logic.network.radio.StationsCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.DataFromUserAPI;
-import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FavoritesCallback;
-import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FiltersCallback;
+import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FavoriteStationsCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.PutCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.SettingsCallback;
 import dagger.hilt.android.lifecycle.HiltViewModel;
@@ -115,6 +100,9 @@ public class SettingsViewModel extends ViewModel {
     }
     private void setSettings(){
         settingsRepository.setSettings(new SettingsDTO().fromModel(settModel));
+    }
+    public void setSettings(Settings settings){
+        settingsRepository.setSettings(new SettingsDTO().fromModel(settings));
     }
     public User getUserData(){
         try {
@@ -285,24 +273,7 @@ public class SettingsViewModel extends ViewModel {
     private void loadDataFromUserAPI(){
         i = 0;
         gettingData.postValue(UiState.loading());
-        executor.execute(() -> dataFromUserAPI.getFilters(userRepository.getUserInSystem(), new FiltersCallback() {
-
-            @Override
-            public void onSuccess(FilterDTO dto) {
-                filterRepository.setFilters(dto);
-                i++;
-                if(i == 3){
-                    gettingData.postValue(UiState.success(true));
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                Log.e("SettingsViewModel", Objects.requireNonNull(t.getMessage()));
-                gettingData.postValue(UiState.error(t.getMessage()));
-            }
-        }));
-        executor.execute(() -> dataFromUserAPI.getFavorites(userRepository.getUserInSystem(), new FavoritesCallback() {
+        executor.execute(() -> dataFromUserAPI.getFavoriteStations(userRepository.getUserInSystem(), new FavoriteStationsCallback() {
 
             @Override
             public void onSuccess(List<FavoriteStationDTO> favoriteStations) {
@@ -310,7 +281,7 @@ public class SettingsViewModel extends ViewModel {
                     favoriteStationRepository.addToFavorite(station.getId(), station.getStationUUID());
                 }
                 i++;
-                if(i == 3){
+                if(i == 2){
                     gettingData.postValue(UiState.success(true));
                 }
             }
@@ -325,10 +296,10 @@ public class SettingsViewModel extends ViewModel {
 
             @Override
             public void onSuccess(SettingsDTO settings) {
-                settModel = settings.toModel();
-                setSettings();
+                Log.e("sett", settings.getSnapEnabled() + " ");
+                setSettings(settings.toModel());
                 i++;
-                if(i == 3){
+                if(i == 2){
                     gettingData.postValue(UiState.success(true));
                 }
             }
@@ -347,6 +318,7 @@ public class SettingsViewModel extends ViewModel {
             @Override
             public void onSuccess(String t) {
                 if (t.equals("saved")){
+                    Log.v("SettingsViewModel: Settings", "sett get ok");
                     j++;
                     if(j == 2){
                         sendingData.postValue(UiState.success(true));
@@ -360,9 +332,10 @@ public class SettingsViewModel extends ViewModel {
                 sendingData.postValue(UiState.error(t.getMessage()));
             }
         }));
-        executor.execute(() -> dataFromUserAPI.putFavorites(favoriteStationRepository.getAllFavorites(), new PutCallback() {
+        executor.execute(() -> dataFromUserAPI.putFavoriteStations(favoriteStationRepository.getAllFavorites(), new PutCallback() {
             @Override
             public void onSuccess(String t) {
+                Log.v("SettingsViewModel: favorite", "fav get ok" + t);
                 if (t.equals("saved")){
                     j++;
                     if(j == 2){

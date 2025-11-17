@@ -18,7 +18,6 @@ import by.roman.worldradio0.business_logic.data.dto.RadioStationDTO;
 import by.roman.worldradio0.business_logic.data.dto.SettingsDTO;
 import by.roman.worldradio0.business_logic.data.dto.UserDTO;
 import by.roman.worldradio0.business_logic.data.models.Filter;
-import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.data.models.Settings;
 import by.roman.worldradio0.business_logic.data.models.User;
 import by.roman.worldradio0.business_logic.data.models.UserRequest;
@@ -27,10 +26,10 @@ import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRep
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.SettingsRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.UserRepository;
 import by.roman.worldradio0.business_logic.network.radio.DataFromRadio;
-import by.roman.worldradio0.business_logic.network.radio.Model;
 import by.roman.worldradio0.business_logic.network.radio.StationsCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.DataFromUserAPI;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.RequestCallback;
+import by.roman.worldradio0.business_logic.network.userAPI.callbacks.SettingsCallback;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
@@ -76,7 +75,6 @@ public class AccountViewModel extends ViewModel {
             public void onSuccess(UserDTO dto) {
                 try {
                     userRepository.useradd(dto);
-
                     userRepository.setUserInSystem(dto.getId());
                     settingsRepository.addSettings(new SettingsDTO().fromModel(new Settings(dto.getId())));
                     filterRepository.addFilters(new FilterDTO().fromModel(new Filter(dto.getId())));

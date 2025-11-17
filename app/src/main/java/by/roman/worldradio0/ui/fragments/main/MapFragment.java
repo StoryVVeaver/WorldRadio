@@ -38,8 +38,10 @@ import java.util.List;
 
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.data.models.MapPoint;
+import by.roman.worldradio0.business_logic.data.models.Settings;
 import by.roman.worldradio0.business_logic.view_models.MapViewModel;
 import by.roman.worldradio0.business_logic.view_models.PlayerViewModel;
+import by.roman.worldradio0.business_logic.view_models.SettingsViewModel;
 import by.roman.worldradio0.ui.elements.view.CenterSnapOverlay;
 import by.roman.worldradio0.ui.elements.view.OptimizedGridClusterer;
 import dagger.hilt.android.AndroidEntryPoint;
@@ -51,6 +53,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
     private MapView map;
     private MapViewModel viewModel;
     private PlayerViewModel playerViewModel;
+    private SettingsViewModel settingsViewModel;
     private OptimizedGridClusterer clusterer;
     private final Handler clusterHandler = new Handler(Looper.getMainLooper());
     private final Runnable clusterRunnable = () -> clusterer.clusterAsync();
@@ -62,6 +65,15 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
     private List<MapPoint> allPoints;
     private IMapController mapController;
     private ImageButton snapOn;
+    private Settings settings;
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        settings = settingsViewModel.getSettingsModel();
+        centerSnap.setSnapEnabled(settings.getSnapEnabled() == 1);
+        fav_snap();
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -83,10 +95,12 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         centerSnappedDrawable = AppCompatResources.getDrawable(requireContext(), R.drawable.fi_rs_filter);
         highlightMarkerDrawable = AppCompatResources.getDrawable(requireContext(), R.drawable.history);
 
-        initializeMap();
-
         viewModel = new ViewModelProvider(requireActivity()).get(MapViewModel.class);
         playerViewModel = new ViewModelProvider(requireActivity()).get(PlayerViewModel.class);
+        settingsViewModel = new ViewModelProvider(requireActivity()).get(SettingsViewModel.class);
+
+        initializeMap();
+
 
         viewModel.loadPoints();
         observeData();
@@ -105,9 +119,12 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
     private void fav_snap(){
         if (centerSnap.isSnapEnabled()){
             snapOn.setImageDrawable(AppCompatResources.getDrawable(requireActivity(), R.drawable.snap));
+            settings.setSnapEnabled(1);
         } else {
             snapOn.setImageDrawable(AppCompatResources.getDrawable(requireActivity(), R.drawable.snap_crossed));
+            settings.setSnapEnabled(0);
         }
+        settingsViewModel.setSettings(settings);
     }
     //TODO синхронизация автоматически листов
     //TODO настройки пользователя
@@ -197,6 +214,8 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         });
 
         map.getOverlays().add(centerSnap);
+        settings = settingsViewModel.getSettingsModel();
+        centerSnap.setSnapEnabled(settings.getSnapEnabled() == 1);
         fav_snap();
     }
     private void observeData(){

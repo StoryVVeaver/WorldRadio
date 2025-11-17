@@ -1,38 +1,28 @@
 package by.roman.worldradio0.business_logic.network.userAPI;
 
-import android.annotation.SuppressLint;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.collection.ObjectFloatMapKt;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Singleton;
 
 import by.roman.worldradio0.business_logic.data.dto.FavoriteStationDTO;
-import by.roman.worldradio0.business_logic.data.dto.FilterDTO;
-import by.roman.worldradio0.business_logic.data.dto.RadioStationDTO;
 import by.roman.worldradio0.business_logic.data.dto.SettingsDTO;
 import by.roman.worldradio0.business_logic.data.dto.UserDTO;
 import by.roman.worldradio0.business_logic.data.models.FavoriteStation;
-import by.roman.worldradio0.business_logic.data.models.Filter;
 import by.roman.worldradio0.business_logic.data.models.Settings;
 import by.roman.worldradio0.business_logic.data.models.User;
 import by.roman.worldradio0.business_logic.data.models.UserRequest;
-import by.roman.worldradio0.business_logic.network.radio.Model;
-import by.roman.worldradio0.business_logic.network.radio.TagsAdapter;
-import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FavoritesCallback;
-import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FiltersCallback;
+import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FavoriteStationsCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.PutCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.RequestCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.SettingsCallback;
@@ -54,60 +44,10 @@ public class UserAPI {
     public UserAPI(){
 
     };
-    public void fetchFilters(int id, FiltersCallback callback){
+    public void fetchFavoriteStations(int id, FavoriteStationsCallback callback){
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
-                .url(API_URL + "/get/filters/" + id)
-                .build();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if(response.isSuccessful()){
-                    try (response){
-                        String jsonResponse = response.body().string();
-                        if (jsonResponse.isEmpty()) {
-                            Log.e("UserAPI: filters", "Empty response body.");
-                            callback.onFailure(new Exception("Empty response body"));
-                            return;
-                        }
-                        Log.d("UserAPI: filters", "Response: " + jsonResponse);
-
-                        if (response.code() != 200) {
-                            Log.e("UserAPI: filters", "Response code: " + response.code());
-                            return;
-                        }
-                        Gson gson = new GsonBuilder().create();
-                        try {
-                            if(jsonResponse.startsWith("{")){
-                                Filter filter = gson.fromJson(jsonResponse, Filter.class);
-                                FilterDTO dto = new FilterDTO();
-                                dto.fromModel(filter);
-                                callback.onSuccess(dto);
-                            }
-                        } catch (Exception e) {
-                            Log.e("UserAPI: filters", "JSON parsing error", e);
-                            callback.onFailure(e);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        callback.onFailure(e);
-                    }
-                } else {
-                    Log.e("UserAPI: filters", "Request failed with code: " + response.code());
-                    callback.onFailure(new Exception("Request failed with code: " + response.code()));
-                }
-            }
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                e.printStackTrace();
-                callback.onFailure(e);
-            }
-        });
-    }
-    public void fetchFavorites(int id, FavoritesCallback callback){
-        OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder()
-                .url(API_URL + "/get/favorites/" + id)
+                .url(API_URL + "/get/favoriteStations/" + id)
                 .build();
         client.newCall(request).enqueue(new Callback() {
             @Override
@@ -116,14 +56,14 @@ public class UserAPI {
                     try (response){
                         assert response.body() != null;
                         String jsonResponse = response.body().string();
-                        Log.d("UserAPI: favorites", "Response: " + jsonResponse);
+                        Log.d("UserAPI: favoriteStations", "Response: " + jsonResponse);
 
                         if (response.code() != 200) {
-                            Log.e("UserAPI: favorites", "Response code: " + response.code());
+                            Log.e("UserAPI: favoriteStations", "Response code: " + response.code());
                             return;
                         }
                         if (jsonResponse.isEmpty()) {
-                            Log.e("UserAPI: favorites", "Empty response body.");
+                            Log.e("UserAPI: favoriteStations", "Empty response body.");
                             callback.onFailure(new Exception("Empty response body"));
                             return;
                         }
@@ -138,7 +78,7 @@ public class UserAPI {
                                 callback.onSuccess(dto);
                             }
                         } catch (Exception e) {
-                            Log.e("UserAPI: filters", "JSON parsing error", e);
+                            Log.e("UserAPI: favoriteStations", "JSON parsing error", e);
                             callback.onFailure(e);
                         }
                     } catch (Exception e) {
@@ -146,7 +86,7 @@ public class UserAPI {
                         callback.onFailure(e);
                     }
                 } else {
-                    Log.e("UserAPI: filters", "Request failed with code: " + response.code());
+                    Log.e("UserAPI: favoriteStations", "Request failed with code: " + response.code());
                     callback.onFailure(new Exception("Request failed with code: " + response.code()));
                 }
             }
@@ -183,10 +123,8 @@ public class UserAPI {
                         Gson gson = new GsonBuilder().create();
                         try {
                             if(jsonResponse.startsWith("{")){
-                                Settings settings = gson.fromJson(jsonResponse, Settings.class);
-                                SettingsDTO dto = new SettingsDTO();
-                                dto.fromModel(settings);
-                                callback.onSuccess(dto);
+                                SettingsDTO settingsDTO = gson.fromJson(jsonResponse, SettingsDTO.class);
+                                callback.onSuccess(settingsDTO);
                             }
                         } catch (Exception e) {
                             Log.e("UserAPI: settings", "JSON parsing error", e);
@@ -325,18 +263,15 @@ public class UserAPI {
             }
         });
     }
-    public void putFilters(Filter filter, PutCallback callback) {
-        executePutRequest("/put/filters", filter, callback);
-    }
     public void putUser(User user, PutCallback callback){
         executePutRequest("/put/user", user, callback);
     }
-    public void putFavorites(List<FavoriteStation> list, PutCallback callback) {
+    public void putFavoriteStations(List<FavoriteStation> list, PutCallback callback) {
         if (list == null || list.isEmpty()) {
             callback.onSuccess("saved");
             return;
         }
-        executePutRequest("/put/favorites", list, callback);
+        executePutRequest("/put/favoriteStations", list, callback);
     }
     public void putSettings(Settings settings, PutCallback callback) {
         executePutRequest("/put/settings", settings, callback);
