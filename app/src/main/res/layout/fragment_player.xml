@@ -12,12 +12,12 @@
         android:id="@+id/bottomPlayer"
         android:layout_width="match_parent"
         android:layout_height="70dp"
-        tools:layout_editor_absoluteY="661dp">
+        tools:layout_editor_absoluteY="661dp"
+        android:background="@color/bottom_player">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/bottom_player">
+            android:layout_height="match_parent">
 
             <ImageView
                 android:id="@+id/bottom_player_logo"

@@ -59,6 +59,9 @@ dependencies {
     implementation(libs.recyclerview)
     implementation(libs.osmdroid)
 
+    implementation(libs.palette)
+    implementation(libs.core)
+
 
     annotationProcessor(libs.glide.compiler)
     annotationProcessor(libs.hilt.compiler)

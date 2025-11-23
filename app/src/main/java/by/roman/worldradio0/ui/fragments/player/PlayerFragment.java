@@ -6,6 +6,8 @@ import static android.view.View.VISIBLE;
 import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -14,8 +16,11 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.ColorUtils;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.palette.graphics.Palette;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,6 +33,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.view_models.PlayerViewModel;
@@ -61,6 +68,15 @@ public class PlayerFragment extends Fragment {
     private boolean isFavoriteTrack;
     private boolean isMap = true;
 
+    // Константы для обработки касаний
+    private final int MIN_SWIPE_DISTANCE = 10;
+    private final int MAX_TAP_MOVEMENT = 5;
+
+    // Вспомогательный метод для перевода DP в Pixels (сохранен для полноты, хотя теперь не используется)
+    private float dpToPx(int dp) {
+        return dp * getResources().getDisplayMetrics().density;
+    }
+
     @Override
     public void onResume(){
         super.onResume();
@@ -77,6 +93,7 @@ public class PlayerFragment extends Fragment {
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_player, container, false);
     }
+
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState){
         super.onViewCreated(view,savedInstanceState);
@@ -88,9 +105,10 @@ public class PlayerFragment extends Fragment {
         buttons();
         Log.v("CollapsedPlayerFragment","Performance - onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
     }
+
     private void findAll(@NonNull View view){
-        //timerButton = view.findViewById();
-        //filterButton = view.findViewById();
+        timerButton = view.findViewById(R.id.timerButtonView);
+        filterButton = view.findViewById(R.id.filterButtonView);
         large_saveTrack = view.findViewById(R.id.large_save_unsave_Track);
         large_internet = view.findViewById(R.id.large_internet);
         close = view.findViewById(R.id.large_back);
@@ -117,9 +135,6 @@ public class PlayerFragment extends Fragment {
     private void initAll(){
         viewModel = new ViewModelProvider(requireActivity()).get(PlayerViewModel.class);
         stateViewModel = new ViewModelProvider(requireActivity()).get(StateViewModel.class);
-
-        final int MIN_SWIPE_DISTANCE = 10;
-        final int MAX_TAP_MOVEMENT = 5;
 
         largePlayer.setOnTouchListener(new View.OnTouchListener() {
             private float startY;
@@ -159,9 +174,7 @@ public class PlayerFragment extends Fragment {
                 return false;
             }
         });
-        bottomPlayer.setOnClickListener(v -> {
-            motionLayout.transitionToEnd();
-        });
+
         bottomPlayer.setOnTouchListener(new View.OnTouchListener() {
             private float startY;
             private float startX;
@@ -179,15 +192,17 @@ public class PlayerFragment extends Fragment {
                         float diffY = endY - startY;
                         float diffX = endX - startX;
 
+                        if (Math.abs(diffX) <= MAX_TAP_MOVEMENT && Math.abs(diffY) <= MAX_TAP_MOVEMENT) {
+                            motionLayout.transitionToEnd();
+                            return true;
+                        }
+
                         if (Math.abs(diffY) > Math.abs(diffX)) {
-                            if (diffY < MIN_SWIPE_DISTANCE) {
+                            if (diffY < -MIN_SWIPE_DISTANCE) {
                                 motionLayout.transitionToEnd();
                                 return true;
                             } else if (diffY > MIN_SWIPE_DISTANCE) {
                                 viewModel.stop();
-                                return true;
-                            } else {
-                                motionLayout.transitionToEnd();
                                 return true;
                             }
                         } else {
@@ -198,10 +213,9 @@ public class PlayerFragment extends Fragment {
                                     onSwipeRight();
                                 }
                                 return true;
-                            } else {
-                                return true;
                             }
                         }
+                        return true;
                     case MotionEvent.ACTION_MOVE:
                         return true;
                 }
@@ -209,19 +223,103 @@ public class PlayerFragment extends Fragment {
             }
         });
     }
-//TODO перекрасить фон в соответствии с аватаркой
+
+    private int darkenColor(int color, float factor) {
+        float[] hsl = new float[3];
+        ColorUtils.colorToHSL(color, hsl);
+        hsl[2] = Math.max(0.1f, hsl[2] * (1f - factor));
+        return ColorUtils.HSLToColor(hsl);
+    }
+
+    private int getCenterColor(Bitmap bitmap) {
+        Palette palette = Palette.from(bitmap).generate();
+        int defaultColor = ContextCompat.getColor(requireContext(), R.color.background);
+        int extractedColor = defaultColor;
+
+        if (palette.getDominantSwatch() != null) {
+            extractedColor = palette.getDominantColor(defaultColor);
+        } else if (palette.getMutedSwatch() != null) {
+            extractedColor = palette.getMutedColor(defaultColor);
+        } else if (palette.getDarkMutedSwatch() != null) {
+            extractedColor = palette.getDarkMutedColor(defaultColor);
+        } else if (palette.getLightMutedSwatch() != null) {
+            extractedColor = palette.getLightMutedColor(defaultColor);
+        }
+
+        // Дополнительное затемнение, если цвет слишком светлый
+        if (ColorUtils.calculateLuminance(extractedColor) > 0.8) {
+            int darkMuted = palette.getDarkMutedColor(defaultColor);
+            if (darkMuted != defaultColor) {
+                extractedColor = darkMuted;
+            } else {
+                extractedColor = darkenColor(extractedColor, 0.45f);
+            }
+        }
+
+        float initialDarkenFactor = 0.8f;
+        int finalColor = ColorUtils.blendARGB(extractedColor, getResources().getColor(R.color.background), 0.6f);
+        return darkenColor(finalColor, initialDarkenFactor);
+    }
+
+    /**
+     * Применяет сплошной цвет к большому плееру, используя среднее затемнение.
+     * @param centerColor Цвет центра градиента (наименее затемненный).
+     */
+    private void applyLargePlayerBackground(int centerColor) {
+        // Краевой цвет (самый затемненный)
+        float edgeDarkenFactor = 0.7f;
+        int edgeColor = darkenColor(centerColor, edgeDarkenFactor);
+
+        // Устанавливаем сплошной цвет на largePlayer
+        largePlayer.setBackgroundColor(darkenColor(edgeColor, 0.8f));
+    }
+
+    /**
+     * Применяет сплошной затемненный цвет к CardView свернутого плеера (bottomPlayer).
+     * @param color Затемненный центральный цвет.
+     */
+    private void applyBottomPlayerBackground(int color) {
+        int defaultColor = ContextCompat.getColor(requireContext(), R.color.bottom_player);
+
+        // Смешиваем затемненный цвет с цветом по умолчанию
+        int finalColor = ColorUtils.blendARGB(color, defaultColor, 0.3f);
+
+        bottomPlayer.setBackgroundColor(finalColor);
+    }
+
+
     @SuppressLint("SetTextI18n")
     private void putData(@NonNull View view){
         station.setText(viewModel.getCurrentStation().getName());
         large_station.setText(viewModel.getCurrentStation().getName());
+
         Glide.with(view.getContext())
                 .load(viewModel.getCurrentStation().getFavicon())
                 .error(AppCompatResources.getDrawable(requireContext(),R.drawable.no_icon))
                 .into(logo);
+
         Glide.with(view.getContext())
+                .asBitmap()
                 .load(viewModel.getCurrentStation().getFavicon())
-                .error(AppCompatResources.getDrawable(requireContext(),R.drawable.no_icon))
-                .into(large_logo);
+                .error(AppCompatResources.getDrawable(requireContext(), R.drawable.no_icon))
+                .into(new CustomTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, Transition<? super Bitmap> transition) {
+                        large_logo.setImageBitmap(resource);
+                        int centerColor = getCenterColor(resource);
+
+                        applyLargePlayerBackground(centerColor); // Сплошной цвет
+                        applyBottomPlayerBackground(centerColor); // Сплошной цвет
+                    }
+
+                    @Override
+                    public void onLoadCleared(android.graphics.drawable.Drawable placeholder) {
+                        largePlayer.setBackgroundResource(R.color.background);
+                        bottomPlayer.setBackgroundResource(R.color.bottom_player);
+                        large_logo.setImageDrawable(AppCompatResources.getDrawable(requireContext(),R.drawable.no_icon));
+                    }
+                });
+
         viewModel.getCurrentTrack().observe(getViewLifecycleOwner(), currentTrack -> {
             track.setText(currentTrack);
             large_track.setText(currentTrack);
@@ -248,14 +346,32 @@ public class PlayerFragment extends Fragment {
             favTrack_icons();
             station.setText(currentStation.getName());
             large_station.setText(currentStation.getName());
+
             Glide.with(view.getContext())
                     .load(currentStation.getFavicon())
                     .error(AppCompatResources.getDrawable(requireContext(),R.drawable.no_icon))
                     .into(logo);
+
             Glide.with(view.getContext())
+                    .asBitmap()
                     .load(currentStation.getFavicon())
                     .error(AppCompatResources.getDrawable(requireContext(),R.drawable.no_icon))
-                    .into(large_logo);
+                    .into(new CustomTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, Transition<? super Bitmap> transition) {
+                            large_logo.setImageBitmap(resource);
+                            int centerColor = getCenterColor(resource);
+
+                            applyLargePlayerBackground(centerColor);
+                            applyBottomPlayerBackground(centerColor);
+                        }
+                        @Override
+                        public void onLoadCleared(android.graphics.drawable.Drawable placeholder) {
+                            largePlayer.setBackgroundResource(R.color.background);
+                            bottomPlayer.setBackgroundResource(R.color.bottom_player);
+                            large_logo.setImageDrawable(AppCompatResources.getDrawable(requireContext(),R.drawable.no_icon));
+                        }
+                    });
         });
         if(!viewModel.getCurrentStation().getHomepage().isEmpty()){
             large_internet.setVisibility(VISIBLE);
@@ -366,5 +482,4 @@ public class PlayerFragment extends Fragment {
             viewModel.playPrevious();
         }
     }
-    //TODO непонятно почему жесты обрабатываюся ,но не выполняются
 }

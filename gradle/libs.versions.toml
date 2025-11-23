@@ -40,6 +40,10 @@ media3hls = "androidx.media3:media3-exoplayer-hls:1.8.0"
 media3ui = "androidx.media3:media3-ui:1.8.0"
 media = "androidx.media:media:1.7.1"
 
+core = "androidx.core:core-ktx:1.12.0"
+
+palette = "androidx.palette:palette:1.0.0"
+
 osmdroid =  "org.osmdroid:osmdroid-android:6.1.20"
 
 ui-graphics-android = { group = "androidx.compose.ui", name = "ui-graphics-android", version.ref = "uiGraphicsAndroid" }
