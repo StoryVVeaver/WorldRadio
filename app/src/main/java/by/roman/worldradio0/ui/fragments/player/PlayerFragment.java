@@ -67,15 +67,8 @@ public class PlayerFragment extends Fragment {
     private boolean isFavorite;
     private boolean isFavoriteTrack;
     private boolean isMap = true;
-
-    // Константы для обработки касаний
     private final int MIN_SWIPE_DISTANCE = 10;
     private final int MAX_TAP_MOVEMENT = 5;
-
-    // Вспомогательный метод для перевода DP в Pixels (сохранен для полноты, хотя теперь не используется)
-    private float dpToPx(int dp) {
-        return dp * getResources().getDisplayMetrics().density;
-    }
 
     @Override
     public void onResume(){
@@ -246,7 +239,6 @@ public class PlayerFragment extends Fragment {
             extractedColor = palette.getLightMutedColor(defaultColor);
         }
 
-        // Дополнительное затемнение, если цвет слишком светлый
         if (ColorUtils.calculateLuminance(extractedColor) > 0.8) {
             int darkMuted = palette.getDarkMutedColor(defaultColor);
             if (darkMuted != defaultColor) {
@@ -261,27 +253,16 @@ public class PlayerFragment extends Fragment {
         return darkenColor(finalColor, initialDarkenFactor);
     }
 
-    /**
-     * Применяет сплошной цвет к большому плееру, используя среднее затемнение.
-     * @param centerColor Цвет центра градиента (наименее затемненный).
-     */
     private void applyLargePlayerBackground(int centerColor) {
-        // Краевой цвет (самый затемненный)
         float edgeDarkenFactor = 0.7f;
         int edgeColor = darkenColor(centerColor, edgeDarkenFactor);
 
-        // Устанавливаем сплошной цвет на largePlayer
         largePlayer.setBackgroundColor(darkenColor(edgeColor, 0.8f));
     }
 
-    /**
-     * Применяет сплошной затемненный цвет к CardView свернутого плеера (bottomPlayer).
-     * @param color Затемненный центральный цвет.
-     */
     private void applyBottomPlayerBackground(int color) {
         int defaultColor = ContextCompat.getColor(requireContext(), R.color.bottom_player);
 
-        // Смешиваем затемненный цвет с цветом по умолчанию
         int finalColor = ColorUtils.blendARGB(color, defaultColor, 0.3f);
 
         bottomPlayer.setBackgroundColor(finalColor);
@@ -308,8 +289,8 @@ public class PlayerFragment extends Fragment {
                         large_logo.setImageBitmap(resource);
                         int centerColor = getCenterColor(resource);
 
-                        applyLargePlayerBackground(centerColor); // Сплошной цвет
-                        applyBottomPlayerBackground(centerColor); // Сплошной цвет
+                        applyLargePlayerBackground(centerColor);
+                        applyBottomPlayerBackground(centerColor);
                     }
 
                     @Override

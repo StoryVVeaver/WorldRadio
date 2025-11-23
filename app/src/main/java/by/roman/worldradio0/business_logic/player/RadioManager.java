@@ -53,42 +53,31 @@ public class RadioManager {
     public RadioManager(Context context) {
         this.context = context;
 
-        // ...
-// Создаем фабрику для DataSource с поддержкой редиректов
         DataSource.Factory dataSourceFactory = createDataSourceFactory();
-
-// ИСПРАВЛЕНИЕ: DefaultMediaSourceFactory теперь принимает только DataSource.Factory
         MediaSource.Factory mediaSourceFactory = new DefaultMediaSourceFactory(dataSourceFactory);
-// ...
 
         this.player = new ExoPlayer.Builder(context)
                 .setMediaSourceFactory(mediaSourceFactory)
-                // Установим стратегию для лучшего поведения с живыми потоками
                 .build();
 
-        // Отключим автоматическое воспроизведение после prepare, чтобы контролировать его через .play()
         player.setPlayWhenReady(false);
 
         setupPlayerListeners();
     }
 
-    // Создает фабрику для обработки HTTP-запросов и локальных ресурсов
     private DataSource.Factory createDataSourceFactory() {
         HttpDataSource.Factory httpDataSourceFactory = new DefaultHttpDataSource.Factory()
-                .setUserAgent("WorldRadio/1.0 (Linux; Android) ExoPlayer")
+                .setUserAgent("App/1.0 (Linux; Android) ExoPlayer")
                 .setConnectTimeoutMs(15000)
                 .setReadTimeoutMs(15000)
                 .setAllowCrossProtocolRedirects(true)
                 .setKeepPostFor302Redirects(true);
 
-        // DefaultDataSource.Factory будет использовать httpDataSourceFactory для сетевых запросов
-        // и стандартный FileDataSource для локальных ресурсов.
         return new DefaultDataSource.Factory(context, httpDataSourceFactory);
     }
 
     @OptIn(markerClass = UnstableApi.class)
     private void setupPlayerListeners() {
-        // ... (Ваша текущая реализация слушателей)
         player.addAnalyticsListener(new AnalyticsListener() {
             @Override
             public void onMetadata(@NonNull EventTime eventTime, @NonNull androidx.media3.common.Metadata metadata) {
@@ -98,7 +87,6 @@ public class RadioManager {
                         IcyInfo icy = (IcyInfo) entry;
                         String streamTitle = icy.title;
                         Log.d(TAG, "Stream Title: " + streamTitle);
-                        // Проверяем, что заголовок не пустой
                         if (streamTitle != null && !streamTitle.trim().isEmpty()) {
                             currentTrack.postValue(streamTitle);
                         }
@@ -113,7 +101,6 @@ public class RadioManager {
                 Log.d(TAG, "Playback state changed: " + playbackState);
                 switch (playbackState) {
                     case Player.STATE_READY:
-                        // Только если плеер должен играть (т.е. мы его запустили)
                         isPlaying.postValue(player.getPlayWhenReady());
                         playbackError.postValue(null);
                         break;
@@ -129,7 +116,6 @@ public class RadioManager {
 
             @Override
             public void onIsPlayingChanged(boolean playing) {
-                // Это более надежный способ отслеживать фактическое воспроизведение
                 Log.d(TAG, "Is playing changed: " + playing);
                 isPlaying.postValue(playing);
             }
@@ -142,7 +128,6 @@ public class RadioManager {
                 String errorMessage = getErrorMessage(error);
                 playbackError.postValue(errorMessage);
 
-                // Останавливаем плеер после ошибки
                 player.stop();
             }
         });
@@ -165,7 +150,6 @@ public class RadioManager {
                 baseMessage = "Формат аудио не поддерживается устройством";
                 break;
             case PlaybackException.ERROR_CODE_IO_UNSPECIFIED:
-                // Часто используется для SSL/TLS ошибок
                 if (error.getMessage() != null && error.getMessage().toLowerCase().contains("ssl")) {
                     baseMessage = "Ошибка SSL/TLS: проблема с безопасным соединением";
                 } else {
@@ -197,7 +181,6 @@ public class RadioManager {
         }
     }
 
-    // ... (Ваша текущая реализация isPlaylistUrl, parseAndPlayPlaylist, parsePlaylist, isValidUrl)
     private boolean isPlaylistUrl(String url) {
         return url.toLowerCase().endsWith(".m3u") ||
                 url.toLowerCase().endsWith(".m3u8") ||
@@ -205,20 +188,16 @@ public class RadioManager {
     }
 
     private void parseAndPlayPlaylist(String playlistUrl) {
-        // Если это M3U8 (HLS), просто воспроизводим его напрямую,
-        // так как DefaultMediaSourceFactory его обработает.
         if (playlistUrl.toLowerCase().endsWith(".m3u8") || playlistUrl.toLowerCase().endsWith(".mpd")) {
             Log.d(TAG, "HLS/DASH detected, playing directly.");
             mainHandler.post(() -> playDirectStream(playlistUrl));
             return;
         }
 
-        // Логика для старых PLS или M3U, которые требуют ручного парсинга
         executorService.execute(() -> {
             try {
                 List<String> streamUrls = parsePlaylist(playlistUrl);
 
-                // ... (остальная логика парсинга для PLS/M3U)
                 if (streamUrls.isEmpty()) {
                     mainHandler.post(() -> {
                         playbackError.postValue("В плейлисте не найдено действующих потоков. Попытка воспроизвести оригинальный URL.");
@@ -264,12 +243,10 @@ public class RadioManager {
                 while ((line = reader.readLine()) != null) {
                     line = line.trim();
 
-                    // Пропускаем комментарии и пустые строки
                     if (line.isEmpty() || line.startsWith("#")) {
                         continue;
                     }
 
-                    // Для PLS плейлистов ищем строки вида File1=http://...
                     if (playlistUrl.toLowerCase().endsWith(".pls")) {
                         if (line.toLowerCase().startsWith("file")) {
                             int equalsIndex = line.indexOf('=');
@@ -281,7 +258,6 @@ public class RadioManager {
                             }
                         }
                     } else {
-                        // Для M3U/M3U8 плейлистов - просто валидные URL
                         if (isValidUrl(line)) {
                             streamUrls.add(line);
                         }
@@ -323,7 +299,7 @@ public class RadioManager {
 
             player.setMediaItem(mediaItem);
             player.prepare();
-            player.setPlayWhenReady(true); // Запускаем воспроизведение
+            player.setPlayWhenReady(true);
 
             Log.d(TAG, "Playback started successfully: " + streamUrl);
 
@@ -334,15 +310,14 @@ public class RadioManager {
         }
     }
 
-    // ... (Остальные методы: stop, pause, resume, setVolume, getters, release)
     public void stop() {
         Log.d(TAG, "Stopping playback");
         try {
             if (player.isPlaying() || player.getPlaybackState() != Player.STATE_IDLE) {
                 player.stop();
-                player.clearMediaItems(); // Очищаем элементы, чтобы "обнулить" плеер
+                player.clearMediaItems();
             }
-            player.setPlayWhenReady(false); // Устанавливаем в false на случай stop()
+            player.setPlayWhenReady(false);
             currentTrack.postValue(null);
             playbackError.postValue(null);
         } catch (Exception e) {
@@ -352,7 +327,7 @@ public class RadioManager {
 
     public void pause() {
         Log.d(TAG, "Pausing playback");
-        player.setPlayWhenReady(false); // Используем PlayWhenReady
+        player.setPlayWhenReady(false);
     }
 
     public void resume() {
@@ -383,7 +358,6 @@ public class RadioManager {
     }
 
     public boolean getIsPlaying() {
-        // Проверяем и PlayWhenReady, и фактическое состояние
         return player != null && player.getPlayWhenReady() && player.getPlaybackState() == Player.STATE_READY;
     }
 
@@ -397,6 +371,6 @@ public class RadioManager {
         } catch (Exception e) {
             Log.e(TAG, "Error releasing player: " + e.getMessage(), e);
         }
-        executorService.shutdownNow(); // Используем shutdownNow для потока
+        executorService.shutdownNow();
     }
 }

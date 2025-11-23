@@ -14,9 +14,7 @@ import androidx.media3.session.MediaSession;
 
 import javax.inject.Inject;
 
-import by.roman.worldradio0.business_logic.data.models.Settings;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRepository;
-import by.roman.worldradio0.business_logic.data.repositories.interfaces.SettingsRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.UserRepository;
 import by.roman.worldradio0.business_logic.media.NotificationService;
 import dagger.hilt.android.AndroidEntryPoint;
@@ -73,13 +71,12 @@ public class PlayerService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        radioManager.getCurrentTrack().observeForever(trackObserver);
-        radioManager.getLiveIsPlaying().observeForever(stateObserver);
-
         mediaSession = new MediaSession.Builder(this, radioManager.getPlayer())
                 .setId("RadioMediaSession")
                 .build();
 
+        radioManager.getCurrentTrack().observeForever(trackObserver);
+        radioManager.getLiveIsPlaying().observeForever(stateObserver);
 
         Log.d("RadioService", "create");
     }
@@ -88,6 +85,11 @@ public class PlayerService extends Service {
     @SuppressLint("ForegroundServiceType")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent == null || intent.getAction() == null) {
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+
         String action = intent.getAction();
 
         Log.d("RadioService", "Received action: " + action);
@@ -113,7 +115,7 @@ public class PlayerService extends Service {
 
                         stopForeground(true);
                         startForeground(NOTIFICATION_ID,
-                                notificationService.startNotification(currentTrack, true, radioRepository.getPlayingStation()));
+                                notificationService.startNotification(currentTrack, true, radioRepository.getPlayingStation(), mediaSession));
 
                         if(!isPlayingBefore){
                             radioRepository.setStatePlayer(true);
@@ -127,28 +129,38 @@ public class PlayerService extends Service {
                     break;
                 case ACTION_STOP:
                     Log.d("RadioService", "Stop playback completely");
-                    notificationService.stopNotification();
-                    radioManager.stop();
-                    isManuallyStopped = true;
-                    isPlayingBefore = false;
-                    userRepository.setPlayingUUID(null);
-                    stopForeground(true);
-                    radioRepository.setStatePlayer(false);
+                    handleStop();
                     break;
             }
         } catch (Exception e) {
             Log.e("RadioService", "Error in onStartCommand: " + e.getMessage(), e);
+            handleStop();
         }
-        return START_STICKY;
+
+        return START_NOT_STICKY;
+    }
+
+    private void handleStop() {
+        notificationService.stopNotification();
+        radioManager.stop();
+        isManuallyStopped = true;
+        isPlayingBefore = false;
+        userRepository.setPlayingUUID(null);
+        stopForeground(true);
+        radioRepository.setStatePlayer(false);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        notificationService.stopNotification();
+        if (notificationService != null) {
+            notificationService.stopNotification();
+        }
+
         radioManager.stop();
         radioManager.release();
         radioManager.getCurrentTrack().removeObserver(trackObserver);
+
         if (mediaSession != null) {
             mediaSession.release();
             mediaSession = null;
