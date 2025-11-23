@@ -24,7 +24,7 @@ import okhttp3.Response;
 
 @Singleton
 public class radio {
-    private static final String API_URL = "http://162.55.180.156/json/stations/topclick/500";
+    private static final String API_URL = "http://162.55.180.156/json/stations/topclick/1000";
     //private static final String API_URL = "http://162.55.180.156/json/stations";
 
 
@@ -71,7 +71,9 @@ public class radio {
                                 Model[] stations = gson.fromJson(jsonResponse, Model[].class);
                                 List<RadioStationDTO> dto = new ArrayList<>();
                                 for (Model i : stations) {
-                                    dto.add(new RadioStationDTO().fromModel(i));
+                                    if(i.getUrl() != null){
+                                        dto.add(new RadioStationDTO().fromModel(i));
+                                    }
                                 }
                                 callback.onSuccess(dto);
                             } else {

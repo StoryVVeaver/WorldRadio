@@ -20,7 +20,6 @@
             app:expandedTitleMarginEnd="16dp"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
-            <!-- Расширенная шапка -->
             <include
                 layout="@layout/settings_header_expanded"
                 android:layout_width="match_parent"

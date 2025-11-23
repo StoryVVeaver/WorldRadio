@@ -6,6 +6,7 @@ import static android.view.View.VISIBLE;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -95,7 +96,14 @@ public class SettingsFragment extends Fragment {
         observeStatus();
         avatar.setOnClickListener(v -> checkPermissionsAndPickImage());
         log_out_button.setOnClickListener(v -> {
-            viewModel.logOut();
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Выход из аккаунта")
+                    .setMessage("Вы действительно хотите выйти из профиля?")
+                    .setPositiveButton("Да", (dialog, which) -> {
+                        viewModel.logOut();
+                    })
+                    .setNegativeButton("Нет", null)
+                    .show();
         });
         edit_user_button.setOnClickListener(v -> {
 

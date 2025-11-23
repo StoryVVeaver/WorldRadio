@@ -49,6 +49,8 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.convertergson)
     implementation(libs.media3exoplayer)
+    implementation(libs.media3dash)
+    implementation(libs.media3hls)
     implementation(libs.media3session)
     implementation(libs.media3ui)
     implementation(libs.media)

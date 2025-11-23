@@ -32,10 +32,14 @@ glide-compiler = "com.github.bumptech.glide:compiler:4.16.0"
 okhttp = "com.squareup.okhttp3:okhttp:4.12.0"
 retrofit = "com.squareup.retrofit2:retrofit:2.9.0"
 convertergson = "com.squareup.retrofit2:converter-gson:2.9.0"
-media3exoplayer = "androidx.media3:media3-exoplayer:1.7.1"
-media3session = "androidx.media3:media3-session:1.7.1"
-media3ui = "androidx.media3:media3-ui:1.7.1"
-media = "androidx.media:media:1.7.0"
+
+media3exoplayer = "androidx.media3:media3-exoplayer:1.8.0"
+media3session = "androidx.media3:media3-session:1.8.0"
+media3dash = "androidx.media3:media3-exoplayer-dash:1.8.0"
+media3hls = "androidx.media3:media3-exoplayer-hls:1.8.0"
+media3ui = "androidx.media3:media3-ui:1.8.0"
+media = "androidx.media:media:1.7.1"
+
 osmdroid =  "org.osmdroid:osmdroid-android:6.1.20"
 
 ui-graphics-android = { group = "androidx.compose.ui", name = "ui-graphics-android", version.ref = "uiGraphicsAndroid" }

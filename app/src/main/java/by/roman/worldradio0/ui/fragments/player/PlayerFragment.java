@@ -22,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,6 +36,8 @@ import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class PlayerFragment extends Fragment {
+    private ImageButton timerButton;
+    private ImageButton filterButton;
     private MotionLayout motionLayout;
     private ImageView save_btn;
     private ImageView large_save_btn;
@@ -86,6 +89,8 @@ public class PlayerFragment extends Fragment {
         Log.v("CollapsedPlayerFragment","Performance - onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
     }
     private void findAll(@NonNull View view){
+        //timerButton = view.findViewById();
+        //filterButton = view.findViewById();
         large_saveTrack = view.findViewById(R.id.large_save_unsave_Track);
         large_internet = view.findViewById(R.id.large_internet);
         close = view.findViewById(R.id.large_back);
@@ -113,8 +118,8 @@ public class PlayerFragment extends Fragment {
         viewModel = new ViewModelProvider(requireActivity()).get(PlayerViewModel.class);
         stateViewModel = new ViewModelProvider(requireActivity()).get(StateViewModel.class);
 
-        final int MIN_SWIPE_DISTANCE = 60;
-        final int MAX_TAP_MOVEMENT = 12;
+        final int MIN_SWIPE_DISTANCE = 10;
+        final int MAX_TAP_MOVEMENT = 5;
 
         largePlayer.setOnTouchListener(new View.OnTouchListener() {
             private float startY;
@@ -154,7 +159,9 @@ public class PlayerFragment extends Fragment {
                 return false;
             }
         });
-
+        bottomPlayer.setOnClickListener(v -> {
+            motionLayout.transitionToEnd();
+        });
         bottomPlayer.setOnTouchListener(new View.OnTouchListener() {
             private float startY;
             private float startX;

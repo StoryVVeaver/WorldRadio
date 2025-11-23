@@ -90,44 +90,54 @@ public class PlayerService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         String action = intent.getAction();
 
-        Log.d("RadioService", action);
-        switch (action) {
-            case ACTION_PLAY:
-                Log.d("RadioService", "play");
-                radioManager.play(currentStreamUrl);
-                break;
-            case ACTION_START:
-                Log.d("RadioService","start");
-                currentStreamUrl = intent.getStringExtra(PlayerService.EXTRA_STREAM_URL);
-                Log.d("RadioService", currentStreamUrl);
-                isManuallyStopped = false;
-                if (currentStreamUrl != null) {
-                    radioManager.play(currentStreamUrl);
-                    currentTrack = null;
-                    Log.d("RadioService", "Station: " + radioRepository.getPlayingStation().getName());
-                    stopForeground(true);
-                    startForeground(NOTIFICATION_ID, notificationService.startNotification(currentTrack, isPlaying, radioRepository.getPlayingStation()));
-                    notificationService.updatePlaybackState(true);
-                    if(!isPlayingBefore){
-                        radioRepository.setStatePlayer(true);
+        Log.d("RadioService", "Received action: " + action);
+        try {
+            switch (action) {
+                case ACTION_PLAY:
+                    Log.d("RadioService", "Resume playback");
+                    radioManager.resume();
+                    break;
+                case ACTION_START:
+                    Log.d("RadioService", "Start new playback");
+                    String newStreamUrl = intent.getStringExtra(PlayerService.EXTRA_STREAM_URL);
+                    Log.d("RadioService", "Stream URL: " + newStreamUrl);
+
+                    if (newStreamUrl != null) {
+                        currentStreamUrl = newStreamUrl;
+                        isManuallyStopped = false;
+
+                        radioManager.play(currentStreamUrl);
+                        currentTrack = null;
+
+                        Log.d("RadioService", "Station: " + radioRepository.getPlayingStation().getName());
+
+                        stopForeground(true);
+                        startForeground(NOTIFICATION_ID,
+                                notificationService.startNotification(currentTrack, true, radioRepository.getPlayingStation()));
+
+                        if(!isPlayingBefore){
+                            radioRepository.setStatePlayer(true);
+                        }
+                        isPlayingBefore = true;
                     }
-                    isPlayingBefore = true;
-                }
-                break;
-            case ACTION_PAUSE:
-                Log.d("RadioService", "pause");
-                radioManager.stop();
-                break;
-            case ACTION_STOP:
-                Log.d("RadioService", "stop");
-                notificationService.stopNotification();
-                radioManager.stop();
-                isManuallyStopped = true;
-                isPlayingBefore = false;
-                userRepository.setPlayingUUID(null);
-                stopForeground(true);
-                radioRepository.setStatePlayer(false);
-                break;
+                    break;
+                case ACTION_PAUSE:
+                    Log.d("RadioService", "Pause playback");
+                    radioManager.pause();
+                    break;
+                case ACTION_STOP:
+                    Log.d("RadioService", "Stop playback completely");
+                    notificationService.stopNotification();
+                    radioManager.stop();
+                    isManuallyStopped = true;
+                    isPlayingBefore = false;
+                    userRepository.setPlayingUUID(null);
+                    stopForeground(true);
+                    radioRepository.setStatePlayer(false);
+                    break;
+            }
+        } catch (Exception e) {
+            Log.e("RadioService", "Error in onStartCommand: " + e.getMessage(), e);
         }
         return START_STICKY;
     }
@@ -135,6 +145,7 @@ public class PlayerService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        notificationService.stopNotification();
         radioManager.stop();
         radioManager.release();
         radioManager.getCurrentTrack().removeObserver(trackObserver);
