@@ -137,8 +137,7 @@ public class HistoryFragment extends Fragment {
 
                 if (playerViewModel.isInternetConnected()) {
                     if (playerViewModel.checkTypeInternet().equals("ok")) {
-                        playerViewModel.setPlaying(adapter.getUUID(position));
-                        playerViewModel.start();
+                        playerViewModel.start(adapter.getUUID(position));
                     } else {
                         Toast.makeText(requireActivity(), "Not correct internet type!", Toast.LENGTH_SHORT).show();
                     }

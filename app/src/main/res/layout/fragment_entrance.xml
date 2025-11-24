@@ -11,16 +11,36 @@
         android:layout_height="match_parent"
         android:background="@color/background">
 
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guide_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.075" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guide_end"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.925" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_bottom_fixed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_end="30dp" />
+
         <by.roman.worldradio0.ui.elements.view.InnerGlowMaterialCardView
             android:id="@+id/loginCardView_Entrance"
             android:layout_width="0dp"
-            android:layout_height="60dp"
-            android:layout_marginStart="34dp"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="6:1"
             android:layout_marginTop="30dp"
-            android:layout_marginEnd="34dp"
             app:cardCornerRadius="15dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/guide_end"
+            app:layout_constraintStart_toStartOf="@+id/guide_start"
             app:layout_constraintTop_toTopOf="parent"
             app:strokeWidth="0dp">
 
@@ -33,9 +53,10 @@
                     android:id="@+id/imageView2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="0dp"
                     android:src="@drawable/user"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/loginInput_Entrance"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -43,15 +64,16 @@
                     android:id="@+id/loginInput_Entrance"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
-                    android:layout_marginStart="60dp"
-                    android:layout_marginEnd="60dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
                     android:background="@null"
                     android:ems="10"
                     android:hint="Логин"
                     android:inputType="text"
+                    android:textSize="16dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/imageView2"
                     app:layout_constraintTop_toTopOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -62,13 +84,12 @@
             app:strokeWidth="0dp"
             android:id="@+id/passwordCardView_Entrance"
             android:layout_width="0dp"
-            android:layout_height="60dp"
-            android:layout_marginStart="34dp"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="6:1"
             android:layout_marginTop="15dp"
-            android:layout_marginEnd="34dp"
             app:cardCornerRadius="15dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/guide_end"
+            app:layout_constraintStart_toStartOf="@+id/guide_start"
             app:layout_constraintTop_toBottomOf="@+id/loginCardView_Entrance">
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -76,28 +97,14 @@
                 android:layout_height="match_parent"
                 android:background="@color/reg_enter_background">
 
-                <EditText
-                    android:id="@+id/passwordInput_Entrance"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_marginStart="60dp"
-                    android:layout_marginEnd="60dp"
-                    android:background="@null"
-                    android:ems="10"
-                    android:hint="Пароль"
-                    android:inputType="textPassword"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
                 <ImageView
                     android:id="@+id/imageView3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="0dp"
                     android:src="@drawable/lock"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/passwordInput_Entrance"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -109,21 +116,38 @@
                     android:src="@drawable/eye_closed"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/passwordInput_Entrance"
                     app:layout_constraintTop_toTopOf="parent" />
+
+                <EditText
+                    android:id="@+id/passwordInput_Entrance"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="0dp"
+                    android:background="@null"
+                    android:ems="10"
+                    android:hint="Пароль"
+                    android:inputType="textPassword"
+                    android:textSize="16dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/passStatus_Entrance"
+                    app:layout_constraintStart_toEndOf="@+id/imageView3"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </by.roman.worldradio0.ui.elements.view.InnerGlowMaterialCardView>
 
         <ImageView
             android:id="@+id/enterButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="145dp"
-
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="80dp"
             android:src="@drawable/textfield_background"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintDimensionRatio="3:1"
+            app:layout_constraintEnd_toEndOf="@+id/guide_end"
+            app:layout_constraintStart_toStartOf="@+id/guide_start"
             app:layout_constraintTop_toBottomOf="@+id/passwordCardView_Entrance" />
 
         <TextView
@@ -132,6 +156,7 @@
             android:layout_height="wrap_content"
             android:text="Вход"
             android:textColor="@color/white"
+            android:textSize="18dp"
             app:layout_constraintBottom_toBottomOf="@+id/enterButton"
             app:layout_constraintEnd_toEndOf="@+id/enterButton"
             app:layout_constraintStart_toStartOf="@+id/enterButton"
@@ -142,21 +167,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/red"
-            android:textSize="14sp"
+            android:textSize="14dp"
             android:visibility="invisible"
             app:layout_constraintBottom_toTopOf="@+id/loginCardView_Entrance"
             app:layout_constraintStart_toStartOf="@+id/loginCardView_Entrance"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.8" />
 
         <TextView
             android:id="@+id/forgotPass_Entrance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="23dp"
-            android:layout_marginEnd="69dp"
-            android:layout_marginBottom="28dp"
-            app:layout_constraintBottom_toTopOf="@+id/enterButton"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="20dp"
+            android:text="Забыли пароль?"
+            android:textSize="14dp"
+            app:layout_constraintEnd_toEndOf="@+id/guide_end"
             app:layout_constraintTop_toBottomOf="@+id/passwordCardView_Entrance" />
 
         <ProgressBar
@@ -175,13 +200,13 @@
             style="?android:attr/progressBarStyleHorizontal"
             android:max="100"
             android:min="0"
-            android:layout_width="200dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="30dp"
             android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintBottom_toBottomOf="@+id/guideline_bottom_fixed"
+            app:layout_constraintEnd_toEndOf="@+id/guide_end"
+            app:layout_constraintStart_toStartOf="@+id/guide_start"
+            app:layout_constraintHorizontal_bias="0.5" />
 
         <TextView
             android:id="@+id/textStationsLoading_Entrance"
@@ -189,6 +214,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
             android:visibility="invisible"
+            android:text="Загрузка..."
+            android:textSize="14dp"
             app:layout_constraintBottom_toTopOf="@+id/progressBar_loading_Entrance"
             app:layout_constraintEnd_toEndOf="@+id/progressBar_loading_Entrance"
             app:layout_constraintHorizontal_bias="0.5"

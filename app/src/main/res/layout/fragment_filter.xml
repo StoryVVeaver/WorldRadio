@@ -35,7 +35,6 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Поля фильтров -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -132,6 +131,12 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:ellipsize="marquee"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:marqueeRepeatLimit="marquee_forever"
+                        android:scrollHorizontally="true"
+                        android:singleLine="true"
                         android:text="Подходит 125 станций"
                         android:textColor="#E2E2E2"
                         android:textSize="14sp" />
@@ -173,63 +178,76 @@
                         android:textColor="#A0A0A0"
                         android:textSize="12sp" />
 
-                    <LinearLayout
+                    <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
+                        android:layout_height="wrap_content">
 
-                        <Space
-                            android:layout_width="0dp"
-                            android:layout_height="1dp"
-                            android:layout_weight="1" />
+                        <androidx.constraintlayout.widget.Guideline
+                            android:id="@+id/g1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            app:layout_constraintGuide_percent="0.333" />
+
+                        <androidx.constraintlayout.widget.Guideline
+                            android:id="@+id/g2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            app:layout_constraintGuide_percent="0.666" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chipAlphabet"
                             style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:layout_marginEnd="4dp"
                             android:text="Алфавит"
+                            android:gravity="center"
+                            android:textSize="10dp"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/g1"
                             app:chipBackgroundColor="@color/chip_selector"
                             app:chipStrokeColor="@color/chip_stroke_selector"
                             app:chipStrokeWidth="1dp" />
-
-                        <Space
-                            android:layout_width="0dp"
-                            android:layout_height="1dp"
-                            android:layout_weight="1" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chipRating"
                             style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:layout_marginEnd="4dp"
                             android:text="Рейтинг"
+                            android:gravity="center"
+                            android:textSize="10dp"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="@+id/g1"
+                            app:layout_constraintEnd_toStartOf="@+id/g2"
                             app:chipBackgroundColor="@color/chip_selector"
                             app:chipStrokeColor="@color/chip_stroke_selector"
                             app:chipStrokeWidth="1dp" />
-
-                        <Space
-                            android:layout_width="0dp"
-                            android:layout_height="1dp"
-                            android:layout_weight="1" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chipBitrate"
                             style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:layout_marginEnd="4dp"
+                            android:textSize="10dp"
                             android:text="Битрейт"
+                            android:gravity="center"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="@+id/g2"
+                            app:layout_constraintEnd_toEndOf="parent"
                             app:chipBackgroundColor="@color/chip_selector"
                             app:chipStrokeColor="@color/chip_stroke_selector"
                             app:chipStrokeWidth="1dp" />
 
-                        <Space
-                            android:layout_width="0dp"
-                            android:layout_height="1dp"
-                            android:layout_weight="1" />
-
-                    </LinearLayout>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
 
                 </LinearLayout>
 

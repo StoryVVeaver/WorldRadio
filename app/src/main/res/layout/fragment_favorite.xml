@@ -11,17 +11,35 @@
         android:layout_height="match_parent"
         android:background="@color/background">
 
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guide_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.05" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guide_end"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.95" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guide_top"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.03" />
+
         <androidx.cardview.widget.CardView
             android:id="@+id/cardView_favorite"
-            android:layout_width="wrap_content"
-            android:layout_height="45dp"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginEnd="10dp"
-            app:cardCornerRadius="15dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="7:1"  app:layout_constraintWidth_percent="0.85" app:cardCornerRadius="15dp"
+            app:layout_constraintEnd_toEndOf="@+id/guide_end"
+            app:layout_constraintStart_toStartOf="@+id/guide_start"
+            app:layout_constraintTop_toTopOf="@+id/guide_top">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -30,8 +48,9 @@
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/stationMode"
-                    android:layout_width="160dp"
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
+                    android:layout_weight="1"
                     android:background="@color/selectedMode">
 
                     <TextView
@@ -40,8 +59,7 @@
                         android:layout_height="wrap_content"
                         android:text="Станции"
                         android:textColor="@color/white"
-                        android:textSize="25sp"
-                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:textSize="20sp" app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -49,8 +67,9 @@
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/trackMode"
-                    android:layout_width="160dp"
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
+                    android:layout_weight="1"
                     android:background="@color/unselectedMode">
 
                     <TextView
@@ -59,8 +78,7 @@
                         android:layout_height="wrap_content"
                         android:text="Треки"
                         android:textColor="@color/unselectedText"
-                        android:textSize="25sp"
-                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:textSize="20sp" app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />

@@ -5,12 +5,11 @@ plugins {
 
 android {
     namespace = "by.roman.worldradio0"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "by.roman.worldradio0"
         minSdk = 28
-        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 

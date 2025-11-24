@@ -62,8 +62,7 @@ public class FavoriteStationsFragment extends Fragment {
             public void onStationItemClick(int position) {
                 if(playerViewModel.isInternetConnected()){
                     if(playerViewModel.checkTypeInternet().equals("ok")){
-                        playerViewModel.setPlaying(adapter.getUUID(position));
-                        playerViewModel.start();
+                        playerViewModel.start(adapter.getUUID(position));
                     } else {
                         Toast.makeText(getContext(), "Not correct internet type!", Toast.LENGTH_SHORT).show();
                     }

@@ -7,6 +7,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -196,8 +197,10 @@ public class EntranceFragment extends Fragment {
         card.setStrokeWidth(strokePx);
         card.setStrokeColor(color);
 
-        card.setOutlineAmbientShadowColor(color);
-        card.setOutlineSpotShadowColor(lightColor);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            card.setOutlineAmbientShadowColor(color);
+            card.setOutlineSpotShadowColor(lightColor);
+        }
     }
     private float dpToPx(int dp) {
         return TypedValue.applyDimension(

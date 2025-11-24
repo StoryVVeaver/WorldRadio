@@ -11,16 +11,37 @@
         android:layout_height="match_parent"
         android:background="@color/background">
 
-        <ImageView
-            android:id="@+id/regButton"
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guide_start"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="70dp"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.075" />
 
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guide_end"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.925" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_bottom_fixed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_end="30dp" />
+
+        <ImageView
+            android:id="@+id/regButton"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="80dp"
             android:src="@drawable/textfield_background"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/password2CardView_Registration" />
+            app:layout_constraintDimensionRatio="3:1"
+            app:layout_constraintEnd_toEndOf="@+id/guide_end"
+            app:layout_constraintStart_toStartOf="@+id/guide_start"
+            app:layout_constraintTop_toBottomOf="@+id/password1CardView_Registration" />
 
         <TextView
             android:id="@+id/textReg_Registration"
@@ -28,6 +49,7 @@
             android:layout_height="wrap_content"
             android:text="Регистрация"
             android:textColor="@color/white"
+            android:textSize="18dp"
             app:layout_constraintBottom_toBottomOf="@+id/regButton"
             app:layout_constraintEnd_toEndOf="@+id/regButton"
             app:layout_constraintStart_toStartOf="@+id/regButton"
@@ -36,14 +58,13 @@
         <by.roman.worldradio0.ui.elements.view.InnerGlowMaterialCardView
             android:id="@+id/password2CardView_Registration"
             android:layout_width="0dp"
-            android:layout_height="60dp"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="6:1"
             app:strokeWidth="0dp"
-            android:layout_marginStart="34dp"
             android:layout_marginTop="15dp"
-            android:layout_marginEnd="34dp"
             app:cardCornerRadius="15dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/guide_end"
+            app:layout_constraintStart_toStartOf="@+id/guide_start"
             app:layout_constraintTop_toBottomOf="@+id/password1CardView_Registration">
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -51,28 +72,14 @@
                 android:layout_height="match_parent"
                 android:background="@color/reg_enter_background">
 
-                <EditText
-                    android:id="@+id/password2Input_Registration"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_marginStart="60dp"
-                    android:layout_marginEnd="60dp"
-                    android:background="@null"
-                    android:ems="10"
-                    android:hint="Повторите пароль"
-                    android:inputType="textPassword"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
                 <ImageView
                     android:id="@+id/imageView42"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="0dp"
                     android:src="@drawable/lock"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/password2Input_Registration"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -84,7 +91,22 @@
                     android:src="@drawable/eye_closed"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/password2Input_Registration"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <EditText
+                    android:id="@+id/password2Input_Registration"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="0dp"
+                    android:background="@null"
+                    android:ems="10"
+                    android:hint="Повторите пароль"
+                    android:inputType="textPassword"
+                    android:textSize="16dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/pass2Status_Registration"
+                    app:layout_constraintStart_toEndOf="@+id/imageView42"
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </by.roman.worldradio0.ui.elements.view.InnerGlowMaterialCardView>
@@ -92,13 +114,12 @@
         <by.roman.worldradio0.ui.elements.view.InnerGlowMaterialCardView
             android:id="@+id/loginCardView_Registration"
             android:layout_width="0dp"
-            android:layout_height="60dp"
-            android:layout_marginStart="34dp"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="6:1"
             android:layout_marginTop="30dp"
-            android:layout_marginEnd="34dp"
             app:cardCornerRadius="15dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/guide_end"
+            app:layout_constraintStart_toStartOf="@+id/guide_start"
             app:layout_constraintTop_toTopOf="parent"
             app:strokeWidth="0dp">
 
@@ -111,9 +132,10 @@
                     android:id="@+id/imageView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="0dp"
                     android:src="@drawable/user"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/loginInput_Registration"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -121,15 +143,16 @@
                     android:id="@+id/loginInput_Registration"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
-                    android:layout_marginStart="60dp"
-                    android:layout_marginEnd="60dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
                     android:background="@null"
                     android:ems="10"
                     android:hint="Логин"
                     android:inputType="text"
+                    android:textSize="16dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/imageView"
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </by.roman.worldradio0.ui.elements.view.InnerGlowMaterialCardView>
@@ -137,14 +160,13 @@
         <by.roman.worldradio0.ui.elements.view.InnerGlowMaterialCardView
             android:id="@+id/password1CardView_Registration"
             android:layout_width="0dp"
-            android:layout_height="60dp"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="6:1"
             app:strokeWidth="0dp"
-            android:layout_marginStart="34dp"
             android:layout_marginTop="15dp"
-            android:layout_marginEnd="34dp"
             app:cardCornerRadius="15dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/guide_end"
+            app:layout_constraintStart_toStartOf="@+id/guide_start"
             app:layout_constraintTop_toBottomOf="@+id/loginCardView_Registration">
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -152,28 +174,14 @@
                 android:layout_height="match_parent"
                 android:background="@color/reg_enter_background">
 
-                <EditText
-                    android:id="@+id/password1Input_Registration"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_marginStart="60dp"
-                    android:layout_marginEnd="60dp"
-                    android:background="@null"
-                    android:ems="10"
-                    android:hint="Пароль"
-                    android:inputType="textPassword"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
                 <ImageView
                     android:id="@+id/imageView4"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="0dp"
                     android:src="@drawable/lock"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/password1Input_Registration"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -185,7 +193,22 @@
                     android:src="@drawable/eye_closed"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/password1Input_Registration"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <EditText
+                    android:id="@+id/password1Input_Registration"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="0dp"
+                    android:background="@null"
+                    android:ems="10"
+                    android:hint="Пароль"
+                    android:inputType="textPassword"
+                    android:textSize="16dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/pass1Status_Registration"
+                    app:layout_constraintStart_toEndOf="@+id/imageView4"
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </by.roman.worldradio0.ui.elements.view.InnerGlowMaterialCardView>
@@ -208,24 +231,25 @@
             android:layout_height="wrap_content"
             android:text="TextView"
             android:textColor="@color/red"
-            android:textSize="14sp"
+            android:textSize="14dp"
             android:visibility="invisible"
             app:layout_constraintBottom_toTopOf="@+id/loginCardView_Registration"
             app:layout_constraintStart_toStartOf="@+id/loginCardView_Registration"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.8" />
 
         <ProgressBar
             android:id="@+id/progressBar_loading_Registration"
-            android:layout_width="200dp"
             style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="30dp"
             android:visibility="invisible"
             android:min="0"
             android:max="100"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintBottom_toBottomOf="@+id/guideline_bottom_fixed"
+            app:layout_constraintEnd_toEndOf="@+id/guide_end"
+            app:layout_constraintStart_toStartOf="@+id/guide_start"
+            app:layout_constraintHorizontal_bias="0.5" />
 
         <TextView
             android:id="@+id/textStationsLoading_Registration"
@@ -233,6 +257,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
             android:visibility="invisible"
+            android:text="Загрузка..."
+            android:textSize="14dp"
             app:layout_constraintBottom_toTopOf="@+id/progressBar_loading_Registration"
             app:layout_constraintEnd_toEndOf="@+id/progressBar_loading_Registration"
             app:layout_constraintHorizontal_bias="0.5"

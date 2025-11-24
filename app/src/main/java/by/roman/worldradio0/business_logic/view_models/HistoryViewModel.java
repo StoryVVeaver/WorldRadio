@@ -135,4 +135,12 @@ public class HistoryViewModel extends ViewModel {
         executor.shutdown();
         isActive.set(false);
     }
+    public History getLastHistory(){
+        try {
+            return historyRepository.getLastHistory();
+        } catch (Exception e) {
+            Log.e("HistoryViewModel", "Failed get last history");
+            return null;
+        }
+    }
 }

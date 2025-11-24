@@ -31,11 +31,11 @@ public class HistoryDao {
         this.db = db;
     }
 
-    public void addToHistory(HistoryDTO dto){
-        removeFromHistory(dto.toModel());
+    public void addToHistory(History history){
+        removeFromHistory(history);
         ContentValues values = new ContentValues();
-        values.put(COLUMN_USER_ID_HISTORY, dto.getUser_id());
-        values.put(COLUMN_UUID_STATION_HISTORY, dto.getUuid());
+        values.put(COLUMN_USER_ID_HISTORY, history.getUser_id());
+        values.put(COLUMN_UUID_STATION_HISTORY, history.getUuid());
         db.insertWithOnConflict(TABLE_HISTORY, null, values, SQLiteDatabase.CONFLICT_REPLACE);
     }
     public void removeFromHistory(History history){
@@ -54,6 +54,39 @@ public class HistoryDao {
             Log.e("HistoryDao", "Error deleting history for user " + userId, e);
         }
     }
+    public History getLastHistory(int userId) {
+        History secondLast = null;
+
+        Cursor cursor = db.query(
+                TABLE_HISTORY,
+                new String[]{ COLUMN_USER_ID_HISTORY, COLUMN_UUID_STATION_HISTORY },
+                COLUMN_USER_ID_HISTORY + " = ?",
+                new String[]{ String.valueOf(userId) },
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null) {
+            try (cursor) {
+                if (cursor.moveToLast() && cursor.moveToPrevious()) {
+                    int userIdIndex = cursor.getColumnIndex(COLUMN_USER_ID_HISTORY);
+                    int uuidIndex = cursor.getColumnIndex(COLUMN_UUID_STATION_HISTORY);
+                    if(userIdIndex != -1 && uuidIndex != -1){
+                        secondLast = new History(
+                                cursor.getInt(userIdIndex),
+                                cursor.getString(uuidIndex)
+                        );
+                    }
+                }
+            } catch (Exception e) {
+                Log.e("HistoryDao", "Error reading second last history for user " + userId, e);
+            }
+        }
+
+        return secondLast;
+    }
+
 
     public List<History> getHistoryByUser(int userId, int currentPage, int pageSize) {
         List<History> histories = new ArrayList<>();

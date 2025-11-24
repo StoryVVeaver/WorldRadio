@@ -2,8 +2,12 @@ package by.roman.worldradio0.business_logic.media;
 
 import static by.roman.worldradio0.business_logic.player.PlayerService.ACTION_STOP;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -12,9 +16,11 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
+import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.media3.common.util.UnstableApi;
 
+import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.player.PlayerService;
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -34,6 +40,9 @@ public class TimerService extends Service {
     public static final String EXTRA_TIME_PAUSE = "EXTRA_TIME_PAUSE";
     public static final String EXTRA_TIME_FINISH = "EXTRA_TIME_FINISH";
 
+    private static final String CHANNEL_ID = "timer_service_channel";
+    private static final int NOTIFICATION_ID = 1;
+
     private Handler handler;
     private Runnable stopRunnable;
     private long endTimeMillis = 0;
@@ -47,16 +56,21 @@ public class TimerService extends Service {
     public void onCreate() {
         super.onCreate();
         handler = new Handler(Looper.getMainLooper());
-        Log.d("TS","created");
+        createNotificationChannel();
+        Log.d("TS", "created");
     }
 
     @Override
     public int onStartCommand(@NonNull Intent intent, int flags, int startId) {
         String action = intent.getAction();
         if (action == null) return START_NOT_STICKY;
+
+        // Сразу переводим сервис в foreground режим
+        startForeground(NOTIFICATION_ID, createNotification("Таймер активен", "Таймер работает..."));
+
         switch (action) {
             case ACTION_START_TIMER:
-                long duration = intent.getLongExtra(EXTRA_DURATION_MS, 2 * 60 * 1000); // default 2 min
+                long duration = intent.getLongExtra(EXTRA_DURATION_MS, 2 * 60 * 1000);
                 startSleepTimer(duration);
                 break;
             case ACTION_PAUSE_TIMER:
@@ -67,6 +81,7 @@ public class TimerService extends Service {
                 break;
             case ACTION_STOP_TIMER:
                 stopSleepTimer();
+                stopSelf(); // Останавливаем сервис
                 break;
             case ACTION_GET_TIME:
                 long timeLeft = getTimeLeft();
@@ -81,6 +96,36 @@ public class TimerService extends Service {
         return START_STICKY;
     }
 
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID,
+                    "Timer Service",
+                    NotificationManager.IMPORTANCE_LOW
+            );
+            channel.setDescription("Channel for timer service");
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            manager.createNotificationChannel(channel);
+        }
+    }
+
+    private Notification createNotification(String title, String content) {
+        return new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle(title)
+                .setContentText(content)
+                .setSmallIcon(R.drawable.timer_home)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setOngoing(true)
+                .setOnlyAlertOnce(true)
+                .build();
+    }
+
+    private void updateNotification(String title, String content) {
+        Notification notification = createNotification(title, content);
+        NotificationManager manager = getSystemService(NotificationManager.class);
+        manager.notify(NOTIFICATION_ID, notification);
+    }
+
     @OptIn(markerClass = UnstableApi.class)
     private void startSleepTimer(long durationMs) {
         stopSleepTimer();
@@ -90,14 +135,27 @@ public class TimerService extends Service {
         stopRunnable = () -> {
             Log.d("TimerService", "Timer expired, stopping playback and service.");
             flag = false;
+
+            // Обновляем уведомление перед остановкой
+            updateNotification("Таймер завершен", "Воспроизведение остановлено");
+
             Intent stopIntent = new Intent(this, PlayerService.class);
             stopIntent.setAction(ACTION_STOP);
             startService(stopIntent);
+
+            // Останавливаем сервис
+            stopSelf();
         };
+
         handler.postDelayed(stopRunnable, durationMs);
         flag = true;
+        flag2 = false;
+
+        // Обновляем уведомление
+        updateNotification("Таймер запущен", formatTime(durationMs) + " осталось");
         Log.d("TimerService", "Sleep timer started for " + durationMs + " ms");
     }
+
     private void stopSleepTimer() {
         if (stopRunnable != null) {
             handler.removeCallbacks(stopRunnable);
@@ -105,40 +163,64 @@ public class TimerService extends Service {
             remaining = 0;
             endTimeMillis = 0;
             flag = false;
+            flag2 = false;
+
+            // Обновляем уведомление
+            updateNotification("Таймер остановлен", "Таймер не активен");
             Log.d("TimerService", "Sleep timer stopped");
         }
     }
-    private void pauseSleepTimer(){
+
+    private void pauseSleepTimer() {
         long now = System.currentTimeMillis();
-        remaining =  Math.max(endTimeMillis - now, 0);
+        remaining = Math.max(endTimeMillis - now, 0);
         if (stopRunnable != null) {
             handler.removeCallbacks(stopRunnable);
             flag = false;
             flag2 = true;
+
+            // Обновляем уведомление
+            updateNotification("Таймер на паузе", formatTime(remaining) + " осталось");
             Log.d("TimerService", "Sleep timer paused");
         }
     }
+
     @OptIn(markerClass = UnstableApi.class)
-    private void resumeSleepTimer(){
-        if(remaining != 0 && stopRunnable != null){
+    private void resumeSleepTimer() {
+        if (remaining != 0 && stopRunnable != null) {
             endTimeMillis = System.currentTimeMillis() + remaining;
             handler.postDelayed(stopRunnable, remaining);
             flag = true;
             flag2 = false;
+
+            // Обновляем уведомление
+            updateNotification("Таймер возобновлен", formatTime(remaining) + " осталось");
             Log.d("TimerService", "Sleep timer resumed for " + remaining + " ms");
         }
     }
+
     private long getTimeLeft() {
         long now = System.currentTimeMillis();
-        if(flag) {
+        if (flag) {
             return Math.max(endTimeMillis - now, 0);
         } else {
             return remaining;
         }
     }
+
+    private String formatTime(long millis) {
+        long seconds = millis / 1000;
+        long minutes = seconds / 60;
+        seconds = seconds % 60;
+        return String.format("%02d:%02d", minutes, seconds);
+    }
+
     @Override
     public void onDestroy() {
         stopSleepTimer();
+        // Убираем уведомление при уничтожении сервиса
+        NotificationManager manager = getSystemService(NotificationManager.class);
+        manager.cancel(NOTIFICATION_ID);
         super.onDestroy();
         Log.d("TimerService", "Service destroyed");
     }

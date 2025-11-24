@@ -39,6 +39,7 @@ import java.util.List;
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.data.models.MapPoint;
 import by.roman.worldradio0.business_logic.data.models.Settings;
+import by.roman.worldradio0.business_logic.view_models.HistoryViewModel;
 import by.roman.worldradio0.business_logic.view_models.MapViewModel;
 import by.roman.worldradio0.business_logic.view_models.PlayerViewModel;
 import by.roman.worldradio0.business_logic.view_models.SettingsViewModel;
@@ -53,6 +54,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
     private MapView map;
     private MapViewModel viewModel;
     private PlayerViewModel playerViewModel;
+    private HistoryViewModel historyViewModel;
     private SettingsViewModel settingsViewModel;
     private OptimizedGridClusterer clusterer;
     private final Handler clusterHandler = new Handler(Looper.getMainLooper());
@@ -97,6 +99,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
 
         viewModel = new ViewModelProvider(requireActivity()).get(MapViewModel.class);
         playerViewModel = new ViewModelProvider(requireActivity()).get(PlayerViewModel.class);
+        historyViewModel = new ViewModelProvider(requireActivity()).get(HistoryViewModel.class);
         settingsViewModel = new ViewModelProvider(requireActivity()).get(SettingsViewModel.class);
 
         initializeMap();
@@ -168,8 +171,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
                 }
                 if (playerViewModel.isInternetConnected()) {
                     if ("ok".equals(playerViewModel.checkTypeInternet())) {
-                        playerViewModel.setPlaying(snapped.getUuid());
-                        playerViewModel.start();
+                        playerViewModel.start(snapped.getUuid());
                     } else {
                         Toast.makeText(getContext(), "Not correct internet type!", Toast.LENGTH_SHORT).show();
                     }
@@ -201,11 +203,9 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         Point defaultIconOffset = new Point(0, - (iconH / 2));
         centerSnap.setDefaultIconOffset(defaultIconOffset);
 
-        // cluster marker click -> enable snap (if not) and snap to point
         clusterer.setOnClusterMarkerClickListener(mp -> {
             centerSnap.snapTo(mp, true, true);
         });
-        // enable snap after first user touch on map (prevents startup sticky behavior)
         map.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 centerSnap.notifyUserInteraction();
@@ -322,11 +322,15 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         for (MapPoint p : visible) {
             String uuid = p.getUuid();
             if (uuid == null) continue;
-            if ((currentSnappedUuid != null && currentSnappedUuid.equals(uuid))
-                    || (previousSnappedUuid != null && previousSnappedUuid.equals(uuid))) {
+            if(uuid.equals(playerViewModel.getCurrentStation().getStationUuid())){
+                Log.v("MapFragment", "Skip " + uuid + ", " +playerViewModel.getCurrentStation().getName());
                 continue;
             }
-
+            if(uuid.equals(historyViewModel.getLastHistory().getUuid())){
+                Log.v("MapFragment", "Skip " + uuid + ", history");
+                continue;
+            }
+            Log.v("MapFragment", uuid + " != " + historyViewModel.getLastHistory().getUuid());
             org.osmdroid.util.GeoPoint gp = new org.osmdroid.util.GeoPoint(p.getLatitude(), p.getLongitude());
             map.getProjection().toPixels(gp, tmp);
             double dx = tmp.x - cx;
@@ -349,13 +353,13 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         centerSnap.snapTo(target, true, true);
     }
     private void snapToPrevious(){
-        if(previousSnappedUuid != null){
-            MapPoint point = viewModel.getMapPointByUUID(previousSnappedUuid);
+        if(historyViewModel.getLastHistory().getUuid() != null){
+            MapPoint point = viewModel.getMapPointByUUID(historyViewModel.getLastHistory().getUuid());
             currentSnappedUuid = previousSnappedUuid;
             previousSnappedUuid = null;
             centerSnap.snapTo(point, true, true);
         } else {
-            //Toast.makeText(requireActivity(), "Нет информации о прошлой станции", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireActivity(), "Нет информации о прошлой станции", Toast.LENGTH_SHORT).show();
         }
     }
     @Override

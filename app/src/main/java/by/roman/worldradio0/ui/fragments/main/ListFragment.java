@@ -53,7 +53,6 @@ public class ListFragment extends Fragment {
         super.onPause();
         isVisibleToUser = false;
         handler.removeCallbacksAndMessages(null);
-        // Не отменяем операции - они могут выполняться в фоне
     }
 
     @Override
@@ -130,7 +129,6 @@ public class ListFragment extends Fragment {
     }
 
     private void play(String uuid) {
-        // Оптимизированная проверка интернета
         if (!playerViewModel.isInternetConnected()) {
             Toast.makeText(getContext(), "Check internet connection!", Toast.LENGTH_SHORT).show();
             return;
@@ -140,9 +138,7 @@ public class ListFragment extends Fragment {
             Toast.makeText(getContext(), "Not correct internet type!", Toast.LENGTH_SHORT).show();
             return;
         }
-
-        playerViewModel.setPlaying(uuid);
-        playerViewModel.start();
+        playerViewModel.start(uuid);
     }
 
     private void observeAndLoad() {
@@ -183,7 +179,6 @@ public class ListFragment extends Fragment {
             }
         });
 
-        // Оптимизированные observers для навигации
         playerViewModel.getPlayPrevious().observe(getViewLifecycleOwner(), flag -> {
             if (flag != null && flag) {
                 String currentUuid = playerViewModel.getCurrentStation().getStationUuid();

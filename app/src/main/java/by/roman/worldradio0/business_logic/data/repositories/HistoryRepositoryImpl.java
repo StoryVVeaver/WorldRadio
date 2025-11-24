@@ -19,9 +19,9 @@ public class HistoryRepositoryImpl implements HistoryRepository {
         this.userDao = userDao;
     }
     @Override
-    public void addToHistory(HistoryDTO dto) {
+    public void addToHistory(History history) {
         try {
-            historyDao.addToHistory(dto);
+            historyDao.addToHistory(history);
         } catch (Exception e) {
             Log.e("HistoryRepositoryImpl", "Failed add to history");
         }
@@ -52,4 +52,15 @@ public class HistoryRepositoryImpl implements HistoryRepository {
             return null;
         }
     }
+
+    @Override
+    public History getLastHistory() {
+        try {
+            return historyDao.getLastHistory(userDao.getIdUserInSystem());
+        } catch (Exception e) {
+            Log.e("HistoryRepositoryImpl", "Failed get last history");
+            return null;
+        }
+    }
+
 }

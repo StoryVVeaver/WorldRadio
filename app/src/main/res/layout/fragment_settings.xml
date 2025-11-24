@@ -4,37 +4,41 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@color/background"
+    android:fitsSystemWindows="false"> <com.google.android.material.appbar.AppBarLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/background"
+    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+    app:liftOnScroll="true">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <com.google.android.material.appbar.CollapsingToolbarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/background"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        app:contentScrim="@color/background"
+        app:expandedTitleMarginStart="16dp"
+        app:expandedTitleMarginEnd="16dp"
+        app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
-        <com.google.android.material.appbar.CollapsingToolbarLayout
+        <include
+            layout="@layout/settings_header_expanded"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:contentScrim="@color/background"
-            app:expandedTitleMarginStart="16dp"
-            app:expandedTitleMarginEnd="16dp"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+            app:layout_collapseMode="parallax" />
 
-            <include
-                layout="@layout/settings_header_expanded"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_collapseMode="parallax" />
+    </com.google.android.material.appbar.CollapsingToolbarLayout>
 
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
+</com.google.android.material.appbar.AppBarLayout>
 
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView_Settings"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:clipToPadding="false"
+
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -60,6 +60,8 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     private final MutableLiveData<Boolean> playNext = new MutableLiveData<>();
     private final MutableLiveData<Boolean> playPrevious = new MutableLiveData<>();
     private Settings settings;
+
+    @OptIn(markerClass = UnstableApi.class)
     @Inject
     public PlayerViewModel(@NonNull RadioManager radioManager,HistoryRepository historyRepository, FavoriteTrackRepository favoriteTrackRepository, FavoriteStationRepository favoriteStationRepository, @ApplicationContext Context context, RadioRepository radioRepository, UserRepository userRepository, SettingsRepository settingsRepository) {
         this.context = context;
@@ -120,13 +122,14 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
         }
     }
     @OptIn(markerClass = UnstableApi.class)
-    public void start(){
-        String streamUrl = radioRepository.getStationById(userRepository.getPlayingUUID()).getUrl();
+    public void start(String uuid){
+        setPlaying(uuid);
+        String streamUrl = radioRepository.getStationById(uuid).getUrl();
         Log.d("PlayerViewModel","push " + streamUrl);
         Intent intent = new Intent(context, PlayerService.class);
         intent.setAction(PlayerService.ACTION_START);
         intent.putExtra(PlayerService.EXTRA_STREAM_URL, streamUrl);
-        historyRepository.addToHistory(new HistoryDTO().fromModel(new History(userRepository.getUserInSystem(), userRepository.getPlayingUUID())));
+        historyRepository.addToHistory(new History(userRepository.getUserInSystem(), uuid));
         startForegroundService(context, intent);
         isPlayingChanged.postValue(getCurrentStation());
     }
@@ -149,10 +152,11 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
         startForegroundService(context, intent);
     }
     public void playNext(){
-        playNext.postValue(false);
+        Log.v("PlayerViewModel","start next");
+        playNext.postValue(true);
     }
     public void playPrevious(){
-        playPrevious.postValue(false);
+        playPrevious.postValue(true);
     }
     public void addToFavorite(){
         try {
@@ -211,10 +215,10 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
         }
     }
     public void requestSnapNearest() {
-        snapNearest.postValue(false);
+        snapNearest.postValue(true);
     }
     public void requestSnapPrevious() {
-        snapPrevious.postValue(false);
+        snapPrevious.postValue(true);
     }
     public RadioStation getCurrentStation(){
         return radioRepository.getPlayingStation();

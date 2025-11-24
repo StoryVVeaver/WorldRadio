@@ -43,6 +43,12 @@ public class CenterSnapOverlay extends Overlay {
     private boolean requireFirstTouch = true;
     private boolean activatedByUser = false;
 
+    // new: prevent repeated snap-to-same-target loops
+    private long lastSnapTime = 0L;
+    private long snapCooldownMs = 800L; // ignore snaps within this interval
+
+    // new: small delay before invalidation to let projection settle
+    private long postInvalidateDelayMs = 80L;
 
     public CenterSnapOverlay(MapView map,
                              int snapThresholdPx,
@@ -64,7 +70,7 @@ public class CenterSnapOverlay extends Overlay {
             snappedPoint = null;
             circleScreenPos = null;
             if (listener != null) listener.onSnap(null);
-            map.invalidate();
+            postInvalidate();
         } else {
             if (!requireFirstTouch) {
                 activatedByUser = true;
@@ -148,18 +154,23 @@ public class CenterSnapOverlay extends Overlay {
             }
         }
 
+        long now = System.currentTimeMillis();
         if (nearest != null && bestDist2 <= (snapThresholdPx * (double) snapThresholdPx)) {
             if (snappedPoint != null && java.util.Objects.equals(snappedPoint.getUuid(), nearest.getUuid())) {
-                return;
+                return; // already snapped to same
             }
+            // cooldown to prevent instant re-snapping loops
+            if (now - lastSnapTime < snapCooldownMs) return;
+
             snapToPoint(nearest, true, defaultIconOffset, false);
+            lastSnapTime = now;
         } else {
             if (snappedPoint != null) {
                 snappedPoint = null;
                 if (snapAnimator != null && snapAnimator.isRunning()) snapAnimator.cancel();
                 circleScreenPos = null;
                 if (listener != null) listener.onSnap(null);
-                map.invalidate();
+                postInvalidate();
             }
         }
     }
@@ -224,7 +235,8 @@ public class CenterSnapOverlay extends Overlay {
                         int ix = Math.round(startPx.x + (dynamicTargetPx.x - startPx.x) * f);
                         int iy = Math.round(startPx.y + (dynamicTargetPx.y - startPx.y) * f);
                         circleScreenPos = new Point(ix, iy);
-                        map.invalidate();
+                        // don't invalidate aggressively here; we'll postDelayed to reduce jitter
+                        postInvalidate();
                     });
 
                     snapAnimator.addListener(new android.animation.AnimatorListenerAdapter() {
@@ -233,14 +245,15 @@ public class CenterSnapOverlay extends Overlay {
                             circleScreenPos = new Point(dynamicTargetPx.x, dynamicTargetPx.y);
                             snappedPoint = p;
                             if (listener != null) listener.onSnap(p);
-                            map.invalidate();
+                            postInvalidate();
+                            lastSnapTime = System.currentTimeMillis();
                         }
                         @Override
                         public void onAnimationCancel(android.animation.Animator animation) {
                             circleScreenPos = null;
                             snappedPoint = null;
                             if (listener != null) listener.onSnap(null);
-                            map.invalidate();
+                            postInvalidate();
                         }
                     });
 
@@ -256,12 +269,16 @@ public class CenterSnapOverlay extends Overlay {
                 circleScreenPos = new Point(targetPx.x, targetPx.y);
                 snappedPoint = p;
                 if (listener != null) listener.onSnap(p);
-                map.invalidate();
+                postInvalidate();
+                lastSnapTime = System.currentTimeMillis();
             }
         });
     }
     public void clearSnapped(){
         snappedPoint = null;
+        lastSnapTime = 0L;
+        if (listener != null) listener.onSnap(null);
+        postInvalidate();
     }
     public @Nullable MapPoint getSnappedPoint() { return snappedPoint; }
     @Override
@@ -289,6 +306,15 @@ public class CenterSnapOverlay extends Overlay {
         d.setBounds(left, top, right, bottom);
         d.draw(canvas);
 
+    }
+
+    private void postInvalidate() {
+        try {
+            mainHandler.removeCallbacksAndMessages(null);
+            mainHandler.postDelayed(() -> {
+                try { if (map != null) map.invalidate(); } catch (Exception ignored) {}
+            }, postInvalidateDelayMs);
+        } catch (Exception ignored) {}
     }
 
     @Override
