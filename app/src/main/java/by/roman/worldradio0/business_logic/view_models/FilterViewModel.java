@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 
+import by.roman.worldradio0.business_logic.LocationUtil;
 import by.roman.worldradio0.business_logic.UiState;
 import by.roman.worldradio0.business_logic.data.dto.FilterDTO;
 import by.roman.worldradio0.business_logic.data.models.Filter;
@@ -156,7 +157,7 @@ public class FilterViewModel extends ViewModel {
     public void loadAutocompleteData() {
         executor.execute(() -> {
             try {
-                List<String> c = radioRepository.getContrives();
+                List<String> c = radioRepository.getContriesCode();
                 List<String> l = radioRepository.getLanguage();
                 List<String> t = radioRepository.getTags();
                 List<String> n = radioRepository.getNames();
@@ -164,19 +165,18 @@ public class FilterViewModel extends ViewModel {
 
                 if (!isActive.get()) return;
 
-                countriesLive.postValue(c != null ? c : new ArrayList<>());
+                countriesLive.postValue(c != null ? LocationUtil.getCountryNamesFromIso(c) : new ArrayList<>());
                 languagesLive.postValue(l != null ? l : new ArrayList<>());
                 tagsLive.postValue(t != null ? t : new ArrayList<>());
                 namesLive.postValue(n != null ? n : new ArrayList<>());
                 codecsLive.postValue(co != null ? co : new ArrayList<>());
             } catch (Exception e) {
+                Log.e("FilterViewModel", e.getMessage() + " ");
             }
         });
     }
     public void setFilters(Filter filter) {
-        Log.e("fdsgdmodel", "set");
         filterRepository.setFilters(new FilterDTO().fromModel(filter));
-        Log.e("fdsgdmodel", "set");
         resetState();
         loadNextPage();
     }

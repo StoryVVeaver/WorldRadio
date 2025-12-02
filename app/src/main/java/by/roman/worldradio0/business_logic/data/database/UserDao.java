@@ -20,7 +20,7 @@ public class UserDao {
     protected static final String COLUMN_AVATAR_USER = "avatar";
 
     protected static final String CREATE_TABLE_USER = "CREATE TABLE "+ TABLE_USER + " ("+
-            COLUMN_ID_USER +               " INTEGER, "+
+            COLUMN_ID_USER +               " INTEGER PRIMARY KEY, "+
             COLUMN_LOGIN_USER +            " TEXT, "+
             COLUMN_PASSWORD_USER +         " TEXT, "+
             COLUMN_UUID_PLAYING_STATION +  " TEXT, "+
@@ -65,6 +65,7 @@ public class UserDao {
     }
     public void addUser(@NonNull UserDTO dto){
         ContentValues values = new ContentValues();
+        removeUser(dto.getId());
         values.put(COLUMN_ID_USER, dto.getId());
         values.put(COLUMN_LOGIN_USER, dto.getLogin());
         values.put(COLUMN_PASSWORD_USER, dto.getPassword());

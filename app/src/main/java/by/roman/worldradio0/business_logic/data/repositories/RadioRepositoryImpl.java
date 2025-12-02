@@ -97,9 +97,9 @@ public class RadioRepositoryImpl implements RadioRepository {
         }
     }
     @Override
-    public List<String> getContrives(){
+    public List<String> getContriesCode(){
         try {
-            return radioStationDao.getCountryList();
+            return radioStationDao.getCountryCodeList();
         } catch (Exception e) {
             Log.e("RadioRepositoryImp","Failed load country list");
             return null;

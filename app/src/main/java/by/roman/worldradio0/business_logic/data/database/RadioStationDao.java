@@ -119,15 +119,15 @@ public class RadioStationDao {
         }
         return codecs;
     }
-    public List<String> getCountryList() {
+    public List<String> getCountryCodeList() {
         List<String> countries = new ArrayList<>();
         Cursor cursor = db.query(true,
                 TABLE_RADIO_STATION,
-                new String[]{COLUMN_COUNTRY_STATION},
+                new String[]{COLUMN_COUNTRY_CODE_STATION},
                 null,null,null,null,null,null);
         if (cursor != null) {
             try (cursor) {
-                int countryIndex = cursor.getColumnIndex(COLUMN_COUNTRY_STATION);
+                int countryIndex = cursor.getColumnIndex(COLUMN_COUNTRY_CODE_STATION);
                 if (countryIndex != -1) {
                     while (cursor.moveToNext()) {
                         String country = cursor.getString(countryIndex);
@@ -282,7 +282,6 @@ public class RadioStationDao {
         return stationList;
     }
     public int getCountFilteredStations(Filter filter){
-        List<RadioStation> stationList = new ArrayList<>();
         StringBuilder selection = new StringBuilder();
         List<String> selectionArgs = getSelectionArgs(filter, selection);
 
@@ -306,7 +305,7 @@ public class RadioStationDao {
         List<String> selectionArgs = new ArrayList<>();
 
         if (filter.getCountry() != null) {
-            selection.append(COLUMN_COUNTRY_STATION).append(" = ?");
+            selection.append(COLUMN_COUNTRY_CODE_STATION).append(" = ?");
             selectionArgs.add(filter.getCountry());
         }
 

@@ -30,6 +30,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import by.roman.worldradio0.R;
+import by.roman.worldradio0.business_logic.LocationUtil;
 import by.roman.worldradio0.business_logic.data.models.UserRequest;
 import by.roman.worldradio0.business_logic.view_models.AccountViewModel;
 import by.roman.worldradio0.ui.activities.MainActivity;
@@ -106,6 +107,17 @@ public class EntranceFragment extends Fragment {
         });
         enterButton.setOnClickListener(v -> {
             enterButton.setEnabled(false);
+            LocationUtil.requestLocation(requireActivity(), new LocationUtil.LocationCallback() {
+                @Override
+                public void onLocationReceived(double latitude, double longitude, String countryName, String countryCode) {
+                    viewModel.setRegion(countryCode);
+                }
+
+                @Override
+                public void onError(String error) {
+                    Log.e("AccountViewModel", error);
+                }
+            });
             hideKeyboard(requireActivity());
             hideError();
             login = loginText.getText().toString();

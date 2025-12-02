@@ -1,5 +1,7 @@
 package by.roman.worldradio0.business_logic.data.database;
 
+import static java.lang.String.valueOf;
+
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -35,12 +37,18 @@ public class FilterDao {
     }
     public void addFilter(@NonNull FilterDTO dto){
         ContentValues values = new ContentValues();
+        deleteFilter(dto.getId());
         values.put(COLUMN_USER_ID_FILTER, dto.getId());
-        values.put(COLUMN_COUNTRY_FILTER, dto.getCountry());
-        values.put(COLUMN_TAGS_FILTER, dto.getTags());
-        values.put(COLUMN_LANG_FILTER, dto.getLang());
-        values.put(COLUMN_SORT_FILTER, dto.getSort());
+        values.put(COLUMN_COUNTRY_FILTER,dto.getCountry());
+        values.put(COLUMN_NAME_FILTER,dto.getName());
+        values.put(COLUMN_CODEC_FILTER,dto.getCodec());
+        values.put(COLUMN_LANG_FILTER,dto.getLang());
+        values.put(COLUMN_TAGS_FILTER,dto.getTags());
+        values.put(COLUMN_SORT_FILTER,dto.getSort());
         db.insertWithOnConflict(TABLE_FILTER, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+    }
+    private void deleteFilter(int userId) {
+        db.delete(TABLE_FILTER, COLUMN_USER_ID_FILTER + " = ?", new String[]{valueOf(userId)});
     }
     public Filter getFilters(int id) {
         Cursor cursor = db.query(TABLE_FILTER,

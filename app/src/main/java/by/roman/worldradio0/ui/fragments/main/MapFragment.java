@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import by.roman.worldradio0.R;
+import by.roman.worldradio0.business_logic.LocationUtil;
 import by.roman.worldradio0.business_logic.data.models.MapPoint;
 import by.roman.worldradio0.business_logic.data.models.Settings;
 import by.roman.worldradio0.business_logic.view_models.HistoryViewModel;
@@ -66,8 +67,9 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
     private String previousSnappedUuid = null;
     private List<MapPoint> allPoints;
     private IMapController mapController;
-    private ImageButton snapOn;
+    private ImageButton snapOn, GPS;
     private Settings settings;
+    private double lat, lon;
 
     @Override
     public void onResume() {
@@ -113,9 +115,27 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
             centerSnap.setSnapEnabled(!centerSnap.isSnapEnabled());
             fav_snap();
         });
+        GPS.setOnClickListener(v -> {
+            mapController.setCenter(new GeoPoint(lat, lon));
+            mapController.setZoom(12.0);
+        });
+        LocationUtil.requestLocation(requireActivity(), new LocationUtil.LocationCallback() {
+            @Override
+            public void onLocationReceived(double latitude, double longitude, String countryName, String countryCode) {
+                mapController.setCenter(new GeoPoint(latitude, longitude));
+                lat = latitude;
+                lon = longitude;
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.e("LOCATION_ERROR", error);
+            }
+        });
     }
 
     private void findViewByID(@NonNull View view){
+        GPS = view.findViewById(R.id.GPSButtonView);
         map = view.findViewById(R.id.map);
         snapOn = view.findViewById(R.id.snapButtonView);
     }
@@ -143,8 +163,8 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         map.setMultiTouchControls(true);
 
         mapController = map.getController();
-        mapController.setZoom(10.0);
-        mapController.setCenter(new GeoPoint(55.7558, 37.6173));
+        mapController.setZoom(12.0);
+        mapController.setCenter(new GeoPoint(0, 0));
 
         clusterer = new OptimizedGridClusterer(requireContext(), map);
         clusterer.setCellSizePx(80);

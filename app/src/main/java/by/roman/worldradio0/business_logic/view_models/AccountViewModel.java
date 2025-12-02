@@ -1,5 +1,6 @@
 package by.roman.worldradio0.business_logic.view_models;
 
+import android.content.Context;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
@@ -12,6 +13,7 @@ import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
+import by.roman.worldradio0.business_logic.LocationUtil;
 import by.roman.worldradio0.business_logic.UiState;
 import by.roman.worldradio0.business_logic.data.dto.FilterDTO;
 import by.roman.worldradio0.business_logic.data.dto.RadioStationDTO;
@@ -43,6 +45,7 @@ public class AccountViewModel extends ViewModel {
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
     private final MutableLiveData<UiState<Boolean>> result = new MutableLiveData<>();
     private final MutableLiveData<UiState<Integer>> stationsLoading = new MutableLiveData<>();
+    private String region;
 
     @Inject
     public AccountViewModel(UserRepository userRepository, SettingsRepository settingsRepository,
@@ -67,6 +70,9 @@ public class AccountViewModel extends ViewModel {
     public boolean hasRecords(){
         return radioRepository.hasRecords();
     }
+    public void setRegion(String code){
+        this.region = code;
+    }
     public void reg(UserRequest userRequest){
         Log.d("AccountViewModel: reg","Start request");
         result.postValue(UiState.loading());
@@ -77,7 +83,10 @@ public class AccountViewModel extends ViewModel {
                     userRepository.useradd(dto);
                     userRepository.setUserInSystem(dto.getId());
                     settingsRepository.addSettings(new SettingsDTO().fromModel(new Settings(dto.getId())));
-                    filterRepository.addFilters(new FilterDTO().fromModel(new Filter(dto.getId())));
+                    Filter model = new Filter(dto.getId());
+                    model.setCountry(region);
+                    Log.v("AccountViewModel", region + " ?");
+                    filterRepository.addFilters(new FilterDTO().fromModel(model));
                     result.postValue(UiState.success(true));
                 } catch (Exception e) {
                     result.postValue(UiState.error(e.getMessage()));
@@ -100,7 +109,10 @@ public class AccountViewModel extends ViewModel {
                     userRepository.useradd(dto);
                     userRepository.setUserInSystem(dto.getId());
                     settingsRepository.addSettings(new SettingsDTO().fromModel(new Settings(dto.getId())));
-                    filterRepository.addFilters(new FilterDTO().fromModel(new Filter(dto.getId())));
+                    Filter model = new Filter(dto.getId());
+                    model.setCountry(region);
+                    Log.v("AccountViewModel", region + " ?");
+                    filterRepository.addFilters(new FilterDTO().fromModel(model));
                     result.postValue(UiState.success(true));
                 } catch (Exception e) {
                     result.postValue(UiState.error(e.getMessage()));

@@ -39,6 +39,8 @@ import com.bumptech.glide.request.transition.Transition;
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.view_models.PlayerViewModel;
 import by.roman.worldradio0.business_logic.view_models.StateViewModel;
+import by.roman.worldradio0.ui.fragments.filter.FilterFragment;
+import by.roman.worldradio0.ui.fragments.timer.TimerFragment;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -363,7 +365,12 @@ public class PlayerFragment extends Fragment {
 
     private void buttons(){
         icons();
-
+        timerButton.setOnClickListener(v -> {
+            stateViewModel.openFullscreen(new TimerFragment());
+        });
+        filterButton.setOnClickListener(v -> {
+            stateViewModel.openFullscreen(new FilterFragment());
+        });
         large_internet.setOnClickListener(v -> {
             openUrlInBrowser(viewModel.getCurrentStation().getHomepage());
             large_internet.setEnabled(false);
@@ -433,9 +440,9 @@ public class PlayerFragment extends Fragment {
     }
     private void favTrack_icons(){
         if (isFavoriteTrack){
-            large_saveTrack.setImageDrawable(AppCompatResources.getDrawable(requireContext(),R.drawable.fi_ss_star__2_));
+            large_saveTrack.setImageDrawable(AppCompatResources.getDrawable(requireContext(),R.drawable.selected_saved_track));
         } else {
-            large_saveTrack.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.unsaved));
+            large_saveTrack.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.unselected_saved_track));
         }
     }
     private void openUrlInBrowser(String homepage) {

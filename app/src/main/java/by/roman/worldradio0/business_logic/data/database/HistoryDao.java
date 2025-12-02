@@ -20,7 +20,7 @@ public class HistoryDao {
     public static final String COLUMN_USER_ID_HISTORY = "user_id";
     public static final String COLUMN_UUID_STATION_HISTORY = "station_uuid";
     protected static final String CREATE_TABLE_HISTORY = "CREATE TABLE " + TABLE_HISTORY + " (" +
-            COLUMN_ID_HISTORY + " INTEGER, "+
+            COLUMN_ID_HISTORY + " INTEGER PRIMARY KEY, "+
             COLUMN_USER_ID_HISTORY +    " INTEGER, "+
             COLUMN_UUID_STATION_HISTORY +   " TEXT, " +
             "FOREIGN KEY (" + COLUMN_USER_ID_HISTORY + ") REFERENCES " + UserDao.TABLE_USER + "(" + UserDao.COLUMN_ID_USER + ") ON DELETE CASCADE"

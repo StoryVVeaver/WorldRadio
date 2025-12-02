@@ -15,7 +15,7 @@ public interface RadioRepository {
     List<RadioStation> getAllStations(int currentPage, int pageSize);
     RadioStation getStationById(String uuid);
     RadioStation getPlayingStation();
-    List<String> getContrives();
+    List<String> getContriesCode();
     List<String> getLanguage();
     List<String> getTags();
     List<String> getNames();

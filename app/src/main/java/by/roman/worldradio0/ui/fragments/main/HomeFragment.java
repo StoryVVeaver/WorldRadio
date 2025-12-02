@@ -20,6 +20,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import by.roman.worldradio0.R;
+import by.roman.worldradio0.business_logic.LocationUtil;
 import by.roman.worldradio0.business_logic.view_models.StateViewModel;
 import by.roman.worldradio0.ui.fragments.filter.FilterFragment;
 import by.roman.worldradio0.ui.fragments.timer.TimerFragment;
@@ -60,6 +61,7 @@ public class HomeFragment extends Fragment {
         Log.v("HomeFragment: performance", "onViewCreated started");
         findAllId(view);
         stateViewModel = new ViewModelProvider(requireActivity()).get(StateViewModel.class);
+        mode(new ListFragment(),1);
         map.setOnClickListener(v1 -> mode(new MapFragment(),0));
         list.setOnClickListener(v1 -> mode(new ListFragment(),1));
         //TODO  перелистывание экранов только по краям карты

@@ -22,6 +22,7 @@ import android.widget.Toast;
 import java.util.List;
 
 import by.roman.worldradio0.R;
+import by.roman.worldradio0.business_logic.LocationUtil;
 import by.roman.worldradio0.business_logic.adapters.RadioAdapter;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.view_models.FavoriteViewModel;
@@ -56,7 +57,6 @@ public class FavoriteFragment extends Fragment {
         stations.setOnClickListener(v1 -> mode(new FavoriteStationsFragment(),0));
         tracks.setOnClickListener(v1 -> mode(new FavoriteTracksFragment(),1));
         Log.v("FavoriteFragment: performance", "onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
-
     }
     private void findAllId(View view){
         stations = view.findViewById(R.id.stationMode);
