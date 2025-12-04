@@ -107,7 +107,7 @@ public class EntranceFragment extends Fragment {
         });
         enterButton.setOnClickListener(v -> {
             enterButton.setEnabled(false);
-            LocationUtil.requestLocation(requireActivity(), new LocationUtil.LocationCallback() {
+            LocationUtil.requestLocationNetwork(requireActivity(), new LocationUtil.LocationCallback() {
                 @Override
                 public void onLocationReceived(double latitude, double longitude, String countryName, String countryCode) {
                     viewModel.setRegion(countryCode);

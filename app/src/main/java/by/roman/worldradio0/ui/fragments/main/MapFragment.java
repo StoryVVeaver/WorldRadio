@@ -80,6 +80,13 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
     }
 
     @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putDouble("SAVED_LAT", lat);
+        outState.putDouble("SAVED_LON", lon);
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
@@ -117,21 +124,38 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         });
         GPS.setOnClickListener(v -> {
             mapController.setCenter(new GeoPoint(lat, lon));
-            mapController.setZoom(12.0);
+            if(map.getZoomLevel() < 12){
+                mapController.setZoom(12.0);
+            }
         });
-        LocationUtil.requestLocation(requireActivity(), new LocationUtil.LocationCallback() {
-            @Override
-            public void onLocationReceived(double latitude, double longitude, String countryName, String countryCode) {
-                mapController.setCenter(new GeoPoint(latitude, longitude));
-                lat = latitude;
-                lon = longitude;
+        if (savedInstanceState != null
+                && savedInstanceState.containsKey("SAVED_LAT")
+                && savedInstanceState.containsKey("SAVED_LON")) {
+
+            lat = savedInstanceState.getDouble("SAVED_LAT");
+            lon = savedInstanceState.getDouble("SAVED_LON");
+
+            mapController.setCenter(new GeoPoint(lat, lon));
+            if (map.getZoomLevel() < 12) {
+                mapController.setZoom(12.0);
             }
 
-            @Override
-            public void onError(String error) {
-                Log.e("LOCATION_ERROR", error);
-            }
-        });
+        } else {
+            LocationUtil.requestLocation(requireActivity(), new LocationUtil.LocationCallback() {
+                @Override
+                public void onLocationReceived(double latitude, double longitude, String countryName, String countryCode) {
+                    mapController.setCenter(new GeoPoint(latitude, longitude));
+                    lat = latitude;
+                    lon = longitude;
+                }
+
+                @Override
+                public void onError(String error) {
+                    Log.e("LOCATION_ERROR", error);
+                }
+            });
+        }
+
     }
 
     private void findViewByID(@NonNull View view){

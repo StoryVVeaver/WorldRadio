@@ -119,7 +119,7 @@ public class RegistrationFragment extends Fragment {
         });
         reg.setOnClickListener(v -> {
             reg.setEnabled(false);
-            LocationUtil.requestLocation(requireActivity(), new LocationUtil.LocationCallback() {
+            LocationUtil.requestLocationNetwork(requireActivity(), new LocationUtil.LocationCallback() {
                 @Override
                 public void onLocationReceived(double latitude, double longitude, String countryName, String countryCode) {
                     viewModel.setRegion(countryCode);

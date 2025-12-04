@@ -3,6 +3,7 @@ package by.roman.worldradio0.business_logic;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -28,6 +29,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class LocationUtil {
 
@@ -38,7 +40,7 @@ public class LocationUtil {
 
     private static final int LOCATION_PERMISSION_REQUEST = 1001;
 
-    public static void requestLocation(Activity activity, LocationCallback callback) {
+    public static void requestLocationNetwork(Activity activity, LocationCallback callback) {
         if (isInternetAvailable(activity)) {
             new Thread(() -> {
                 try {
@@ -59,6 +61,64 @@ public class LocationUtil {
             }).start();
         } else {
             requestLocalLocation(activity, callback);
+        }
+    }
+
+    public static void requestLocation(Activity activity, LocationCallback callback) {
+        if (ActivityCompat.checkSelfPermission(activity, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(activity, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(activity,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION},
+                    LOCATION_PERMISSION_REQUEST);
+            callback.onError("Location permission not granted");
+            return;
+        }
+
+        AtomicBoolean preciseSent = new AtomicBoolean(false);
+
+        if (isInternetAvailable(activity)) {
+            new Thread(() -> {
+                try {
+                    JSONObject json = getJsonObject();
+                    double lat = json.getDouble("lat");
+                    double lon = json.getDouble("lon");
+                    String countryName = json.getString("country");
+                    String countryCode = json.getString("countryCode");
+
+                    activity.runOnUiThread(() ->
+                            callback.onLocationReceived(lat, lon, countryName, countryCode));
+
+                } catch (Exception e) {
+                    Log.e("HybridLocation", "Internet geolocation failed: " + e.getMessage());
+                }
+            }).start();
+        }
+
+        LocationManager locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
+        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            Location lastNetwork = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            if (lastNetwork != null) {
+                getCountryFromLocation(activity, lastNetwork, callback);
+            }
+        }
+
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            LocationListener listener = new LocationListener() {
+                @Override
+                public void onLocationChanged(@NonNull Location location) {
+                    if (preciseSent.get()) return;
+                    preciseSent.set(true);
+
+                    getCountryFromLocation(activity, location, callback);
+                    locationManager.removeUpdates(this);
+                }
+
+                @Override public void onStatusChanged(String provider, int status, android.os.Bundle extras) {}
+                @Override public void onProviderEnabled(@NonNull String provider) {}
+                @Override public void onProviderDisabled(@NonNull String provider) {}
+            };
+
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, listener);
         }
     }
 
