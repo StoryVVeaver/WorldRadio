@@ -40,7 +40,6 @@ public class ListFragment extends Fragment {
         super.onResume();
         isVisibleToUser = true;
 
-        // Загружаем только при первом открытии или если данные сброшены
         if (isFirstLoad) {
             viewModel.resetState();
             viewModel.loadStart();

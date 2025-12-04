@@ -11,6 +11,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,6 +32,7 @@ import java.util.List;
 import java.util.Objects;
 
 import by.roman.worldradio0.R;
+import by.roman.worldradio0.business_logic.LocationUtil;
 import by.roman.worldradio0.business_logic.data.models.Filter;
 import by.roman.worldradio0.business_logic.view_models.FilterViewModel;
 import by.roman.worldradio0.business_logic.view_models.StateViewModel;
@@ -78,7 +81,6 @@ public class FilterFragment extends Fragment {
         chipRating = view.findViewById(R.id.chipRating);
         chipBitrate = view.findViewById(R.id.chipBitrate);
 
-        // Находим AutoCompleteTextView для каждого поля
         setupAutoCompleteFields(view);
     }
 
@@ -163,7 +165,7 @@ public class FilterFragment extends Fragment {
     private void handleSelection(String selectedItem, MaterialAutoCompleteTextView actv, String fieldType) {
         switch (fieldType) {
             case "country":
-                filter.setCountry(selectedItem);
+                filter.setCountry(LocationUtil.getIsoFromCountryName(selectedItem));
                 break;
             case "tags":
                 filter.setTag(selectedItem);
@@ -204,15 +206,35 @@ public class FilterFragment extends Fragment {
 
         viewModel.loadCount();
 
-        // Настройка автодополнения
         viewModel.getCountriesLive().observe(getViewLifecycleOwner(), list ->
                 setupAutoComplete(actvCountry, list, "country"));
         viewModel.getTagsLive().observe(getViewLifecycleOwner(), list ->
                 setupAutoComplete(actvTags, list, "tags"));
         viewModel.getLanguagesLive().observe(getViewLifecycleOwner(), list ->
                 setupAutoComplete(actvLang, list, "language"));
-        viewModel.getNamesLive().observe(getViewLifecycleOwner(), list ->
-                setupAutoComplete(actvName, list, "name"));
+        viewModel.getNamesLive().observe(getViewLifecycleOwner(), list -> {
+                setupAutoComplete(actvName, list, "name");
+                actvName.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        String text = s.toString();
+
+                        if (text.isEmpty()) {
+                            filter.setName(null);
+                        } else {
+                            filter.setName(text);
+                        }
+
+                        viewModel.setFilters(filter);
+                        viewModel.loadCount();
+                    }
+                });
+        });
         viewModel.getCodecsLive().observe(getViewLifecycleOwner(), list ->
                 setupAutoComplete(actvCodec, list, "codec"));
 
@@ -239,7 +261,6 @@ public class FilterFragment extends Fragment {
         stateViewModel = new ViewModelProvider(requireActivity()).get(StateViewModel.class);
         filter = viewModel.getFilters();
 
-        // Восстанавливаем состояние сортировки
         currentSort = filter.getSort();
         switch (currentSort) {
             case 1: chipAlphabet.setChecked(true); break;
@@ -251,7 +272,7 @@ public class FilterFragment extends Fragment {
     private void fillFields() {
         try {
             if (filter.getLang() != null) actvLang.setText(filter.getLang());
-            if (filter.getCountry() != null) actvCountry.setText(filter.getCountry());
+            if (filter.getCountry() != null) actvCountry.setText(LocationUtil.getCountryNameFromIso(filter.getCountry()));
             if (filter.getTag() != null) actvTags.setText(filter.getTag());
             if (filter.getName() != null) actvName.setText(filter.getName());
             if (filter.getCodec() != null) actvCodec.setText(filter.getCodec());

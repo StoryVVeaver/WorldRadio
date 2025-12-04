@@ -7,10 +7,13 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -104,10 +107,19 @@ public class FilterViewModel extends ViewModel {
                 if (list.isEmpty()) {
                     stations.postValue(UiState.error("Лист пуст"));
                 } else {
-                    allStations = new ArrayList<>(list);
+                    Set<String> uuids = new HashSet<>();
+                    List<RadioStation> uniqueList = new ArrayList<>();
+                    for (RadioStation rs : list) {
+                        if (!uuids.contains(rs.getStationUuid())) {
+                            uuids.add(rs.getStationUuid());
+                            uniqueList.add(rs);
+                        }
+                    }
+
+                    allStations = new ArrayList<>(uniqueList);
                     stations.postValue(UiState.success(allStations));
                     currentPage = 1;
-                    isLastPage = list.size() < pageSize;
+                    isLastPage = uniqueList.size() < pageSize;
                 }
             } catch (Exception e) {
                 if (isActive.get()) {
@@ -116,6 +128,7 @@ public class FilterViewModel extends ViewModel {
             }
         });
     }
+
     public void loadNextPage() {
         if (!isActive.get() || isLastPage) return;
 
@@ -130,9 +143,15 @@ public class FilterViewModel extends ViewModel {
                     isLastPage = true;
                     stations.postValue(UiState.success(allStations));
                 } else {
-                    List<RadioStation> newList = new ArrayList<>(allStations);
-                    newList.addAll(list);
-                    allStations = newList;
+                    Set<String> existingUuids = allStations.stream()
+                            .map(RadioStation::getStationUuid)
+                            .collect(Collectors.toSet());
+
+                    List<RadioStation> uniqueNew = list.stream()
+                            .filter(rs -> !existingUuids.contains(rs.getStationUuid()))
+                            .collect(Collectors.toList());
+
+                    allStations.addAll(uniqueNew);
 
                     stations.postValue(UiState.success(allStations));
                     currentPage++;
@@ -145,6 +164,7 @@ public class FilterViewModel extends ViewModel {
             }
         });
     }
+
     public void cancelPendingOperations() {
         isActive.set(false);
     }

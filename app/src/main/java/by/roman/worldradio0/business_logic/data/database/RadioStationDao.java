@@ -328,6 +328,13 @@ public class RadioStationDao {
             selection.append(COLUMN_LANGUAGE_STATION).append(" = ?");
             selectionArgs.add(filter.getLang());
         }
+
+        if (filter.getName() != null) {
+            if (selection.length() > 0) selection.append(" AND ");
+            selection.append("LOWER(").append(COLUMN_NAME_STATION).append(") LIKE ?");
+            selectionArgs.add("%" + filter.getName().toLowerCase() + "%");
+        }
+
         return selectionArgs;
     }
         private RadioStation createStationFromCursor(Cursor cursor) {
