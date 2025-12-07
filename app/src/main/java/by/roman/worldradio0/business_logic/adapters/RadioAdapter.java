@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -31,7 +32,7 @@ import java.util.List;
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
 
-public class    RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int TYPE_STATION = 0;
     private static final int TYPE_LOADING = 1;
     private int mode = 0;
@@ -43,6 +44,8 @@ public class    RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public interface OnItemClickListener {
         void onStationItemClick(int position);
         void onDeleteClick(int position);
+        void onStationLongClick(int position);
+
     }
 
     public RadioAdapter(Context context, OnItemClickListener listener) {
@@ -85,6 +88,13 @@ public class    RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 if (pos != RecyclerView.NO_POSITION && pos < stations.size()) {
                     listener.onStationItemClick(pos);
                 }
+            });
+            holder.itemView.setOnLongClickListener(v -> {
+                int pos = holder.getBindingAdapterPosition();
+                if (pos != RecyclerView.NO_POSITION) {
+                    listener.onStationLongClick(pos);
+                }
+                return true;
             });
 
         }

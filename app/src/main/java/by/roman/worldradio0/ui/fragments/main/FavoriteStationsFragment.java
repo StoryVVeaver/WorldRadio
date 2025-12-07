@@ -1,5 +1,6 @@
 package by.roman.worldradio0.ui.fragments.main;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -9,9 +10,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import java.util.List;
@@ -22,6 +25,8 @@ import by.roman.worldradio0.business_logic.adapters.RadioAdapter;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.view_models.FavoriteViewModel;
 import by.roman.worldradio0.business_logic.view_models.PlayerViewModel;
+import by.roman.worldradio0.business_logic.view_models.StateViewModel;
+import by.roman.worldradio0.ui.fragments.timer.AlarmFragment;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -29,6 +34,7 @@ public class FavoriteStationsFragment extends Fragment {
     private RecyclerView recyclerView;
     private RadioAdapter adapter;
     private FavoriteViewModel viewModel;
+    private StateViewModel stateViewModel;
     private PlayerViewModel playerViewModel;
 
     @Override
@@ -74,9 +80,15 @@ public class FavoriteStationsFragment extends Fragment {
             public void onDeleteClick(int position) {
                 viewModel.removeStationFromFavorite(adapter.getUUID(position));
             }
+
+            @Override
+            public void onStationLongClick(int position) {
+                showMenu(position);
+            }
         });
-        adapter.setMode(1);
+        //adapter.setMode(1);
         playerViewModel = new ViewModelProvider(requireActivity()).get(PlayerViewModel.class);
+        stateViewModel = new ViewModelProvider(requireActivity()).get(StateViewModel.class);
         viewModel = new ViewModelProvider(requireActivity()).get(FavoriteViewModel.class);
         LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext());
         recyclerView.setLayoutManager(layoutManager);
@@ -89,6 +101,31 @@ public class FavoriteStationsFragment extends Fragment {
         };
         recyclerView.addOnScrollListener(scrollListener);
     }
+    private void showMenu(int position) {
+        String[] options = {"Отложить запуск", "Убрать из избранного"};
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle(playerViewModel.getStationById(adapter.getUUID(position)).getName());
+        builder.setItems(options, (dialog, which) -> {
+            switch (which) {
+                case 0:
+                    AlarmFragment fragment = AlarmFragment.newInstance(adapter.getUUID(position));
+                    stateViewModel.openFullscreen(fragment);
+                    break;
+                case 1:
+                    viewModel.removeStationFromFavorite(adapter.getUUID(position));
+                    break;
+            }
+        });
+        builder.setNegativeButton("Отмена", (dialog, which) -> dialog.dismiss());
+
+        AlertDialog dialog = builder.create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setGravity(Gravity.CENTER);
+        }
+        dialog.show();
+    }
+
     private void observeAndLoad() {
         viewModel.getFavoriteStations().observe(getViewLifecycleOwner(), stations -> {
             switch (stations.status) {

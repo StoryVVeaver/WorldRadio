@@ -87,6 +87,17 @@ public class RadioRepositoryImpl implements RadioRepository {
             return null;
         }
     }
+
+    @Override
+    public RadioStation getStationByUrl(String url) {
+        try {
+            return radioStationDao.getStationByUrl(url);
+        } catch (Exception e) {
+            Log.e("RadioRepositoryImp","Failed get station by url");
+            return null;
+        }
+    }
+
     @Override
     public RadioStation getPlayingStation(){
         try {

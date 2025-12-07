@@ -46,6 +46,9 @@
         <service
             android:name=".business_logic.media.TimerService"
             android:exported="false" />
+        <receiver
+            android:name="by.roman.worldradio0.business_logic.media.AlarmReceiver"
+            android:exported="true"/>
     </application>
 
 </manifest>

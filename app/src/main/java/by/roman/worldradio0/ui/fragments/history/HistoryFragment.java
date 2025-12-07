@@ -12,11 +12,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import java.util.List;
@@ -27,6 +29,7 @@ import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.view_models.HistoryViewModel;
 import by.roman.worldradio0.business_logic.view_models.PlayerViewModel;
 import by.roman.worldradio0.business_logic.view_models.StateViewModel;
+import by.roman.worldradio0.ui.fragments.timer.AlarmFragment;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -149,9 +152,41 @@ public class HistoryFragment extends Fragment {
             @Override
             public void onDeleteClick(int position) {
             }
+
+            @Override
+            public void onStationLongClick(int position) {
+                showMenu(position);
+            }
+
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(requireActivity()));
         recyclerView.setAdapter(adapter);
+    }
+    private void showMenu(int position) {
+        String[] options = {"Отложить запуск", "Удалить запись"};
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle(playerViewModel.getStationById(adapter.getUUID(position)).getName());
+        builder.setItems(options, (dialog, which) -> {
+            switch (which) {
+                case 0:
+                    AlarmFragment fragment = AlarmFragment.newInstance(adapter.getUUID(position));
+                    stateViewModel.openFullscreen(fragment);
+                    break;
+                case 1:
+                    viewModel.deleteOneFromHistory(adapter.getUUID(position));
+                    viewModel.resetState();
+                    viewModel.loadStart();
+                    break;
+            }
+        });
+        builder.setNegativeButton("Отмена", (dialog, which) -> dialog.dismiss());
+
+        AlertDialog dialog = builder.create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setGravity(Gravity.CENTER);
+        }
+        dialog.show();
     }
     private void observeAndLoad(){
         viewModel.getHistoryList().observe(getViewLifecycleOwner(), list -> {

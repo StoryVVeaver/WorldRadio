@@ -1,5 +1,6 @@
 package by.roman.worldradio0.ui.fragments.main;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -10,9 +11,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 import java.util.List;
 import by.roman.worldradio0.R;
@@ -21,6 +24,7 @@ import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.view_models.FilterViewModel;
 import by.roman.worldradio0.business_logic.view_models.PlayerViewModel;
 import by.roman.worldradio0.business_logic.view_models.StateViewModel;
+import by.roman.worldradio0.ui.fragments.timer.AlarmFragment;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -87,7 +91,6 @@ public class ListFragment extends Fragment {
                     int totalItemCount = layoutManager.getItemCount();
                     int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
 
-                    // Более агрессивная загрузка - начинаем раньше
                     if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount - 3) {
                         isLoadingNextPage = true;
                         adapter.showLoading();
@@ -108,15 +111,18 @@ public class ListFragment extends Fragment {
 
             @Override
             public void onDeleteClick(int position) {
-                // Обработка удаления
+            }
+
+            @Override
+            public void onStationLongClick(int position) {
+                showMenu(position);
             }
         });
 
-        // Оптимизация RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
-        recyclerView.setHasFixedSize(true); // Если все элементы одинаковой высоты
-        recyclerView.setItemViewCacheSize(20); // Кэшируем больше элементов
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setItemViewCacheSize(20);
 
         viewModel = new ViewModelProvider(requireActivity()).get(FilterViewModel.class);
         playerViewModel = new ViewModelProvider(requireActivity()).get(PlayerViewModel.class);
@@ -126,7 +132,27 @@ public class ListFragment extends Fragment {
     private void findAllId(View view) {
         recyclerView = view.findViewById(R.id.list_recycler);
     }
+    private void showMenu(int position) {
+        String[] options = {"Отложить запуск"};
 
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle(playerViewModel.getStationById(adapter.getUUID(position)).getName());
+        builder.setItems(options, (dialog, which) -> {
+            switch (which) {
+                case 0:
+                    AlarmFragment fragment = AlarmFragment.newInstance(adapter.getUUID(position));
+                    stateViewModel.openFullscreen(fragment);
+                    break;
+            }
+        });
+        builder.setNegativeButton("Отмена", (dialog, which) -> dialog.dismiss());
+
+        AlertDialog dialog = builder.create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setGravity(Gravity.CENTER);
+        }
+        dialog.show();
+    }
     private void play(String uuid) {
         if (!playerViewModel.isInternetConnected()) {
             Toast.makeText(getContext(), "Check internet connection!", Toast.LENGTH_SHORT).show();
@@ -141,13 +167,11 @@ public class ListFragment extends Fragment {
     }
 
     private void observeAndLoad() {
-        // Оптимизированный observer для станций
         viewModel.getFilteredStations().observe(getViewLifecycleOwner(), stations -> {
             if (!isVisibleToUser) return;
 
             switch (stations.status) {
                 case LOADING:
-                    // Показываем loading только если список пустой
                     if (adapter.getItemCount() == 0) {
                         adapter.showLoading();
                     }

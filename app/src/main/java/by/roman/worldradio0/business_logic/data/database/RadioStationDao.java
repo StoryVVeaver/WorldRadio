@@ -227,6 +227,19 @@ public class RadioStationDao {
         }
         return null;
     }
+    public RadioStation getStationByUrl(String url){
+        Cursor cursor = db.query(TABLE_RADIO_STATION,
+                null,
+                COLUMN_URL_STATION + " = ?",
+                new String[]{url},
+                null, null, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            try (cursor) {
+                return createStationFromCursor(cursor);
+            }
+        }
+        return null;
+    }
     public List<RadioStation> getAllStations(int currentPage, int pageSize) {
         List<RadioStation> stations = new ArrayList<>();
 

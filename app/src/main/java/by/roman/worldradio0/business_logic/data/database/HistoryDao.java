@@ -32,15 +32,15 @@ public class HistoryDao {
     }
 
     public void addToHistory(History history){
-        removeFromHistory(history);
+        removeFromHistory(history.getUuid(), history.getUser_id());
         ContentValues values = new ContentValues();
         values.put(COLUMN_USER_ID_HISTORY, history.getUser_id());
         values.put(COLUMN_UUID_STATION_HISTORY, history.getUuid());
         db.insertWithOnConflict(TABLE_HISTORY, null, values, SQLiteDatabase.CONFLICT_REPLACE);
     }
-    public void removeFromHistory(History history){
+    public void removeFromHistory(String uuid, long id){
         db.delete(TABLE_HISTORY, COLUMN_USER_ID_HISTORY + " = ? AND "
-                + COLUMN_UUID_STATION_HISTORY + " = ?", new String[]{valueOf(history.getUser_id()), history.getUuid()});
+                + COLUMN_UUID_STATION_HISTORY + " = ?", new String[]{valueOf(id), uuid});
     }
     public void deleteHistoryByUser(int userId) {
         try {

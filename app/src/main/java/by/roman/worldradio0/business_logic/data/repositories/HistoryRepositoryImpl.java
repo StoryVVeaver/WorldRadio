@@ -10,6 +10,7 @@ import by.roman.worldradio0.business_logic.data.database.UserDao;
 import by.roman.worldradio0.business_logic.data.dto.HistoryDTO;
 import by.roman.worldradio0.business_logic.data.models.History;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.HistoryRepository;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.UserRepository;
 
 public class HistoryRepositoryImpl implements HistoryRepository {
     private final HistoryDao historyDao;
@@ -28,9 +29,9 @@ public class HistoryRepositoryImpl implements HistoryRepository {
     }
 
     @Override
-    public void removeFromHistory(History history) {
+    public void removeFromHistory(String uuid) {
         try {
-            historyDao.removeFromHistory(history);
+            historyDao.removeFromHistory(uuid, userDao.getIdUserInSystem());
         } catch (Exception e) {
             Log.e("HistoryRepositoryImpl", "Failed remove from history");
         }

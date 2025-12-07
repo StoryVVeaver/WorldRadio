@@ -60,9 +60,17 @@ public class HistoryViewModel extends ViewModel {
         try {
             historyRepository.removeFromHistoryById(userRepository.getUserInSystem());
         } catch (Exception e){
-            Log.e("SettingsViewModel", "Delete all history crashed");
+            Log.e("HistoryViewModel", "Delete all history crashed");
         }
     }
+    public void deleteOneFromHistory(String uuid){
+        try {
+            historyRepository.removeFromHistory(uuid);
+        } catch (Exception e){
+            Log.e("HistoryViewModel", "Delete one history crashed");
+        }
+    }
+
     public void loadStart() {
         if (!isActive.get()) return;
 

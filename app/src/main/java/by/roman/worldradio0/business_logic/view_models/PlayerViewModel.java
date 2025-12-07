@@ -223,6 +223,9 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     public RadioStation getCurrentStation(){
         return radioRepository.getPlayingStation();
     }
+    public RadioStation getStationById(String uuid){
+        return radioRepository.getStationById(uuid);
+    }
     public LiveData<Boolean> getIsPlaying(){
         return isPlaying;
     }
