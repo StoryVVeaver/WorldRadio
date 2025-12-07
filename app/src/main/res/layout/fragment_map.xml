@@ -45,7 +45,8 @@
                     android:focusable="true"
                     android:padding="10dp"
                     android:src="@drawable/snap"
-                    app:tint="@color/white" />
+                    app:tint="@color/white"
+                    tools:ignore="ContentDescription" />
             </FrameLayout>
         </androidx.cardview.widget.CardView>
 
@@ -76,7 +77,8 @@
                     android:focusable="true"
                     android:padding="10dp"
                     android:src="@drawable/gps"
-                    app:tint="@color/white" />
+                    app:tint="@color/white"
+                    tools:ignore="ContentDescription" />
             </FrameLayout>
         </androidx.cardview.widget.CardView>
 

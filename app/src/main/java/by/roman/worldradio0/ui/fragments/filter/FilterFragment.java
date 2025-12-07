@@ -8,6 +8,8 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -45,7 +47,6 @@ public class FilterFragment extends Fragment {
     private MaterialAutoCompleteTextView actvTags;
     private MaterialAutoCompleteTextView actvLang;
     private MaterialAutoCompleteTextView actvName;
-    private MaterialAutoCompleteTextView actvCodec;
     private MaterialToolbar toolbar;
     private TextView countText;
     private MaterialButton btnReset;
@@ -85,30 +86,21 @@ public class FilterFragment extends Fragment {
     }
 
     private void setupAutoCompleteFields(View view) {
-        // Страна
         TextInputLayout countryLayout = view.findViewById(R.id.filterCountry).findViewById(R.id.textInputLayout);
         actvCountry = (MaterialAutoCompleteTextView) countryLayout.getEditText();
-        countryLayout.setHint("Страна");
+        countryLayout.setHint(getResources().getString(R.string.country));
 
-        // Теги
         TextInputLayout tagsLayout = view.findViewById(R.id.filterTags).findViewById(R.id.textInputLayout);
         actvTags = (MaterialAutoCompleteTextView) tagsLayout.getEditText();
-        tagsLayout.setHint("Теги");
+        tagsLayout.setHint(getResources().getString(R.string.tag));
 
-        // Язык
         TextInputLayout langLayout = view.findViewById(R.id.filterLanguage).findViewById(R.id.textInputLayout);
         actvLang = (MaterialAutoCompleteTextView) langLayout.getEditText();
-        langLayout.setHint("Язык");
+        langLayout.setHint(getResources().getString(R.string.lang));
 
-        // Название
         TextInputLayout nameLayout = view.findViewById(R.id.filterName).findViewById(R.id.textInputLayout);
         actvName = (MaterialAutoCompleteTextView) nameLayout.getEditText();
-        nameLayout.setHint("Название станции");
-
-        // Кодек
-        TextInputLayout codecLayout = view.findViewById(R.id.filterCodec).findViewById(R.id.textInputLayout);
-        actvCodec = (MaterialAutoCompleteTextView) codecLayout.getEditText();
-        codecLayout.setHint("Кодек");
+        nameLayout.setHint(getResources().getString(R.string.name));
     }
 
     private void setupClickListeners() {
@@ -147,7 +139,6 @@ public class FilterFragment extends Fragment {
         actvCountry.setText("");
         actvTags.setText("");
         actvLang.setText("");
-        actvCodec.setText("");
 
         currentSort = 0;
         chipAlphabet.setChecked(false);
@@ -191,15 +182,15 @@ public class FilterFragment extends Fragment {
             switch (count.status) {
                 case SUCCESS:
                     if (count.data != null) {
-                        String stationText = count.data + " станций найдено";
+                        String stationText = count.data + " " + getResources().getString(R.string.filter_count);
                         countText.setText(stationText);
                     }
                     break;
                 case LOADING:
-                    countText.setText("Загрузка...");
+                    countText.setText(getResources().getString(R.string.loading));
                     break;
                 case ERROR:
-                    countText.setText("Ошибка");
+                    countText.setText(getResources().getString(R.string.err_loading));
                     break;
             }
         });
@@ -235,8 +226,6 @@ public class FilterFragment extends Fragment {
                     }
                 });
         });
-        viewModel.getCodecsLive().observe(getViewLifecycleOwner(), list ->
-                setupAutoComplete(actvCodec, list, "codec"));
 
         viewModel.loadAutocompleteData();
     }
@@ -275,7 +264,6 @@ public class FilterFragment extends Fragment {
             if (filter.getCountry() != null) actvCountry.setText(LocationUtil.getCountryNameFromIso(filter.getCountry()));
             if (filter.getTag() != null) actvTags.setText(filter.getTag());
             if (filter.getName() != null) actvName.setText(filter.getName());
-            if (filter.getCodec() != null) actvCodec.setText(filter.getCodec());
         } catch (Exception e) {
             Log.e("FilterFragment", "Error filling fields", e);
         }

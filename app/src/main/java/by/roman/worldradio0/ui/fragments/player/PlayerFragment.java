@@ -450,7 +450,7 @@ public class PlayerFragment extends Fragment {
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(homepage));
             startActivity(browserIntent);
         } catch (ActivityNotFoundException e) {
-            Toast.makeText(requireContext(), "Браузер не обнаружен", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getResources().getString(R.string.no_browser), Toast.LENGTH_SHORT).show();
             Log.e("BottomPlayer", "Error opening URL: " + e.getMessage());
         }
     }

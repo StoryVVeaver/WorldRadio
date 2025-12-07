@@ -1,8 +1,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:padding="16dp"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    tools:ignore="UseCompoundDrawables">
 
     <TextView
         android:id="@+id/group_title"
@@ -18,5 +20,6 @@
         android:id="@+id/group_arrow"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:src="@drawable/collapsed" />
+        android:src="@drawable/collapsed"
+        tools:ignore="ContentDescription" />
 </LinearLayout>

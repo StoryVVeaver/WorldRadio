@@ -44,6 +44,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:baselineAligned="true"
                 android:orientation="horizontal">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -57,7 +58,7 @@
                         android:id="@+id/stationMode_Text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Станции"
+                        android:text="@string/stations"
                         android:textColor="@color/white"
                         android:textSize="20sp" app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -76,7 +77,7 @@
                         android:id="@+id/trackMode_Text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Треки"
+                        android:text="@string/tracks"
                         android:textColor="@color/unselectedText"
                         android:textSize="20sp" app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"

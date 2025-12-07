@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -24,7 +25,8 @@
             android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:srcCompat="@drawable/playbutton" />
+            app:srcCompat="@drawable/playbutton"
+            tools:ignore="ContentDescription" />
 
         <by.roman.worldradio0.ui.elements.view.CircularTimerView
             android:id="@+id/circularTimerView"
@@ -44,7 +46,8 @@
             android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:srcCompat="@drawable/pausebutton" />
+            app:srcCompat="@drawable/pausebutton"
+            tools:ignore="ContentDescription" />
 
         <ImageView
             android:id="@+id/stopButtonView"
@@ -55,7 +58,8 @@
             android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/stopbutton" />
+            app:srcCompat="@drawable/stopbutton"
+            tools:ignore="ContentDescription" />
 
         <ImageView
             android:id="@+id/startButtonView"
@@ -66,7 +70,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:srcCompat="@drawable/playbutton" />
+            app:srcCompat="@drawable/playbutton"
+            tools:ignore="ContentDescription" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/setTime"
@@ -102,8 +107,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:contentDescription=""
-                    android:src="@drawable/romb" />
+                    android:src="@drawable/romb"
+                    tools:ignore="ContentDescription" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recyclerMinute"
@@ -118,11 +123,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:contentDescription=""
                     android:src="@drawable/romb"
-                    android:visibility="gone" />
+                    android:visibility="gone"
+                    tools:ignore="ContentDescription" />
 
-                <!-- Третья колонка (секунды) -->
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recyclerSecond"
                     android:layout_width="76dp"
@@ -145,7 +149,8 @@
             android:layout_marginTop="25dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/back" />
+            app:srcCompat="@drawable/back"
+            tools:ignore="ContentDescription" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

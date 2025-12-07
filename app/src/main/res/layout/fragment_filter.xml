@@ -19,7 +19,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="#100E1B"
             app:navigationIcon="@drawable/back"
-            app:title="Фильтры"
+            app:title="@string/filters"
             app:titleTextColor="@color/white" />
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -137,7 +137,7 @@
                         android:marqueeRepeatLimit="marquee_forever"
                         android:scrollHorizontally="true"
                         android:singleLine="true"
-                        android:text="Подходит 125 станций"
+                        android:text="@string/filter_count"
                         android:textColor="#E2E2E2"
                         android:textSize="14sp" />
 
@@ -146,7 +146,7 @@
                         style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Сбросить"
+                        android:text="@string/reset"
                         android:textColor="#6C5CE7"
                         android:textSize="12sp"
                         app:icon="@android:drawable/ic_menu_revert"
@@ -174,7 +174,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="12dp"
-                        android:text="Сортировка"
+                        android:text="@string/sort"
                         android:textColor="#A0A0A0"
                         android:textSize="12sp" />
 
@@ -203,7 +203,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
                             android:layout_marginEnd="4dp"
-                            android:text="Алфавит"
+                            android:text="@string/alphabet"
                             android:gravity="center"
                             android:textSize="10dp"
                             app:layout_constraintTop_toTopOf="parent"
@@ -211,7 +211,8 @@
                             app:layout_constraintEnd_toStartOf="@+id/g1"
                             app:chipBackgroundColor="@color/chip_selector"
                             app:chipStrokeColor="@color/chip_stroke_selector"
-                            app:chipStrokeWidth="1dp" />
+                            app:chipStrokeWidth="1dp"
+                            tools:ignore="SpUsage" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chipRating"
@@ -220,7 +221,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
                             android:layout_marginEnd="4dp"
-                            android:text="Рейтинг"
+                            android:text="@string/rating"
                             android:gravity="center"
                             android:textSize="10dp"
                             app:layout_constraintTop_toTopOf="parent"
@@ -228,7 +229,8 @@
                             app:layout_constraintEnd_toStartOf="@+id/g2"
                             app:chipBackgroundColor="@color/chip_selector"
                             app:chipStrokeColor="@color/chip_stroke_selector"
-                            app:chipStrokeWidth="1dp" />
+                            app:chipStrokeWidth="1dp"
+                            tools:ignore="SpUsage" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chipBitrate"
@@ -238,14 +240,15 @@
                             android:layout_marginStart="4dp"
                             android:layout_marginEnd="4dp"
                             android:textSize="10dp"
-                            android:text="Битрейт"
+                            android:text="@string/bitrate"
                             android:gravity="center"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="@+id/g2"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:chipBackgroundColor="@color/chip_selector"
                             app:chipStrokeColor="@color/chip_stroke_selector"
-                            app:chipStrokeWidth="1dp" />
+                            app:chipStrokeWidth="1dp"
+                            tools:ignore="SpUsage" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
 

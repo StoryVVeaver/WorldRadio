@@ -17,8 +17,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import java.util.List;
@@ -83,15 +81,15 @@ public class HistoryFragment extends Fragment {
         });
         deleteAll.setOnClickListener(v1 -> {
             new AlertDialog.Builder(requireContext())
-                    .setTitle("Очиста истории")
-                    .setMessage("Будет очищена вся история прослушивания. Продолжить?")
-                    .setPositiveButton("Да", (dialog, which) -> {
+                    .setTitle(getResources().getString(R.string.clear_history))
+                    .setMessage(getResources().getString(R.string.clear_history_text))
+                    .setPositiveButton(getResources().getString(R.string.yes), (dialog, which) -> {
                         adapter.clear();
                         viewModel.deleteAllHistory();
                         viewModel.resetState();
                         viewModel.loadStart();
                     })
-                    .setNegativeButton("Нет", null)
+                    .setNegativeButton(getResources().getString(R.string.no), null)
                     .show();
         });
 
@@ -142,10 +140,10 @@ public class HistoryFragment extends Fragment {
                     if (playerViewModel.checkTypeInternet().equals("ok")) {
                         playerViewModel.start(adapter.getUUID(position));
                     } else {
-                        Toast.makeText(requireActivity(), "Not correct internet type!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireActivity(), getResources().getString(R.string.not_correct_internet), Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(requireActivity(), "Check internet connection!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireActivity(), getResources().getString(R.string.no_internet), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -163,7 +161,7 @@ public class HistoryFragment extends Fragment {
         recyclerView.setAdapter(adapter);
     }
     private void showMenu(int position) {
-        String[] options = {"Отложить запуск", "Удалить запись"};
+        String[] options = {getResources().getString(R.string.schedule_playback), getResources().getString(R.string.delete_record)};
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle(playerViewModel.getStationById(adapter.getUUID(position)).getName());
@@ -180,7 +178,7 @@ public class HistoryFragment extends Fragment {
                     break;
             }
         });
-        builder.setNegativeButton("Отмена", (dialog, which) -> dialog.dismiss());
+        builder.setNegativeButton(getResources().getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
 
         AlertDialog dialog = builder.create();
         if (dialog.getWindow() != null) {
@@ -217,7 +215,7 @@ public class HistoryFragment extends Fragment {
                             adapter.hideLoading();
                             if (!list.message.isEmpty() && !list.message.equals("")) {
                                 if(list.message.equals("Лист пуст")){
-                                    Toast.makeText(requireActivity(), "В истории ничего нет", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(requireActivity(), getResources().getString(R.string.no_history), Toast.LENGTH_SHORT).show();
                                 } else {
                                     Toast.makeText(requireActivity(), list.message, Toast.LENGTH_SHORT).show();
                                 }

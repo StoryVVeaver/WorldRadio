@@ -2,13 +2,13 @@
     <item
         android:id="@+id/nav_favorite"
         android:icon="@drawable/favorite_selector"
-        android:title="Favorite" />
+        android:title="@string/favorite" />
     <item
         android:id="@+id/nav_home"
         android:icon="@drawable/home_selector"
-        android:title="Home" />
+        android:title="@string/home" />
     <item
         android:id="@+id/nav_settings"
         android:icon="@drawable/settings_selector"
-        android:title="Settings" />
+        android:title="@string/menu" />
 </menu>

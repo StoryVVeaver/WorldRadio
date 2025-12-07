@@ -217,10 +217,10 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
                     if ("ok".equals(playerViewModel.checkTypeInternet())) {
                         playerViewModel.start(snapped.getUuid());
                     } else {
-                        Toast.makeText(getContext(), "Not correct internet type!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), getResources().getString(R.string.not_correct_internet), Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(getContext(), "Check internet connection!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), getResources().getString(R.string.no_internet), Toast.LENGTH_SHORT).show();
                 }
                 clusterer.highlightMarkerByUuid(snapped.getUuid(), highlightMarkerDrawable);
 
@@ -387,7 +387,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         }
 
         if (nearest == null) {
-            Toast.makeText(requireContext(), "Рядом нет других радиостанций", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getResources().getString(R.string.no_stations), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -403,12 +403,11 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
             previousSnappedUuid = null;
             centerSnap.snapTo(point, true, true);
         } else {
-            Toast.makeText(requireActivity(), "Нет информации о прошлой станции", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireActivity(), getResources().getString(R.string.no_last), Toast.LENGTH_SHORT).show();
         }
     }
     @Override
     public boolean singleTapConfirmedHelper(GeoPoint p) { return false; }
-//Log.v("MapFragment", "from " + centerSnap.getSnappedPoint().getUuid() + " to " + nearest.getUuid());
     @Override
     public boolean longPressHelper(GeoPoint p) { return false; }
 

@@ -97,12 +97,12 @@ public class SettingsFragment extends Fragment {
         avatar.setOnClickListener(v -> checkPermissionsAndPickImage());
         log_out_button.setOnClickListener(v -> {
             new AlertDialog.Builder(requireContext())
-                    .setTitle("Выход из аккаунта")
-                    .setMessage("Вы действительно хотите выйти из профиля?")
-                    .setPositiveButton("Да", (dialog, which) -> {
+                    .setTitle(getResources().getString(R.string.sign_out))
+                    .setMessage(getResources().getString(R.string.sing_out_text))
+                    .setPositiveButton(getResources().getString(R.string.yes), (dialog, which) -> {
                         viewModel.logOut();
                     })
-                    .setNegativeButton("Нет", null)
+                    .setNegativeButton(getResources().getString(R.string.no), null)
                     .show();
         });
         edit_user_button.setOnClickListener(v -> {
@@ -145,7 +145,7 @@ public class SettingsFragment extends Fragment {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 openImagePicker();
             } else {
-                Toast.makeText(requireActivity(), "Разрешение необходимо для выбора фото", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireActivity(), getResources().getString(R.string.photo_permission), Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -176,11 +176,9 @@ public class SettingsFragment extends Fragment {
                 displayBase64Image(base64);
 
                 viewModel.addAvator(base64);
-
-                Toast.makeText(requireActivity(), "Аватар успешно установлен", Toast.LENGTH_SHORT).show();
             }
         } catch (Exception e) {
-            Toast.makeText(requireActivity(), "Ошибка при обработке изображения", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireActivity(), getResources().getString(R.string.err_photo), Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
     }
@@ -265,7 +263,7 @@ public class SettingsFragment extends Fragment {
             text_status.setVisibility(INVISIBLE);
             text_status.setTextColor(AppCompatResources.getColorStateList(requireContext(),R.color.white));
         };
-        textView.setText("Добро пожаловать, " +viewModel.getUserData().getLogin());
+        textView.setText(getResources().getString(R.string.hello) + " " + viewModel.getUserData().getLogin());
 
         loadCurrentAvatar();
     }
@@ -286,11 +284,11 @@ public class SettingsFragment extends Fragment {
                     if(count.data == 0){
                         text_status.setVisibility(VISIBLE);
                         loading.setVisibility(VISIBLE);
-                        text_status.setText("Загрузка данных...");
+                        text_status.setText(getResources().getString(R.string.loading));
                         loading.setIndeterminate(true);
                         handler.removeCallbacks(runnable);
                     } else {
-                        text_status.setText("Сохранение данных...");
+                        text_status.setText(getResources().getString(R.string.storing));
                         loading.setIndeterminate(false);
                         text_status.setText(count.data + "%");
                         loading.setProgress(count.data);
@@ -300,14 +298,14 @@ public class SettingsFragment extends Fragment {
                 case SUCCESS:
                     loading.setVisibility(INVISIBLE);
                     text_status.setTextColor(AppCompatResources.getColorStateList(requireContext(),R.color.green));
-                    text_status.setText("Данных сохранены");
+                    text_status.setText(getResources().getString(R.string.stored));
                     handler.postDelayed(runnable,5000);
                     break;
 
                 case ERROR:
                     loading.setVisibility(INVISIBLE);
                     text_status.setTextColor(AppCompatResources.getColorStateList(requireContext(),R.color.red));
-                    text_status.setText("Ошибка обновления");
+                    text_status.setText(getResources().getString(R.string.err_update));
                     handler.postDelayed(runnable,5000);
                     break;
             }
@@ -318,17 +316,17 @@ public class SettingsFragment extends Fragment {
                     handler.removeCallbacks(runnable);
                     loading.setVisibility(INVISIBLE);
                     text_status.setVisibility(VISIBLE);
-                    text_status.setText("Загрузка данных");
+                    text_status.setText(getResources().getString(R.string.loading));
                     break;
 
                 case SUCCESS:
-                    text_status.setText("Данные загружены");
+                    text_status.setText(getResources().getString(R.string.stored));
                     text_status.setTextColor(AppCompatResources.getColorStateList(requireContext(), R.color.green));
                     handler.postDelayed(runnable,5000);
                     break;
 
                 case ERROR:
-                    text_status.setText("Ошибка загрузки");
+                    text_status.setText(getResources().getString(R.string.err_loading));
                     text_status.setTextColor(AppCompatResources.getColorStateList(requireContext(), R.color.red));
                     handler.postDelayed(runnable,5000);
                     break;
@@ -339,18 +337,18 @@ public class SettingsFragment extends Fragment {
                 case LOADING:
                     loading.setVisibility(INVISIBLE);
                     text_status.setVisibility(VISIBLE);
-                    text_status.setText("Отправка данных");
+                    text_status.setText(getResources().getString(R.string.sending));
                     handler.removeCallbacks(runnable);
                     break;
 
                 case SUCCESS:
-                    text_status.setText("Данные отправлены");
+                    text_status.setText(getResources().getString(R.string.sent));
                     text_status.setTextColor(AppCompatResources.getColorStateList(requireContext(), R.color.green));
                     handler.postDelayed(runnable,5000);
                     break;
 
                 case ERROR:
-                    text_status.setText("Ошибка отправки");
+                    text_status.setText(getResources().getString(R.string.err_send));
                     text_status.setTextColor(AppCompatResources.getColorStateList(requireContext(), R.color.red));
                     handler.postDelayed(runnable,5000);
                     break;
@@ -365,10 +363,10 @@ public class SettingsFragment extends Fragment {
             if (avatarState != null) {
                 switch (avatarState.status) {
                     case SUCCESS:
-                        Toast.makeText(requireContext(), "Аватар успешно сохранен", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), getResources().getString(R.string.avatar_saved), Toast.LENGTH_SHORT).show();
                         break;
                     case ERROR:
-                        Toast.makeText(requireContext(), "Ошибка сохранения аватара: " + avatarState.message, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), getResources().getString(R.string.err_avatar) + " " + avatarState.message, Toast.LENGTH_SHORT).show();
                         break;
                 }
             }

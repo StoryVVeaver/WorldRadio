@@ -24,6 +24,7 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_marginStart="10dp"
+                android:importantForAccessibility="no"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -73,7 +74,8 @@
                 android:src="@drawable/pause"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="ContentDescription" />
 
             <ImageView
                 android:id="@+id/bottom_player_save"
@@ -83,7 +85,8 @@
                 android:src="@drawable/unsaved"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/bottom_player_play_pause"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="ContentDescription" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
@@ -127,7 +130,8 @@
                     app:tint="@color/white"
                     android:layout_gravity="center"
                     android:clickable="true"
-                    android:focusable="true" />
+                    android:focusable="true"
+                    tools:ignore="ContentDescription" />
             </FrameLayout>
         </androidx.cardview.widget.CardView>
 
@@ -148,7 +152,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@color/background"
-                android:clipToOutline="true">
+                android:clipToOutline="true"
+                tools:ignore="UnusedAttribute">
 
                 <ImageButton
                     android:id="@+id/filterButtonView"
@@ -158,7 +163,8 @@
                     app:tint="@color/white"
                     android:src="@drawable/fi_rs_filter"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:layout_gravity="center" />
+                    android:layout_gravity="center"
+                    tools:ignore="ContentDescription" />
             </FrameLayout>
         </androidx.cardview.widget.CardView>
 
@@ -189,7 +195,8 @@
             app:layout_constraintStart_toStartOf="@+id/large_internet"
             app:layout_constraintEnd_toEndOf="@id/large_internet"
             app:layout_constraintTop_toTopOf="@+id/large_track_name"
-            app:srcCompat="@drawable/unsaved" />
+            app:srcCompat="@drawable/unsaved"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/large_station_name"
@@ -204,7 +211,6 @@
             android:marqueeRepeatLimit="marquee_forever"
             android:scrollHorizontally="true"
             android:singleLine="true"
-            android:text="Station Name"
             android:textSize="25sp"
             app:layout_constraintEnd_toStartOf="@+id/large_internet"
             app:layout_constraintStart_toStartOf="parent"
@@ -215,10 +221,10 @@
             android:layout_width="200dp"
             android:layout_height="200dp"
             android:layout_marginTop="150dp"
-            android:contentDescription="Station Logo"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="ContentDescription" />
 
         <ImageView
             android:id="@+id/large_play_pause"
@@ -227,7 +233,8 @@
             android:layout_marginTop="150dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/large_track_name"/>
+            app:layout_constraintTop_toBottomOf="@+id/large_track_name"
+            tools:ignore="ContentDescription" />
 
         <ImageView
             android:id="@+id/large_save_unsave"
@@ -239,44 +246,32 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/large_play_pause"
             app:srcCompat="@drawable/unsaved"
-            android:contentDescription="Save/Unsave" />
-
-        <ImageView
-            android:id="@+id/large_volume"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
-            app:layout_constraintBottom_toBottomOf="@+id/large_play_pause"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/large_play_pause"
-            app:layout_constraintTop_toTopOf="@+id/large_play_pause"
-            app:srcCompat="@drawable/media3_icon_volume_down"
-            android:contentDescription="Volume" />
+            tools:ignore="ContentDescription" />
 
         <ImageView
             android:id="@+id/large_internet"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="40dp"
+            android:layout_marginEnd="40dp"
             android:padding="10dp"
             android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="@+id/large_station_name"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/large_station_name"
             app:srcCompat="@drawable/internet_explorer"
-            android:contentDescription="Internet" />
+            tools:ignore="ContentDescription" />
 
         <ImageView
             android:id="@+id/large_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
+            android:layout_marginStart="20dp"
             android:layout_marginTop="25dp"
             android:padding="10dp"
             android:rotation="270"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/back"
-            android:contentDescription="Back" />
+            tools:ignore="ContentDescription" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.motion.widget.MotionLayout>

@@ -106,10 +106,10 @@ public class FavoriteTracksFragment extends Fragment {
             if (intent.resolveActivity(context.getPackageManager()) != null) {
                 context.startActivity(intent);
             } else {
-                Toast.makeText(context, "Нет доступного браузера", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, getResources().getString(R.string.no_browser), Toast.LENGTH_SHORT).show();
             }
         } catch (Exception e) {
-            Toast.makeText(context, "Ошибка при открытии браузера", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, getResources().getString(R.string.err_browser), Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
     }

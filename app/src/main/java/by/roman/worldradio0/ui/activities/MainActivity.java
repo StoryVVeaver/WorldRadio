@@ -63,19 +63,20 @@ public class MainActivity extends AppCompatActivity {
         observeChanges();
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
-            switch (Objects.requireNonNull(item.getTitle()).toString()) {
-                case "Favorite":
-                    viewPager.setCurrentItem(0);
-                    return true;
-                case "Home":
-                    viewPager.setCurrentItem(1);
-                    return true;
-                case "Settings":
-                    viewPager.setCurrentItem(2);
-                    return true;
+            int id = item.getItemId();
+            if (id == R.id.nav_favorite) {
+                viewPager.setCurrentItem(0);
+                return true;
+            } else if (id == R.id.nav_home) {
+                viewPager.setCurrentItem(1);
+                return true;
+            } else if (id == R.id.nav_settings) {
+                viewPager.setCurrentItem(2);
+                return true;
             }
             return false;
         });
+
         if (savedInstanceState == null) {
             viewPager.setCurrentItem(1, false);
         }

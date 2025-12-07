@@ -133,7 +133,7 @@ public class ListFragment extends Fragment {
         recyclerView = view.findViewById(R.id.list_recycler);
     }
     private void showMenu(int position) {
-        String[] options = {"Отложить запуск"};
+        String[] options = {getResources().getString(R.string.schedule_playback)};
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle(playerViewModel.getStationById(adapter.getUUID(position)).getName());
@@ -145,7 +145,7 @@ public class ListFragment extends Fragment {
                     break;
             }
         });
-        builder.setNegativeButton("Отмена", (dialog, which) -> dialog.dismiss());
+        builder.setNegativeButton(getResources().getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
 
         AlertDialog dialog = builder.create();
         if (dialog.getWindow() != null) {
@@ -155,12 +155,12 @@ public class ListFragment extends Fragment {
     }
     private void play(String uuid) {
         if (!playerViewModel.isInternetConnected()) {
-            Toast.makeText(getContext(), "Check internet connection!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), getResources().getString(R.string.not_correct_internet), Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (!"ok".equals(playerViewModel.checkTypeInternet())) {
-            Toast.makeText(getContext(), "Not correct internet type!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), getResources().getString(R.string.no_internet), Toast.LENGTH_SHORT).show();
             return;
         }
         playerViewModel.start(uuid);

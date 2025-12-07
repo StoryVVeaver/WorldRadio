@@ -70,10 +70,10 @@ public class FavoriteStationsFragment extends Fragment {
                     if(playerViewModel.checkTypeInternet().equals("ok")){
                         playerViewModel.start(adapter.getUUID(position));
                     } else {
-                        Toast.makeText(getContext(), "Not correct internet type!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), getResources().getString(R.string.not_correct_internet), Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(getContext(), "Check internet connection!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), getResources().getString(R.string.no_internet), Toast.LENGTH_SHORT).show();
                 }
             }
             @Override
@@ -102,7 +102,7 @@ public class FavoriteStationsFragment extends Fragment {
         recyclerView.addOnScrollListener(scrollListener);
     }
     private void showMenu(int position) {
-        String[] options = {"Отложить запуск", "Убрать из избранного"};
+        String[] options = {getResources().getString(R.string.schedule_playback), getResources().getString(R.string.remove_favorite)};
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle(playerViewModel.getStationById(adapter.getUUID(position)).getName());
@@ -117,7 +117,7 @@ public class FavoriteStationsFragment extends Fragment {
                     break;
             }
         });
-        builder.setNegativeButton("Отмена", (dialog, which) -> dialog.dismiss());
+        builder.setNegativeButton(getResources().getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
 
         AlertDialog dialog = builder.create();
         if (dialog.getWindow() != null) {

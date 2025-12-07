@@ -32,10 +32,6 @@ import by.roman.worldradio0.business_logic.view_models.StateViewModel;
 import by.roman.worldradio0.business_logic.view_models.TimerViewModel;
 import by.roman.worldradio0.ui.elements.view.CircularTimerView;
 
-/**
- * Refactored TimerFragment with clearer state machine and readable methods.
- * This version avoids compact one-line statements and keeps code explicit and maintainable.
- */
 public class TimerFragment extends Fragment {
 
     private static final String TAG = "TimerFragment";

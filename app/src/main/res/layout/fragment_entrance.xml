@@ -58,7 +58,8 @@
                     android:src="@drawable/user"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="ContentDescription" />
 
                 <EditText
                     android:id="@+id/loginInput_Entrance"
@@ -68,13 +69,14 @@
                     android:layout_marginEnd="16dp"
                     android:background="@null"
                     android:ems="10"
-                    android:hint="Логин"
+                    android:hint="@string/login"
                     android:inputType="text"
                     android:textSize="16dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/imageView2"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="SpUsage" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -106,7 +108,8 @@
                     android:src="@drawable/lock"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="ContentDescription" />
 
                 <ImageView
                     android:id="@+id/passStatus_Entrance"
@@ -116,7 +119,8 @@
                     android:src="@drawable/eye_closed"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="ContentDescription" />
 
                 <EditText
                     android:id="@+id/passwordInput_Entrance"
@@ -126,13 +130,14 @@
                     android:layout_marginEnd="0dp"
                     android:background="@null"
                     android:ems="10"
-                    android:hint="Пароль"
+                    android:hint="@string/pass"
                     android:inputType="textPassword"
                     android:textSize="16dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/passStatus_Entrance"
                     app:layout_constraintStart_toEndOf="@+id/imageView3"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="SpUsage" />
 
 
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -148,19 +153,21 @@
             app:layout_constraintDimensionRatio="3:1"
             app:layout_constraintEnd_toEndOf="@+id/guide_end"
             app:layout_constraintStart_toStartOf="@+id/guide_start"
-            app:layout_constraintTop_toBottomOf="@+id/passwordCardView_Entrance" />
+            app:layout_constraintTop_toBottomOf="@+id/passwordCardView_Entrance"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/textEnter_Entrance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Вход"
+            android:text="@string/enter"
             android:textColor="@color/white"
             android:textSize="18dp"
             app:layout_constraintBottom_toBottomOf="@+id/enterButton"
             app:layout_constraintEnd_toEndOf="@+id/enterButton"
             app:layout_constraintStart_toStartOf="@+id/enterButton"
-            app:layout_constraintTop_toTopOf="@+id/enterButton" />
+            app:layout_constraintTop_toTopOf="@+id/enterButton"
+            tools:ignore="SpUsage" />
 
         <TextView
             android:id="@+id/errorText_Entrance"
@@ -172,17 +179,8 @@
             app:layout_constraintBottom_toTopOf="@+id/loginCardView_Entrance"
             app:layout_constraintStart_toStartOf="@+id/loginCardView_Entrance"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.8" />
-
-        <TextView
-            android:id="@+id/forgotPass_Entrance"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="Забыли пароль?"
-            android:textSize="14dp"
-            app:layout_constraintEnd_toEndOf="@+id/guide_end"
-            app:layout_constraintTop_toBottomOf="@+id/passwordCardView_Entrance" />
+            app:layout_constraintVertical_bias="0.8"
+            tools:ignore="SpUsage" />
 
         <ProgressBar
             android:id="@+id/progressBar_Entrance"
@@ -214,12 +212,13 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
             android:visibility="invisible"
-            android:text="Загрузка..."
+            android:text="@string/loading"
             android:textSize="14dp"
             app:layout_constraintBottom_toTopOf="@+id/progressBar_loading_Entrance"
             app:layout_constraintEnd_toEndOf="@+id/progressBar_loading_Entrance"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="@+id/progressBar_loading_Entrance" />
+            app:layout_constraintStart_toStartOf="@+id/progressBar_loading_Entrance"
+            tools:ignore="SpUsage" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

@@ -35,7 +35,7 @@ public class SettingsList {
     public static List<SettingsGroup> getSettingsList(Settings settings){
 
         List<SettingsGroup> groups = new ArrayList<>();
-
+        //TODO ......
         try {
             List<SettingsItem> audioItems = new ArrayList<>();
             audioItems.add(new SliderItem(AUDIO_BALANCE,"Баланс:",-10, 10,settings.getAudioBalance(),"L","R",true));

@@ -48,7 +48,8 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.5"
-                app:srcCompat="@drawable/delete" />
+                app:srcCompat="@drawable/delete"
+                tools:ignore="ContentDescription" />
 
             <ImageView
                 android:id="@+id/browseButtonTrack"
@@ -58,7 +59,8 @@
                 app:layout_constraintBottom_toBottomOf="@+id/delButton_track"
                 app:layout_constraintEnd_toStartOf="@+id/delButton_track"
                 app:layout_constraintTop_toTopOf="@+id/delButton_track"
-                app:srcCompat="@drawable/selected_globe_navigation_bar" />
+                app:srcCompat="@drawable/selected_globe_navigation_bar"
+                tools:ignore="ContentDescription" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>

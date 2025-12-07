@@ -162,9 +162,9 @@ public class AlarmFragment extends Fragment {
 
         Notification notification = new NotificationCompat.Builder(ctx, "alarm_channel")
                 .setSmallIcon(R.drawable.timer_home)
-                .setContentTitle("Будильник установлен")
-                .setContentText("Сработает в " + timeText)
-                .addAction(R.drawable.delete, "Отменить", cancelPending)
+                .setContentTitle(getResources().getString(R.string.alarm))
+                .setContentText(getResources().getString(R.string.alarm_time) + " " + timeText)
+                .addAction(R.drawable.delete, getResources().getString(R.string.cancel), cancelPending)
                 .setOngoing(true)
                 .build();
 

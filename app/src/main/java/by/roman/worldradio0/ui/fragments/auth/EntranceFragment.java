@@ -51,7 +51,6 @@ public class EntranceFragment extends Fragment {
     private TextView loadingText;
     private ProgressBar progressBar;
     private ProgressBar progressBar_loading;
-    private boolean passVisibility;
     private String login;
     private String password;
 

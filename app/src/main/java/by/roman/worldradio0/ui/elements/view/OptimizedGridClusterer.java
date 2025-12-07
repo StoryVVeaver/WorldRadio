@@ -30,9 +30,6 @@ import java.util.concurrent.Future;
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.data.models.MapPoint;
 
-/**
- * OptimizedGridClusterer — гридовая кластеризация, хранит все точки локально.
- */
 public class OptimizedGridClusterer {
     public interface OnClusterMarkerClickListener {
         void onClusterMarkerClicked(MapPoint point);
@@ -46,11 +43,9 @@ public class OptimizedGridClusterer {
     private final Map<String, Marker> markerByUuid = new HashMap<>();
     private final Map<String, Drawable> originalIconByUuid = new HashMap<>();
 
-    // отложенная подсветка (если подсветили до создания маркера)
     private String pendingHighlightUuid = null;
     private Drawable pendingHighlightDrawable = null;
 
-    // все точки (весь мир) — загружаются один раз
     private List<MapPoint> items = new ArrayList<>();
 
     private final List<Marker> clusterMarkers = new ArrayList<>();
@@ -162,7 +157,6 @@ public class OptimizedGridClusterer {
                 }
 
                 mainHandler.post(() -> {
-                    // remove old
                     for (Marker m : clusterMarkers) {
                         try { map.getOverlays().remove(m); } catch (Exception ignored) {}
                     }
@@ -176,7 +170,6 @@ public class OptimizedGridClusterer {
                         GeoPoint pos = new GeoPoint(c.lat, c.lon);
 
                         if (c.count == 1) {
-                            // одиночная точка — ставим маркер, привязываем MapPoint и клики будут примагничивать + запускать playback
                             Marker marker = new Marker(map);
                             marker.setPosition(pos);
                             marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER);
@@ -186,7 +179,7 @@ public class OptimizedGridClusterer {
 
                             MapPoint sample = c.sample;
                             if (sample != null) {
-                                marker.setRelatedObject(sample); // ONLY for single points
+                                marker.setRelatedObject(sample);
                                 String uuid = sample.getUuid();
                                 if (uuid != null) {
                                     markerByUuid.put(uuid, marker);
@@ -194,15 +187,13 @@ public class OptimizedGridClusterer {
                                 }
                             }
 
-                            // click => snap/play
                             marker.setOnMarkerClickListener((m, mapView) -> {
                                 Object ro = m.getRelatedObject();
                                 if (ro instanceof MapPoint) {
                                     MapPoint mp = (MapPoint) ro;
-                                    // делегируем наружу: MapFragment через clickListener сделает centerSnap.snapTo(mp)
                                     if (clickListener != null) clickListener.onClusterMarkerClicked(mp);
                                 }
-                                return true; // consume — не показывать info window
+                                return true;
                             });
 
                             clusterMarkers.add(marker);
@@ -210,15 +201,12 @@ public class OptimizedGridClusterer {
                             continue;
                         }
 
-                        // АГРЕГИРОВАННЫЙ КЛАСТЕР (count > 1)
                         Marker marker = new Marker(map);
                         marker.setPosition(pos);
                         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER);
                         Drawable clusterIcon = getClusterDrawableForCount(c.count);
                         if (clusterIcon != null) marker.setIcon(clusterIcon);
 
-                        // НЕ устанавливем marker.setRelatedObject(sample) — клики по кластеру не должны запускать воспроизведение
-                        // но можно сохранить mapping uuid -> marker для highlight (по representative sample)
                         MapPoint sample = c.sample;
                         if (sample != null) {
                             String uuid = sample.getUuid();
@@ -228,7 +216,6 @@ public class OptimizedGridClusterer {
                             }
                         }
 
-                        // click => zoom into cluster center (не snap/play)
                         marker.setOnMarkerClickListener((m, mapView) -> {
                             mapControllerZoomToPoint(pos, 2.0);
                             return true;
@@ -239,11 +226,9 @@ public class OptimizedGridClusterer {
                     }
 
 
-                    // apply pending highlight if present
                     if (pendingHighlightUuid != null && pendingHighlightDrawable != null) {
                         Marker pending = markerByUuid.get(pendingHighlightUuid);
                         if (pending != null) {
-                            // save original if missing
                             if (!originalIconByUuid.containsKey(pendingHighlightUuid)) {
                                 originalIconByUuid.put(pendingHighlightUuid, pending.getIcon());
                             }
@@ -260,32 +245,26 @@ public class OptimizedGridClusterer {
         });
     }
 
-    /** Поставить подсветку (highlightDrawable) на маркер по uuid. Выполняется на UI-потоке. */
     public void highlightMarkerByUuid(final String uuid, final Drawable highlightDrawable) {
         if (uuid == null) return;
-        // Сохраним pending — чтобы при пересоздании маркеров highlight не терялся
         pendingHighlightUuid = uuid;
         pendingHighlightDrawable = highlightDrawable;
 
         mainHandler.post(() -> {
             Marker m = markerByUuid.get(uuid);
             if (m != null) {
-                // если оригинал ещё не сохранён — сохраним
                 if (!originalIconByUuid.containsKey(uuid)) {
                     originalIconByUuid.put(uuid, m.getIcon());
                 }
                 if (highlightDrawable != null) m.setIcon(highlightDrawable);
                 map.invalidate();
             }
-            // если маркера сейчас нет, pending будет применён в конце clusterAsync()
         });
     }
 
-    /** Убрать подсветку и вернуть оригинальную иконку. */
     public void clearHighlightByUuid(final String uuid) {
         if (uuid == null) return;
         mainHandler.post(() -> {
-            // убрать pending если он совпадает
             if (uuid.equals(pendingHighlightUuid)) {
                 pendingHighlightUuid = null;
                 pendingHighlightDrawable = null;
