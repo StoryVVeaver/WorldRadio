@@ -39,11 +39,15 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
 
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+
     implementation(libs.okhttp)
     implementation(libs.retrofit)
     implementation(libs.convertergson)
 
     implementation(libs.hilt.android)
+    implementation(libs.recyclerview)
     annotationProcessor(libs.hilt.compiler)
 
     testImplementation(libs.junit)
