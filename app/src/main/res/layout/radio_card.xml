@@ -88,16 +88,22 @@
                         tools:text="Country Name" />
                 </LinearLayout>
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/clickCountView"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:textSize="14sp"
-                android:textColor="@android:color/black"
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
                 android:gravity="center_vertical|end"
-                tools:text="1234" />
+                android:weightSum="4">
+
+                <TextView
+                    android:id="@+id/clickCountView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    tools:text="1234" />
+
+            </LinearLayout>
+
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>

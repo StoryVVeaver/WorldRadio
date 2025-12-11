@@ -4,4 +4,9 @@
     <string name="stations">Популярные станции</string>
     <string name="dashboard">Инфо</string>
     <string name="countries">Страны</string>
+    <string name="save">Сохранить фильтры</string>
+    <string name="dashboard_title">Панель Администратора</string>
+    <string name="total_users">Всего пользователей: %d</string>
+    <string name="active_stations">Активных станций: %d</string>
+    <string name="default_error_message">Не удалось загрузить статистику. Попробуйте позже.</string>
 </resources>

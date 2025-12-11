@@ -4,4 +4,10 @@
     <string name="stations">Top stations</string>
     <string name="dashboard">Dashboard</string>
     <string name="countries">Countries</string>
+    <string name="save">Save filters</string>
+    <string name="dashboard_title">Dashboard</string>
+    <string name="total_users">Count users: %d</string>
+    <string name="active_stations">Active stations:  %d</string>
+    <string name="default_error_message">Error while loading statistics</string>
+
 </resources>

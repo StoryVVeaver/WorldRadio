@@ -33,7 +33,7 @@ public class NetworkModule {
     @Named("staticRetrofit")
     Retrofit provideStaticRetrofit(@Named("staticClient") OkHttpClient client) {
         return new Retrofit.Builder()
-                .baseUrl("https://kkvxmvg9-8080.euw.devtunnels.ms/api/") // OK
+                .baseUrl("https://kkvxmvg9-8080.euw.devtunnels.ms/api/v1/user/")
                 .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
