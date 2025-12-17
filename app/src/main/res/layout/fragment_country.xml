@@ -8,6 +8,14 @@
     android:paddingEnd="5dp"
     android:orientation="vertical">
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textSize="20dp"
+        android:padding="10dp"
+        android:text="Исключённые страны вещания" />
+
     <androidx.cardview.widget.CardView
         android:layout_marginTop="10dp"
         android:padding="5dp"

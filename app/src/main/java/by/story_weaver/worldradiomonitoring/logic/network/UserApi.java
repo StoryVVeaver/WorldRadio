@@ -15,4 +15,7 @@ public interface UserApi {
 
     @PUT("put/filter")
     Call<List<FilterStation>> putStationFilters(@Body List<FilterStation> list);
+
+    @GET("get/user")
+    Call<Long> getCountUsers();
 }
