@@ -1,5 +1,7 @@
 package by.roman.worldradio0.business_logic.network.radio;
 
+import android.annotation.SuppressLint;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -10,8 +12,13 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
+import java.util.Vector;
 
 import javax.inject.Singleton;
 
@@ -24,20 +31,57 @@ import okhttp3.Response;
 
 @Singleton
 public class radio {
-    private static final String API_URL = "http://162.55.180.156/json/stations/topclick/1000";
+    private List<String> address;
+    private static final String API_URL = "/json/stations/topclick/1000";
     //private static final String API_URL = "http://162.55.180.156/json/stations";
 
 
     public radio() {
+        updateDnsList();
+    }
+    private void updateDnsList(){
+        Log.v("radio", "start scanning");
+        @SuppressLint("StaticFieldLeak")
+        final AsyncTask<Void, Void, String[]> xxx = new AsyncTask<Void, Void, String[]>() {
+            @Override
+            protected String[] doInBackground(Void... params) {
+                Vector<String> listResult = new Vector<>();
+                try {
+                    InetAddress[] list = InetAddress.getAllByName("all.api.radio-browser.info");
+                    for (InetAddress item : list) {
+                        listResult.add(item.getCanonicalHostName());
+                    }
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                }
+                return listResult.toArray(new String[0]);
+            }
 
+            @Override
+            protected void onPostExecute(String[] result) {
+                address = Arrays.asList(result);
+                super.onPostExecute(result);
+            }
+        }.execute();
     }
 
+    private String normalizeUrl(String host) {
+        if (host == null) return null;
+
+        if (host.startsWith("http://") || host.startsWith("https://")) {
+            return host;
+        }
+        return "http://" + host + API_URL;
+    }
+
+
     public void fetchStations (StationsCallback callback) {
+        Random r= new Random();
         callback.onLoading();
         OkHttpClient client = new OkHttpClient();
 
         Request request = new Request.Builder()
-                .url(API_URL)
+                .url(normalizeUrl(address.get(r.nextInt(address.size()))))
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -77,7 +121,8 @@ public class radio {
                                 }
                                 callback.onSuccess(dto);
                             } else {
-                                Log.e("RadioAPI", "Unexpected response: " + jsonResponse);
+                                //Log.e("RadioAPI", "Unexpected response: " + jsonResponse);
+                                Log.e("RadioAPI", "Unexpected request url: " + request.url());
                                 callback.onFailure(new Exception("Unexpected response: " + jsonResponse));
                             }
                         } catch (JsonSyntaxException e) {

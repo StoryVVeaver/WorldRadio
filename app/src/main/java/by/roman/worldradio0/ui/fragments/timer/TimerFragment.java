@@ -10,6 +10,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -47,6 +48,7 @@ public class TimerFragment extends Fragment {
 
     private CircularTimerView circularTimerView;
     private CountDownTimer countDownTimer;
+    private CardView holder;
 
     private TimerViewModel viewModel;
     private SettingsViewModel settingsViewModel;
@@ -119,6 +121,7 @@ public class TimerFragment extends Fragment {
         divider1 = root.findViewById(R.id.dotDivider1);
         divider2 = root.findViewById(R.id.dotDivider2);
         time = root.findViewById(R.id.setTime);
+        holder = root.findViewById(R.id.holder);
     }
     private void initViewModels() {
         viewModel = new ViewModelProvider(requireActivity()).get(TimerViewModel.class);
@@ -262,9 +265,6 @@ public class TimerFragment extends Fragment {
     private void updateUiForState(TimerState currentState) {
         switch (currentState) {
             case RUNNING:
-                if(!isPaused){
-                    animateMoveDown(circularTimerView);
-                }
                 time.setVisibility(GONE);
                 fadeInOnResume();
                 startButton.setVisibility(GONE);
@@ -283,7 +283,6 @@ public class TimerFragment extends Fragment {
                 break;
             case IDLE:
             default:
-                animateMoveUp(circularTimerView);
                 time.setVisibility(VISIBLE);
                 startButton.setVisibility(VISIBLE);
                 stopButton.setVisibility(GONE);
@@ -362,7 +361,7 @@ public class TimerFragment extends Fragment {
         fadeOut.setDuration(500);
         fadeOut.addUpdateListener(animation -> {
             float alpha = (float) animation.getAnimatedValue();
-            circularTimerView.setAlpha(alpha);
+            holder.setAlpha(alpha);
         });
         fadeOut.start();
     }
@@ -371,18 +370,8 @@ public class TimerFragment extends Fragment {
         fadeIn.setDuration(500);
         fadeIn.addUpdateListener(animation -> {
             float alpha = (float) animation.getAnimatedValue();
-            circularTimerView.setAlpha(alpha);
+            holder.setAlpha(alpha);
         });
         fadeIn.start();
-    }
-    private void animateMoveDown(View view) {
-        ObjectAnimator animator = ObjectAnimator.ofFloat(view, "translationY", 70f, 270f);
-        animator.setDuration(1250);
-        animator.start();
-    }
-    private void animateMoveUp(View view) {
-        ObjectAnimator animator = ObjectAnimator.ofFloat(view, "translationY", 270f, 70f);
-        animator.setDuration(1250);
-        animator.start();
     }
 }

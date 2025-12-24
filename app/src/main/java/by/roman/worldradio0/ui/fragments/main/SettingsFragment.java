@@ -41,7 +41,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
 import by.roman.worldradio0.R;
-import by.roman.worldradio0.business_logic.SettingsList;
+import by.roman.worldradio0.business_logic.settings.SettingsList;
 import by.roman.worldradio0.business_logic.adapters.SettingsAdapter;
 import by.roman.worldradio0.business_logic.data.models.User;
 import by.roman.worldradio0.business_logic.settings.SettingsChangeListener;
@@ -234,7 +234,7 @@ public class SettingsFragment extends Fragment {
     private void initAll(){
         viewModel = new ViewModelProvider(requireActivity()).get(SettingsViewModel.class);
         stateViewModel = new ViewModelProvider(requireActivity()).get(StateViewModel.class);
-        SettingsAdapter adapter = new SettingsAdapter(SettingsList.getSettingsList(viewModel.getSettingsModel()), new SettingsChangeListener() {
+        SettingsAdapter adapter = new SettingsAdapter(SettingsList.getSettingsList(viewModel.getSettingsModel(), requireActivity()), new SettingsChangeListener() {
             @Override
             public void onToggleChanged(@NonNull String key, boolean isChecked) {
                 viewModel.toggleChange(key,isChecked);

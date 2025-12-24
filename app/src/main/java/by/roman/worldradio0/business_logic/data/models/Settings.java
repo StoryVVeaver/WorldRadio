@@ -27,7 +27,7 @@ public class Settings {
         this.crossfade_enabled = 0;
         this.crossfade_time = 0;
 
-        this.network_type = 0;
+        this.network_type = 2;
 
         this.timer_seconds_enabled = 1;
         this.timer_dots_type = 0;

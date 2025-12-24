@@ -56,4 +56,20 @@
     <string name="rating">Рейтинг</string>
     <string name="bitrate">Битрейт</string>
     <string name="repeat_pass">Повторите пароль</string>
+    <string name="connection">Подключение</string>
+    <string name="network_sett">Сетевые параметры</string>
+    <string name="wifi">Только Wi-fi</string>
+    <string name="any">Любое</string>
+    <string name="mobile">Только мобильная сеть</string>
+    <string name="timer_seconds">Использовать секунды</string>
+    <string name="circle">Круг</string>
+    <string name="rhombus">Ромб</string>
+    <string name="divider">Тип разделителя</string>
+    <string name="swipe">Свайп</string>
+    <string name="buttons">Кнопки</string>
+    <string name="and">и</string>
+    <string name="appearance">Внешний вид</string>
+    <string name="nav_type">Тип навигации</string>
+    <string name="balance">Баланс</string>
+    <string name="audio">Аудио</string>
 </resources>

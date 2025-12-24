@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -15,6 +16,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guide_timer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.5" />
 
         <ImageView
             android:id="@+id/playButtonView"
@@ -28,14 +36,6 @@
             app:srcCompat="@drawable/playbutton"
             tools:ignore="ContentDescription" />
 
-        <by.roman.worldradio0.ui.elements.view.CircularTimerView
-            android:id="@+id/circularTimerView"
-            android:layout_width="350dp"
-            android:layout_height="350dp"
-            android:layout_marginTop="130dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/pauseButtonView"
@@ -65,22 +65,47 @@
             android:id="@+id/startButtonView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="70dp"
+            android:layout_marginBottom="30dp"
             android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/setTime"
+            app:layout_constraintVertical_bias="0.65"
             app:srcCompat="@drawable/playbutton"
             tools:ignore="ContentDescription" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/holder"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="40dp"
+            android:layout_marginTop="50dp"
+            android:layout_marginEnd="40dp"
+            android:background="@color/background"
+            app:layout_constraintBottom_toTopOf="@id/guide_timer"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <by.roman.worldradio0.ui.elements.view.CircularTimerView
+                android:id="@+id/circularTimerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/background" />
+
+        </androidx.cardview.widget.CardView>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/setTime"
             android:layout_width="wrap_content"
             android:layout_height="141dp"
-            android:layout_marginBottom="250dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/guide_timer"
+            app:layout_constraintVertical_bias="0.100000024">
 
             <LinearLayout
                 android:id="@+id/rootLayout"
@@ -143,10 +168,10 @@
             android:id="@+id/backButtonTimerView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginTop="15dp"
             android:background="@color/background"
-            android:layout_marginStart="20dp"
             android:padding="10dp"
-            android:layout_marginTop="25dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/back"

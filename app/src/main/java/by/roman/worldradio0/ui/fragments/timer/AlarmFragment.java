@@ -1,7 +1,6 @@
 package by.roman.worldradio0.ui.fragments.timer;
 
 import android.app.AlarmManager;
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -50,7 +49,6 @@ public class AlarmFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         if (getArguments() != null) {
             uuid = getArguments().getString(ARG_UUID);
         }
@@ -63,43 +61,59 @@ public class AlarmFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
         RecyclerView hourWheel = view.findViewById(R.id.hourWheel);
         RecyclerView minuteWheel = view.findViewById(R.id.minuteWheel);
         Button startButton = view.findViewById(R.id.startButton);
 
-        hourAdapter = new TimerWheelAdapter(requireContext(), 24);
-        minuteAdapter = new TimerWheelAdapter(requireContext(), 60);
+        hourAdapter = new TimerWheelAdapter(requireActivity(), 24);
+        minuteAdapter = new TimerWheelAdapter(requireActivity(), 60);
 
-        setupWheel(hourWheel, hourAdapter);
-        setupWheel(minuteWheel, minuteAdapter);
+        setupWheel(hourWheel, hourAdapter, 24);
+        setupWheel(minuteWheel, minuteAdapter, 60);
 
         startButton.setOnClickListener(v -> scheduleAlarm());
     }
 
-    private void setupWheel(RecyclerView wheel, TimerWheelAdapter adapter) {
-        LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext());
-        layoutManager.setOrientation(RecyclerView.VERTICAL);
-        wheel.setLayoutManager(layoutManager);
-        wheel.setAdapter(adapter);
+    private void setupWheel(@NonNull RecyclerView recyclerView, TimerWheelAdapter adapter, int range) {
+        LinearLayoutManager layoutManager = new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(adapter);
 
-        LinearSnapHelper snapHelper = new LinearSnapHelper();
-        snapHelper.attachToRecyclerView(wheel);
+        final LinearSnapHelper snapHelper = new LinearSnapHelper();
+        snapHelper.attachToRecyclerView(recyclerView);
 
-        wheel.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        recyclerView.post(() -> {
+            int mid = adapter.getItemCount() / 2;
+            int startOffset = mid % range;
+            int zeroPosition = mid - startOffset;
+
+            scrollToPosition(0, recyclerView, adapter, zeroPosition);
+        });
+
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView rv, int newState) {
                 super.onScrollStateChanged(rv, newState);
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     View centerView = snapHelper.findSnapView(layoutManager);
                     if (centerView != null) {
-                        int pos = layoutManager.getPosition(centerView);
-                        adapter.setSelectedPosition(pos);
+                        int position = layoutManager.getPosition(centerView);
+                        adapter.setSelectedPosition(position);
                     }
                 }
             }
         });
+    }
 
-        wheel.scrollToPosition(adapter.getItemCount() / 2);
+    private void scrollToPosition(int value, @NonNull RecyclerView recyclerView, TimerWheelAdapter adapter, int zeroPosition) {
+        LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+        if (layoutManager != null) {
+            int target = zeroPosition + value;
+            layoutManager.scrollToPositionWithOffset(target, -20);
+            adapter.setSelectedPosition(target);
+        }
     }
 
     private void scheduleAlarm() {
@@ -111,6 +125,7 @@ public class AlarmFragment extends Fragment {
         target.set(Calendar.HOUR_OF_DAY, hour);
         target.set(Calendar.MINUTE, minute);
         target.set(Calendar.SECOND, 0);
+        target.set(Calendar.MILLISECOND, 0);
 
         if (target.getTimeInMillis() <= now.getTimeInMillis()) {
             target.add(Calendar.DAY_OF_YEAR, 1);
@@ -127,7 +142,9 @@ public class AlarmFragment extends Fragment {
         );
 
         AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, target.getTimeInMillis(), pendingIntent);
+        if (alarmManager != null) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, target.getTimeInMillis(), pendingIntent);
+        }
 
         showAlarmNotification(target.getTimeInMillis());
     }
@@ -136,15 +153,18 @@ public class AlarmFragment extends Fragment {
         Context ctx = requireContext();
         NotificationManager nm = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        NotificationChannel channel = new NotificationChannel(
-                "alarm_channel",
-                "Запланированные сигналы",
-                NotificationManager.IMPORTANCE_DEFAULT
-        );
-        nm.createNotificationChannel(channel);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    "alarm_channel",
+                    "Запланированные сигналы",
+                    NotificationManager.IMPORTANCE_HIGH
+            );
+            nm.createNotificationChannel(channel);
+        }
 
         Intent cancelIntent = new Intent(ctx, AlarmReceiver.class);
         cancelIntent.setAction("CANCEL_ALARM");
+        cancelIntent.putExtra("uuid", uuid);
 
         PendingIntent cancelPending = PendingIntent.getBroadcast(
                 ctx,
@@ -160,15 +180,14 @@ public class AlarmFragment extends Fragment {
                 calendar.get(Calendar.HOUR_OF_DAY),
                 calendar.get(Calendar.MINUTE));
 
-        Notification notification = new NotificationCompat.Builder(ctx, "alarm_channel")
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(ctx, "alarm_channel")
                 .setSmallIcon(R.drawable.timer_home)
                 .setContentTitle(getResources().getString(R.string.alarm))
                 .setContentText(getResources().getString(R.string.alarm_time) + " " + timeText)
-                .addAction(R.drawable.delete, getResources().getString(R.string.cancel), cancelPending)
+                .addAction(R.drawable.delete, "Отмена", cancelPending)
                 .setOngoing(true)
-                .build();
+                .setPriority(NotificationCompat.PRIORITY_HIGH);
 
-        nm.notify(5005, notification);
+        nm.notify(5005, builder.build());
     }
-
 }

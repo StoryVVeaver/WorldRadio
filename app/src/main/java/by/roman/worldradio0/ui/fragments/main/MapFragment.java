@@ -45,7 +45,7 @@ import by.roman.worldradio0.business_logic.view_models.MapViewModel;
 import by.roman.worldradio0.business_logic.view_models.PlayerViewModel;
 import by.roman.worldradio0.business_logic.view_models.SettingsViewModel;
 import by.roman.worldradio0.ui.elements.view.CenterSnapOverlay;
-import by.roman.worldradio0.ui.elements.view.OptimizedGridClusterer;
+import by.roman.worldradio0.ui.elements.view.GridClusterer;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -57,7 +57,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
     private PlayerViewModel playerViewModel;
     private HistoryViewModel historyViewModel;
     private SettingsViewModel settingsViewModel;
-    private OptimizedGridClusterer clusterer;
+    private GridClusterer clusterer;
     private final Handler clusterHandler = new Handler(Looper.getMainLooper());
     private final Runnable clusterRunnable = () -> clusterer.clusterAsync();
     private final Runnable updateVisibleRunnable = this::updateCenterSnapVisiblePointsImmediate;
@@ -190,7 +190,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         mapController.setZoom(12.0);
         mapController.setCenter(new GeoPoint(0, 0));
 
-        clusterer = new OptimizedGridClusterer(requireContext(), map);
+        clusterer = new GridClusterer(requireContext(), map);
         clusterer.setCellSizePx(80);
 
         map.addMapListener(new MapListener() {

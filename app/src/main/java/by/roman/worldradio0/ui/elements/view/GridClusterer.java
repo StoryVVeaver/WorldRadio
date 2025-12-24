@@ -30,7 +30,7 @@ import java.util.concurrent.Future;
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.data.models.MapPoint;
 
-public class OptimizedGridClusterer {
+public class GridClusterer {
     public interface OnClusterMarkerClickListener {
         void onClusterMarkerClicked(MapPoint point);
     }
@@ -55,7 +55,7 @@ public class OptimizedGridClusterer {
 
     private OnClusterMarkerClickListener clickListener;
 
-    public OptimizedGridClusterer(Context context, MapView map) {
+    public GridClusterer(Context context, MapView map) {
         this.context = context.getApplicationContext();
         this.map = map;
     }

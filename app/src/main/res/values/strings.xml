@@ -56,4 +56,22 @@
     <string name="rating">Rating</string>
     <string name="bitrate">Bitrate</string>
     <string name="repeat_pass">Repeat the password</string>
+    <string name="connection">Connection</string>
+    <string name="network_sett">Network Settings</string>
+    <string name="wifi">Wi-fi only</string>
+    <string name="any">Any</string>
+    <string name="mobile">Mobile network only</string>
+    <string name="timer_seconds">Use seconds</string>
+    <string name="circle">Circle</string>
+    <string name="rhombus">Rhombus</string>
+    <string name="divider">Divider type</string>
+    <string name="swipe">Swipe</string>
+    <string name="buttons">Buttons</string>
+    <string name="and">and</string>
+    <string name="appearance">Appearance</string>
+    <string name="nav_type">Navigation type</string>
+    <string name="balance">Balance</string>
+    <string name="audio">Audio</string>
+    <string name="agc" translatable="false">AGC</string>
+    <string name="crossfade" translatable="false">Crossfade</string>
 </resources>

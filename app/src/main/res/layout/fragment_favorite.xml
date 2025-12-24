@@ -11,19 +11,54 @@
         android:layout_height="match_parent"
         android:background="@color/background">
 
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="15dp"
+            android:clickable="false"
+            android:focusable="false"
+            android:background="@color/background"
+            android:visibility="invisible"
+            app:cardCornerRadius="15dp"
+            app:cardElevation="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/background">
+
+                <ImageButton
+                    android:id="@+id/timerButtonView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="10dp"
+                    android:src="@drawable/timer_home"
+                    app:tint="@color/white"
+                    tools:ignore="ContentDescription" />
+            </FrameLayout>
+        </androidx.cardview.widget.CardView>
+
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guide_start"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.05" />
+            app:layout_constraintGuide_percent="0.04" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guide_end"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.95" />
+            app:layout_constraintGuide_percent="0.96" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guide_top"
@@ -36,10 +71,11 @@
             android:id="@+id/cardView_favorite"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layout_constraintDimensionRatio="7:1"  app:layout_constraintWidth_percent="0.85" app:cardCornerRadius="15dp"
+            app:cardCornerRadius="15dp"
+            app:layout_constraintBottom_toBottomOf="@+id/cardView"
             app:layout_constraintEnd_toEndOf="@+id/guide_end"
             app:layout_constraintStart_toStartOf="@+id/guide_start"
-            app:layout_constraintTop_toTopOf="@+id/guide_top">
+            app:layout_constraintTop_toTopOf="@+id/cardView">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -58,9 +94,11 @@
                         android:id="@+id/stationMode_Text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+
                         android:text="@string/stations"
                         android:textColor="@color/white"
-                        android:textSize="20sp" app:layout_constraintBottom_toBottomOf="parent"
+                        android:textSize="20sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -79,7 +117,8 @@
                         android:layout_height="wrap_content"
                         android:text="@string/tracks"
                         android:textColor="@color/unselectedText"
-                        android:textSize="20sp" app:layout_constraintBottom_toBottomOf="parent"
+                        android:textSize="20sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />

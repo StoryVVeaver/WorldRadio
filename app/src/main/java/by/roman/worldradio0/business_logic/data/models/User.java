@@ -1,5 +1,7 @@
 package by.roman.worldradio0.business_logic.data.models;
 
+import androidx.annotation.NonNull;
+
 public class User {
     private final int id;
     private final String login;
@@ -16,6 +18,7 @@ public class User {
         this.inSystem = inSystem;
         this.avatar = avatar;
     }
+    @NonNull
     @Override
     public String toString(){
         return "id: " + id + "\n" +
