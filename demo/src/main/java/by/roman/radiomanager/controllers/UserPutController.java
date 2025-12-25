@@ -14,7 +14,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
 @RequestMapping("/api/v1/user/put")
 @RestController
 @AllArgsConstructor
@@ -79,6 +78,15 @@ public class UserPutController {
             }
             User responce = userPutService.saveUser(user);
             return responce != null ? ResponseEntity.ok("saved") : ResponseEntity.status(HttpStatus.CONFLICT).build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/filter")
+    public ResponseEntity<?> putStationsFilter(@RequestBody List<FilterStation> list) {
+        try {
+            return ResponseEntity.ok().body(userPutService.saveFilterStation(list));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }

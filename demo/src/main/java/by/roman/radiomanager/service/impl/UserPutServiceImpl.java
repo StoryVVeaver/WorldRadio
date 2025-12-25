@@ -1,6 +1,9 @@
 package by.roman.radiomanager.service.impl;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,9 @@ public class UserPutServiceImpl implements UserPutService{
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private FilterStationRepository filterStationRepository;
 
     @Override
     public Settings saveSettings(Settings sett){
@@ -76,4 +82,20 @@ public class UserPutServiceImpl implements UserPutService{
             throw e;
         }
     }
+
+    @Override
+    public List<FilterStation> saveFilterStation(List<FilterStation> list) {
+        filterStationRepository.deleteAll();
+        if (list == null || list.isEmpty()) {
+            return List.of();
+        }
+
+        Map<String, FilterStation> uniqueMap = new LinkedHashMap<>();
+        for (FilterStation fs : list) {
+            uniqueMap.put(fs.getCode(), fs);
+        }
+
+        return filterStationRepository.saveAll(new ArrayList<>(uniqueMap.values()));
+    }
+
 }

@@ -9,4 +9,5 @@ public interface UserPutService {
     List<FavoriteStation> saveFavoriteStations(List<FavoriteStation> favorites);
     List<FavoriteTrack> saveFavoriteTracks(List<FavoriteTrack> favorites);
     User saveUser(User user);
+    List<FilterStation> saveFilterStation(List<FilterStation> list);
 }

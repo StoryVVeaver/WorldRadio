@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+
 @RequestMapping("/api/v1/user/get")
 @RestController
 @AllArgsConstructor
@@ -57,4 +58,23 @@ public class UserGetController {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }
+
+    @GetMapping("/filter")
+    public ResponseEntity<?> getStationFilter() {
+        try {
+            return ResponseEntity.ok().body(userGetService.getFilterStations());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<?> getCountUsers(){
+        try {
+            return ResponseEntity.ok().body(userGetService.getCountUsers());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
+    
 }

@@ -8,4 +8,6 @@ public interface UserGetService {
     List<FavoriteStation> getFavoriteStations(Long id);
     List<FavoriteTrack> getFavoriteTracks(Long id);
     Settings getSettings(Long id);
+    List<FilterStation> getFilterStations();
+    Long getCountUsers();
 }

@@ -13,6 +13,9 @@ import lombok.AllArgsConstructor;
 @Service
 @AllArgsConstructor
 public class UserGetServiceImpl implements UserGetService{
+
+    @Autowired
+    private UserRepository userRepository;
     
     @Autowired
     private FavoriteStationsRepository favoriteStationsRepository;
@@ -23,15 +26,16 @@ public class UserGetServiceImpl implements UserGetService{
     @Autowired
     private SettingsRepository settingsRepository;
 
+    @Autowired
+    private FilterStationRepository filterStationRepository;
+
     @Override
     public List<FavoriteStation> getFavoriteStations(Long id){
         try {
             List<FavoriteStation> list = favoriteStationsRepository.findByUserId(id);
-            if(list == null){
-                return null;
-            } else return list;
+            return list;
         } catch (Exception e) {
-            return null;
+            throw e;
         }
     }
 
@@ -39,11 +43,9 @@ public class UserGetServiceImpl implements UserGetService{
     public List<FavoriteTrack> getFavoriteTracks(Long id){
         try {
             List<FavoriteTrack> list = favoriteTrackRepository.findByUserId(id);
-            if(list == null){
-                return null;
-            } else return list;
+            return list;
         } catch (Exception e) {
-            return null;
+            throw e;
         }
     }
 
@@ -51,11 +53,27 @@ public class UserGetServiceImpl implements UserGetService{
     public Settings getSettings(Long id){
         try {
             Settings sett = settingsRepository.findSettingsById(id);
-            if(sett == null){
-                return null;
-            } else return sett;
+            return sett;
         } catch (Exception e) {
-            return null;
+            throw e;
+        }
+    }
+
+    @Override
+    public List<FilterStation> getFilterStations(){
+        try {
+            return filterStationRepository.findAll();
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    @Override
+    public Long getCountUsers(){
+        try {
+            return userRepository.count();
+        } catch (Exception e) {
+            throw e;
         }
     }
 }

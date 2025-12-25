@@ -17,6 +17,8 @@ public class FavoriteStation {
     @Column(columnDefinition = "TEXT")
     private String uuid;
 
+    public FavoriteStation(){}
+
     public FavoriteStation(Long userId, String uuid) {
         this.userId = userId;
         this.uuid = uuid;
