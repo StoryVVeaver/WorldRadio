@@ -10,19 +10,20 @@
         android:id="@+id/text_check"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:textSize="18sp"
-        android:paddingStart="32dp"
+        android:padding="10dp"
+        android:paddingStart="22dp"
+        android:textSize="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/checkBox_check"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="RtlSymmetry,SpUsage" />
 
     <CheckBox
         android:id="@+id/checkBox_check"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="56dp"
+        android:layout_marginEnd="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

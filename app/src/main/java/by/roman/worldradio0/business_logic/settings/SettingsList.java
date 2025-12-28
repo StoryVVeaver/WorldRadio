@@ -66,7 +66,7 @@ public class SettingsList {
 
         try {
             List<SettingsItem> dataItems = new ArrayList<>();
-            dataItems.add(new TextButtonItem(GET_USER_DATA, PUT_USER_DATA,"Синхронизация:", "[Загрузить]", "[Выгрузить]"));
+            dataItems.add(new TextButtonItem(GET_USER_DATA, PUT_USER_DATA,"Данные:", "[Загрузить]", "[Выгрузить]"));
             dataItems.add(new TextButtonItem(UPDATE_STATIONS_DATA,"Станции:", "[Обновить]"));
             dataItems.add(new TextButtonItem(DELETE_ACCOUNT,"Удалить аккаунт", "                "));
             groups.add(new SettingsGroup("Данные и аккаунт", dataItems));

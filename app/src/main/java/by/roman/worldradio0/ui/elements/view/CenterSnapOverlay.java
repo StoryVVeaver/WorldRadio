@@ -43,11 +43,8 @@ public class CenterSnapOverlay extends Overlay {
     private boolean requireFirstTouch = true;
     private boolean activatedByUser = false;
 
-    // new: prevent repeated snap-to-same-target loops
     private long lastSnapTime = 0L;
-    private long snapCooldownMs = 800L; // ignore snaps within this interval
-
-    // new: small delay before invalidation to let projection settle
+    private long snapCooldownMs = 800L;
     private long postInvalidateDelayMs = 80L;
 
     public CenterSnapOverlay(MapView map,
@@ -157,9 +154,8 @@ public class CenterSnapOverlay extends Overlay {
         long now = System.currentTimeMillis();
         if (nearest != null && bestDist2 <= (snapThresholdPx * (double) snapThresholdPx)) {
             if (snappedPoint != null && java.util.Objects.equals(snappedPoint.getUuid(), nearest.getUuid())) {
-                return; // already snapped to same
+                return;
             }
-            // cooldown to prevent instant re-snapping loops
             if (now - lastSnapTime < snapCooldownMs) return;
 
             snapToPoint(nearest, true, defaultIconOffset, false);
@@ -235,7 +231,6 @@ public class CenterSnapOverlay extends Overlay {
                         int ix = Math.round(startPx.x + (dynamicTargetPx.x - startPx.x) * f);
                         int iy = Math.round(startPx.y + (dynamicTargetPx.y - startPx.y) * f);
                         circleScreenPos = new Point(ix, iy);
-                        // don't invalidate aggressively here; we'll postDelayed to reduce jitter
                         postInvalidate();
                     });
 

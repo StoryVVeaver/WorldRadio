@@ -39,6 +39,7 @@ import java.util.List;
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.LocationUtil;
 import by.roman.worldradio0.business_logic.data.models.MapPoint;
+import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.data.models.Settings;
 import by.roman.worldradio0.business_logic.view_models.HistoryViewModel;
 import by.roman.worldradio0.business_logic.view_models.MapViewModel;
@@ -77,6 +78,16 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         settings = settingsViewModel.getSettingsModel();
         centerSnap.setSnapEnabled(settings.getSnapEnabled() == 1);
         fav_snap();
+        if (playerViewModel.getCurrentStation() != null) {
+            RadioStation station = playerViewModel.getCurrentStation();
+            Log.v("MapFragment", "station ok, checking " + station.getGeoLat() + " " + station.getGeoLong() + " " + station.getStationUuid());
+            if (station.getGeoLat() != 0 && station.getGeoLong() != 0 && !station.getStationUuid().isEmpty()) {
+                mapController.setCenter(new GeoPoint(station.getGeoLat(), station.getGeoLong()));
+                if (map.getZoomLevel() < 12) {
+                    mapController.setZoom(12.0);
+                }
+            }
+        }
     }
 
     @Override
@@ -134,12 +145,10 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
 
             lat = savedInstanceState.getDouble("SAVED_LAT");
             lon = savedInstanceState.getDouble("SAVED_LON");
-
             mapController.setCenter(new GeoPoint(lat, lon));
             if (map.getZoomLevel() < 12) {
                 mapController.setZoom(12.0);
             }
-
         } else {
             LocationUtil.requestLocation(requireActivity(), new LocationUtil.LocationCallback() {
                 @Override
@@ -155,7 +164,6 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
                 }
             });
         }
-
     }
 
     private void findViewByID(@NonNull View view){
@@ -210,9 +218,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
 
         centerSnap = new CenterSnapOverlay(map, 256, centerDrawable, centerSnappedDrawable, snapped -> {
             if (snapped != null) {
-                if (currentSnappedUuid != null && !currentSnappedUuid.equals(snapped.getUuid())) {
-                    previousSnappedUuid = currentSnappedUuid;
-                }
+
                 if (playerViewModel.isInternetConnected()) {
                     if ("ok".equals(playerViewModel.checkTypeInternet())) {
                         playerViewModel.start(snapped.getUuid());

@@ -9,6 +9,27 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guide_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.02" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guide_top"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.01" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guide_end"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.98" />
+
         <org.osmdroid.views.MapView
             android:id="@+id/map"
             android:layout_width="match_parent"
@@ -19,16 +40,82 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.cardview.widget.CardView
+            android:id="@+id/cardView345"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/background"
+            android:clickable="false"
+            android:focusable="false"
+            android:visibility="invisible"
+            app:cardCornerRadius="15dp"
+            app:cardElevation="0dp"
+            app:layout_constraintEnd_toStartOf="@+id/guide_end"
+            app:layout_constraintTop_toBottomOf="@+id/guide_top">
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/background">
+
+                <ImageButton
+                    android:id="@+id/timerButtonView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="10dp"
+                    android:src="@drawable/timer_home"
+                    app:tint="@color/white"
+                    tools:ignore="ContentDescription" />
+            </FrameLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardView345e"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="6dp"
+            android:background="@color/background"
+            android:clickable="false"
+            android:focusable="false"
+            android:visibility="invisible"
+            app:cardCornerRadius="15dp"
+            app:cardElevation="0dp"
+            app:layout_constraintEnd_toStartOf="@+id/cardView345"
+            app:layout_constraintTop_toBottomOf="@+id/guide_top">
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/background">
+
+                <ImageButton
+                    android:id="@+id/timerButtonVieww"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="10dp"
+                    android:src="@drawable/timer_home"
+                    app:tint="@color/white"
+                    tools:ignore="ContentDescription" />
+            </FrameLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
             android:id="@+id/cardView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="135dp"
+            android:layout_marginEnd="6dp"
             android:background="@color/background"
             app:cardCornerRadius="15dp"
             app:cardElevation="0dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintEnd_toStartOf="@+id/cardView345e"
+            app:layout_constraintTop_toBottomOf="@id/guide_top">
 
             <FrameLayout
                 android:layout_width="wrap_content"

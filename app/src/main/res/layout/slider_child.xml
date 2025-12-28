@@ -10,12 +10,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="16dp"
-        android:textSize="18sp"
-        android:paddingStart="32dp"
+        android:textSize="16dp"
+        android:paddingStart="22dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="RtlSymmetry" />
+        tools:ignore="RtlSymmetry,SpUsage" />
 
     <SeekBar
         android:id="@+id/seekBar_child"
@@ -35,27 +35,32 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
+        android:textSize="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/text_slider"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="SpUsage" />
 
     <TextView
         android:id="@+id/right_slider"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="10dp"
+        android:textSize="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/value_slider"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="SpUsage" />
 
     <TextView
         android:id="@+id/value_slider"
         android:layout_width="35dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="10dp"
-        android:gravity="right"
+        android:gravity="end"
+        android:textSize="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="RtlHardcoded" />
+        tools:ignore="RtlHardcoded,SpUsage" />
 </androidx.constraintlayout.widget.ConstraintLayout>

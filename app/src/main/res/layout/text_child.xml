@@ -3,8 +3,8 @@
     android:id="@+id/child_title"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingStart="32dp"
-    android:padding="16dp"
+    android:paddingStart="22dp"
+    android:padding="10dp"
     android:textColor="@android:color/darker_gray"
-    android:textSize="18sp"
-    tools:ignore="RtlSymmetry" />
+    android:textSize="16dp"
+    tools:ignore="RtlSymmetry,SpUsage" />

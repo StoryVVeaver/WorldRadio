@@ -7,23 +7,27 @@
 
     <TextView
         android:id="@+id/text_switch"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
         android:padding="16dp"
-        android:textSize="18sp"
-        android:paddingStart="32dp"
+        android:paddingStart="22dp"
+        android:textSize="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/textView1_switch"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="RtlSymmetry" />
+        tools:ignore="RtlSymmetry,SpUsage" />
 
     <TextView
         android:id="@+id/textView1_switch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:textSize="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/text_switch"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="SpUsage" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
