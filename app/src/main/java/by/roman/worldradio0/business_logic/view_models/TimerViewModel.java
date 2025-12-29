@@ -57,22 +57,22 @@ public class TimerViewModel extends ViewModel {
     public void resumeTimer(){
         Intent intent = new Intent(context, TimerService.class);
         intent.setAction(TimerService.ACTION_RESUME_TIMER);
-        startForegroundService(context, intent);
+        context.startService(intent);
     }
     public void pauseTimer(){
         Intent intent = new Intent(context, TimerService.class);
         intent.setAction(TimerService.ACTION_PAUSE_TIMER);
-        startForegroundService(context, intent);
+        context.startService(intent);
     }
     public void stopTimer(){
         Intent intent = new Intent(context, TimerService.class);
         intent.setAction(TimerService.ACTION_STOP_TIMER);
-        startForegroundService(context, intent);
+        context.startService(intent);
     }
     public void loadData(){
         Intent intent = new Intent(context, TimerService.class);
         intent.setAction(TimerService.ACTION_GET_TIME);
-        startForegroundService(context, intent);
+        context.startService(intent);
     }
     public MutableLiveData<Long> getDuration() {
         return duration;

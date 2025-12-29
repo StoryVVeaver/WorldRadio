@@ -130,7 +130,6 @@ public class RadioManager {
                 player.stop();
             }
         });
-        // ...
     }
 
     private String getErrorMessage(PlaybackException error) {

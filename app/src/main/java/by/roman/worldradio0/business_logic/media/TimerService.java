@@ -45,6 +45,8 @@ public class TimerService extends Service {
 
     private Handler handler;
     private Runnable stopRunnable;
+    private Runnable tickRunnable;
+    private static final long TICK_INTERVAL = 60_000;
     private long endTimeMillis = 0;
     private long duration = 0;
     private long remaining = 0;
@@ -57,7 +59,6 @@ public class TimerService extends Service {
         super.onCreate();
         handler = new Handler(Looper.getMainLooper());
         createNotificationChannel();
-        Log.d("TS", "created");
     }
 
     @Override
@@ -65,11 +66,9 @@ public class TimerService extends Service {
         String action = intent.getAction();
         if (action == null) return START_NOT_STICKY;
 
-        // Сразу переводим сервис в foreground режим
-        startForeground(NOTIFICATION_ID, createNotification("Таймер активен", "Таймер работает..."));
-
         switch (action) {
             case ACTION_START_TIMER:
+                startForeground(NOTIFICATION_ID, createNotification("Таймер запущен", ""));
                 long duration = intent.getLongExtra(EXTRA_DURATION_MS, 2 * 60 * 1000);
                 startSleepTimer(duration);
                 break;
@@ -81,7 +80,8 @@ public class TimerService extends Service {
                 break;
             case ACTION_STOP_TIMER:
                 stopSleepTimer();
-                stopSelf(); // Останавливаем сервис
+                stopForeground(true);
+                stopSelf();
                 break;
             case ACTION_GET_TIME:
                 long timeLeft = getTimeLeft();
@@ -136,14 +136,12 @@ public class TimerService extends Service {
             Log.d("TimerService", "Timer expired, stopping playback and service.");
             flag = false;
 
-            // Обновляем уведомление перед остановкой
             updateNotification("Таймер завершен", "Воспроизведение остановлено");
 
             Intent stopIntent = new Intent(this, PlayerService.class);
             stopIntent.setAction(ACTION_STOP);
             startService(stopIntent);
 
-            // Останавливаем сервис
             stopSelf();
         };
 
@@ -151,21 +149,21 @@ public class TimerService extends Service {
         flag = true;
         flag2 = false;
 
-        // Обновляем уведомление
-        updateNotification("Таймер запущен", formatTime(durationMs) + " осталось");
+        updateNotification("Таймер запущен", formatRemainingText(durationMs) + " осталось");
         Log.d("TimerService", "Sleep timer started for " + durationMs + " ms");
+        startTicking();
     }
 
     private void stopSleepTimer() {
         if (stopRunnable != null) {
             handler.removeCallbacks(stopRunnable);
+            stopTicking();
             stopRunnable = null;
             remaining = 0;
             endTimeMillis = 0;
             flag = false;
             flag2 = false;
 
-            // Обновляем уведомление
             updateNotification("Таймер остановлен", "Таймер не активен");
             Log.d("TimerService", "Sleep timer stopped");
         }
@@ -176,11 +174,11 @@ public class TimerService extends Service {
         remaining = Math.max(endTimeMillis - now, 0);
         if (stopRunnable != null) {
             handler.removeCallbacks(stopRunnable);
+            stopTicking();
             flag = false;
             flag2 = true;
 
-            // Обновляем уведомление
-            updateNotification("Таймер на паузе", formatTime(remaining) + " осталось");
+            updateNotification("Таймер на паузе", formatRemainingText(remaining) + " осталось");
             Log.d("TimerService", "Sleep timer paused");
         }
     }
@@ -193,11 +191,37 @@ public class TimerService extends Service {
             flag = true;
             flag2 = false;
 
-            // Обновляем уведомление
-            updateNotification("Таймер возобновлен", formatTime(remaining) + " осталось");
+            updateNotification("Таймер возобновлен", formatRemainingText(remaining) + " осталось");
             Log.d("TimerService", "Sleep timer resumed for " + remaining + " ms");
+            startTicking();
         }
     }
+
+    private void startTicking() {
+        stopTicking();
+
+        tickRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (flag && !flag2) {
+                    long left = getTimeLeft();
+                    updateNotification("Таймер", formatRemainingText(left));
+                    handler.postDelayed(this, 60_000);
+                }
+            }
+        };
+
+        handler.post(tickRunnable);
+    }
+
+
+    private void stopTicking() {
+        if (tickRunnable != null) {
+            handler.removeCallbacks(tickRunnable);
+            tickRunnable = null;
+        }
+    }
+
 
     private long getTimeLeft() {
         long now = System.currentTimeMillis();
@@ -208,19 +232,50 @@ public class TimerService extends Service {
         }
     }
 
-    private String formatTime(long millis) {
-        long seconds = millis / 1000;
-        long minutes = seconds / 60;
-        seconds = seconds % 60;
-        return String.format("%02d:%02d", minutes, seconds);
+    private String formatRemainingText(long millis) {
+        long totalMinutes = (long) Math.ceil(millis / 60000.0);
+
+        if (totalMinutes <= 0) {
+            return "Время вышло";
+        }
+
+        long hours = totalMinutes / 60;
+        long minutes = totalMinutes % 60;
+
+        StringBuilder sb = new StringBuilder("Осталось ");
+
+        if (hours > 0) {
+            sb.append(hours).append(" ").append(plural(hours, "час", "часа", "часов"));
+            if (minutes > 0) {
+                sb.append(" ");
+            }
+        }
+
+        if (minutes > 0) {
+            sb.append(minutes).append(" ").append(plural(minutes, "минута", "минуты", "минут"));
+        }
+
+        return sb.toString();
     }
+
+    private String plural(long value, String one, String few, String many) {
+        if (value % 10 == 1 && value % 100 != 11) {
+            return one;
+        }
+        if (value % 10 >= 2 && value % 10 <= 4
+                && (value % 100 < 10 || value % 100 >= 20)) {
+            return few;
+        }
+        return many;
+    }
+
 
     @Override
     public void onDestroy() {
         stopSleepTimer();
-        // Убираем уведомление при уничтожении сервиса
         NotificationManager manager = getSystemService(NotificationManager.class);
         manager.cancel(NOTIFICATION_ID);
+        stopForeground(true);
         super.onDestroy();
         Log.d("TimerService", "Service destroyed");
     }

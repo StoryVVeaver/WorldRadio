@@ -60,6 +60,18 @@ public class PlayerService extends Service {
                 .build();
 
         Log.d("RadioService", "create");
+
+        radioManager.getCurrentTrack().observeForever(track -> {
+            if (track != null) {
+                notificationService.updateTrack(track);
+            }
+        });
+
+        radioManager.getLiveIsPlaying().observeForever(isPlaying -> {
+            if (isPlaying != null) {
+                notificationService.updatePlaybackState(isPlaying);
+            }
+        });
     }
 
     @SuppressLint("ForegroundServiceType")

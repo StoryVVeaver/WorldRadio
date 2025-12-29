@@ -136,20 +136,20 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     public void stop(){
         Intent intent = new Intent(context, PlayerService.class);
         intent.setAction(PlayerService.ACTION_STOP);
-        startForegroundService(context, intent);
+        context.startService(intent);
         radioRepository.setCurrentUUID("");
     }
     @OptIn(markerClass = UnstableApi.class)
     public void play(){
         Intent intent = new Intent(context, PlayerService.class);
         intent.setAction(PlayerService.ACTION_PLAY);
-        startForegroundService(context, intent);
+        context.startService(intent);
     }
     @OptIn(markerClass = UnstableApi.class)
     public void pause(){
         Intent intent = new Intent(context, PlayerService.class);
         intent.setAction(PlayerService.ACTION_PAUSE);
-        startForegroundService(context, intent);
+        context.startService(intent);
     }
     public void playNext(){
         Log.v("PlayerViewModel","start next");
