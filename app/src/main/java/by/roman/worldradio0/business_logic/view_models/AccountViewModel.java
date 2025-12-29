@@ -46,6 +46,7 @@ public class AccountViewModel extends ViewModel {
     private final MutableLiveData<UiState<Boolean>> result = new MutableLiveData<>();
     private final MutableLiveData<UiState<Integer>> stationsLoading = new MutableLiveData<>();
     private String region;
+    private final boolean TEST = true;
 
     @Inject
     public AccountViewModel(UserRepository userRepository, SettingsRepository settingsRepository,
@@ -65,6 +66,9 @@ public class AccountViewModel extends ViewModel {
         return stationsLoading;
     }
     public int isUserHere(){
+        if(TEST && userRepository.isTableEmpty()){
+            useradd();
+        }
         return userRepository.getUserInSystem();
     }
     public boolean hasRecords(){
@@ -128,7 +132,7 @@ public class AccountViewModel extends ViewModel {
     }
     public void useradd(){
         UserDTO dto = new UserDTO();
-        userRepository.useradd(dto.fromModel(new User(1,"user","user",null,1, null)));
+        userRepository.useradd(dto.fromModel(new User(0,"test","test",null,1, null)));
         settingsRepository.addSettings(new SettingsDTO().fromModel(new Settings(dto.getId())));
         filterRepository.addFilters(new FilterDTO().fromModel(new Filter(dto.getId())));
     }

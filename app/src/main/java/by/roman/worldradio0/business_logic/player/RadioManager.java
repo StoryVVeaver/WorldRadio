@@ -36,7 +36,6 @@ import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
-// Используем UnstableApi, как и в оригинале, но стараемся его минимизировать
 @UnstableApi
 public class RadioManager {
     private static final String TAG = "RadioManager";

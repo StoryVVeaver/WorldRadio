@@ -10,8 +10,6 @@ public interface UserRepository {
     boolean entrance(User user);
     int getUserInSystem();
     void setUserInSystem(int id);
-    String getPlayingUUID();
-    void setPlayingUUID(String UUID);
     void useradd(UserDTO dto);
     void removeUser();
     boolean exit();

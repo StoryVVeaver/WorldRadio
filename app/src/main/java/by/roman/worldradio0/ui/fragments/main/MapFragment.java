@@ -78,16 +78,8 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         settings = settingsViewModel.getSettingsModel();
         centerSnap.setSnapEnabled(settings.getSnapEnabled() == 1);
         fav_snap();
-        if (playerViewModel.getCurrentStation() != null) {
-            RadioStation station = playerViewModel.getCurrentStation();
-            Log.v("MapFragment", "station ok, checking " + station.getGeoLat() + " " + station.getGeoLong() + " " + station.getStationUuid());
-            if (station.getGeoLat() != 0 && station.getGeoLong() != 0 && !station.getStationUuid().isEmpty()) {
-                mapController.setCenter(new GeoPoint(station.getGeoLat(), station.getGeoLong()));
-                if (map.getZoomLevel() < 12) {
-                    mapController.setZoom(12.0);
-                }
-            }
-        }
+        centerMap(playerViewModel.getCurrentStation());
+
     }
 
     @Override
@@ -139,31 +131,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
                 mapController.setZoom(12.0);
             }
         });
-        if (savedInstanceState != null
-                && savedInstanceState.containsKey("SAVED_LAT")
-                && savedInstanceState.containsKey("SAVED_LON")) {
-
-            lat = savedInstanceState.getDouble("SAVED_LAT");
-            lon = savedInstanceState.getDouble("SAVED_LON");
-            mapController.setCenter(new GeoPoint(lat, lon));
-            if (map.getZoomLevel() < 12) {
-                mapController.setZoom(12.0);
-            }
-        } else {
-            LocationUtil.requestLocation(requireActivity(), new LocationUtil.LocationCallback() {
-                @Override
-                public void onLocationReceived(double latitude, double longitude, String countryName, String countryCode) {
-                    mapController.setCenter(new GeoPoint(latitude, longitude));
-                    lat = latitude;
-                    lon = longitude;
-                }
-
-                @Override
-                public void onError(String error) {
-                    Log.e("LOCATION_ERROR", error);
-                }
-            });
-        }
+        centerMap(playerViewModel.getCurrentStation());
     }
 
     private void findViewByID(@NonNull View view){
@@ -296,15 +264,72 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
                 previousSnappedUuid = null;
             }
         });
-        playerViewModel.getIsPlayingChanged().observe(getViewLifecycleOwner(), station -> {
-            if(map.getZoomLevel() < 10){
-                map.setZoomLevel(10);
-            }
-            if(station.getGeoLat() != 0 && station.getGeoLong() != 0){
-                mapController.setCenter(new GeoPoint(station.getGeoLat(), station.getGeoLong()));
-            }
-        });
+        playerViewModel.getIsPlayingChanged().observe(getViewLifecycleOwner(), this::centerMap);
     }
+
+    private void centerMap(@Nullable RadioStation station) {
+
+        if (station != null &&
+                isValidLocation(station.getGeoLat(), station.getGeoLong())) {
+
+            Log.v("MapFragment", "Center to station");
+            mapController.setCenter(
+                    new GeoPoint(station.getGeoLat(), station.getGeoLong())
+            );
+            ensureZoom();
+            return;
+        }
+
+        if (isValidLocation(lat, lon)) {
+            Log.v("MapFragment", "Center to user");
+            mapController.setCenter(new GeoPoint(lat, lon));
+            ensureZoom();
+            return;
+        }
+
+        Log.v("MapFragment", "Request user location");
+        requestUserLocation();
+    }
+
+
+    private void requestUserLocation() {
+        LocationUtil.requestLocation(requireActivity(),
+                new LocationUtil.LocationCallback() {
+                    @Override
+                    public void onLocationReceived(
+                            double latitude,
+                            double longitude,
+                            String countryName,
+                            String countryCode) {
+
+                        if (!isValidLocation(latitude, longitude)) {
+                            Log.w("MapFragment", "Ignore 0.0 / 0.0 location");
+                            return;
+                        }
+
+                        lat = latitude;
+                        lon = longitude;
+                        mapController.setCenter(new GeoPoint(latitude, longitude));
+                        ensureZoom();
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        Log.e("LOCATION_ERROR", error);
+                    }
+                });
+    }
+
+    private void ensureZoom() {
+        if (map.getZoomLevel() < 12) {
+            mapController.setZoom(12.0);
+        }
+    }
+
+    private boolean isValidLocation(double lat, double lon) {
+        return lat != 0.0 && lon != 0.0;
+    }
+
 
     private void scheduleCluster() {
         clusterHandler.removeCallbacks(clusterRunnable);

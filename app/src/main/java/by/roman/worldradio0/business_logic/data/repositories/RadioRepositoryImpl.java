@@ -23,11 +23,33 @@ public class RadioRepositoryImpl implements RadioRepository {
     private final UserDao userDao;
     private final FilterDao filterDao;
     private final MutableLiveData<Boolean> showPlayer = new MutableLiveData<>();
+    private String currentUUID = "";
+    private final List<RadioRepositoryImpl.OnPlayingChangedListener> listeners = new ArrayList<>();
     public RadioRepositoryImpl(RadioStationDao radioStationDao, FavoriteStationDao favoriteStationDao, UserDao userDao, FilterDao filterDao) {
         this.radioStationDao = radioStationDao;
         this.favoriteStationDao = favoriteStationDao;
         this.userDao = userDao;
         this.filterDao = filterDao;
+    }
+
+    public interface OnPlayingChangedListener {
+        void onPlayingChanged();
+    }
+
+    @Override
+    public void addListener(RadioRepositoryImpl.OnPlayingChangedListener listener) {
+        if (!listeners.contains(listener)) {
+            listeners.add(listener);
+        }
+    }
+    private void notifyPlayerChanged() {
+        for (RadioRepositoryImpl.OnPlayingChangedListener listener : new ArrayList<>(listeners)) {
+            listener.onPlayingChanged();
+        }
+    }
+    @Override
+    public void removeListener(RadioRepositoryImpl.OnPlayingChangedListener listener) {
+        listeners.remove(listener);
     }
     @Override
     public LiveData<Boolean> getShowPlayer() {
@@ -99,13 +121,18 @@ public class RadioRepositoryImpl implements RadioRepository {
     }
 
     @Override
-    public RadioStation getPlayingStation(){
-        try {
-            return radioStationDao.getStationById(userDao.getColumnPlayingUUID(userDao.getIdUserInSystem()));
-        } catch (Exception e) {
-            Log.e("RadioRepositoryImp","Failed load playing station");
-            return null;
+    public String getCurrentUUID(){
+        return currentUUID;
+    }
+
+    @Override
+    public void setCurrentUUID(String currentUUID){
+        if (currentUUID == null || currentUUID.isEmpty()) {
+            this.currentUUID = "";
+            return;
         }
+        this.currentUUID = currentUUID;
+        notifyPlayerChanged();
     }
     @Override
     public List<String> getContriesCode(){

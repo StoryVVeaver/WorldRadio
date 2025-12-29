@@ -38,12 +38,11 @@ public class PlayerStarter {
 
     @OptIn(markerClass = UnstableApi.class)
     public void start(String uuid) {
-        String streamUrl = radioRepository.getStationById(uuid).getUrl();
-        userRepository.setPlayingUUID(uuid);
 
+        radioRepository.setCurrentUUID(uuid);
         Intent intent = new Intent(context, PlayerService.class);
         intent.setAction(PlayerService.ACTION_START);
-        intent.putExtra(PlayerService.EXTRA_STREAM_URL, streamUrl);
+        intent.putExtra(PlayerService.EXTRA_STREAM_UUID, uuid);
 
         historyRepository.addToHistory(
                 new History(userRepository.getUserInSystem(), uuid)

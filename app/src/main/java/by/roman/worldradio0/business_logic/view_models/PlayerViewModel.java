@@ -9,9 +9,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.OptIn;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.media3.common.util.UnstableApi;
@@ -20,13 +18,12 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
-import by.roman.worldradio0.business_logic.UiState;
-import by.roman.worldradio0.business_logic.data.dto.HistoryDTO;
 import by.roman.worldradio0.business_logic.data.models.History;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.data.models.Settings;
 import by.roman.worldradio0.business_logic.data.repositories.FavoriteStationRepositoryImpl;
 import by.roman.worldradio0.business_logic.data.repositories.FavoriteTrackRepositoryImpl;
+import by.roman.worldradio0.business_logic.data.repositories.RadioRepositoryImpl;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteStationRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteTrackRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.HistoryRepository;
@@ -40,7 +37,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 
 @HiltViewModel
-public class PlayerViewModel extends ViewModel implements FavoriteStationRepositoryImpl.OnFavoriteStationsChangedListener, FavoriteTrackRepositoryImpl.OnFavoriteTracksChangedListener {
+public class PlayerViewModel extends ViewModel implements FavoriteStationRepositoryImpl.OnFavoriteStationsChangedListener, FavoriteTrackRepositoryImpl.OnFavoriteTracksChangedListener, RadioRepositoryImpl.OnPlayingChangedListener {
 
     @SuppressLint("StaticFieldLeak")
     private final Context context;
@@ -86,6 +83,7 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
         });
         favoriteStationRepository.addListener(this);
         favoriteTrackRepository.addListener(this);
+        radioRepository.addListener(this);
         isFavorite.postValue(isFavorite());
         settings = settingsRepository.getSettings();
         if(currentTrack.getValue() != null){
@@ -123,21 +121,23 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     }
     @OptIn(markerClass = UnstableApi.class)
     public void start(String uuid){
-        setPlaying(uuid);
-        String streamUrl = radioRepository.getStationById(uuid).getUrl();
-        Log.d("PlayerViewModel","push " + streamUrl);
-        Intent intent = new Intent(context, PlayerService.class);
-        intent.setAction(PlayerService.ACTION_START);
-        intent.putExtra(PlayerService.EXTRA_STREAM_URL, streamUrl);
-        historyRepository.addToHistory(new History(userRepository.getUserInSystem(), uuid));
-        startForegroundService(context, intent);
-        isPlayingChanged.postValue(getCurrentStation());
+        if(radioRepository.getCurrentUUID().isEmpty() || !radioRepository.getCurrentUUID().equals(uuid)){
+            radioRepository.setCurrentUUID(uuid);
+            Log.d("PlayerViewModel","push " + radioRepository.getCurrentUUID());
+            Intent intent = new Intent(context, PlayerService.class);
+            intent.setAction(PlayerService.ACTION_START);
+            intent.putExtra(PlayerService.EXTRA_STREAM_UUID, radioRepository.getCurrentUUID());
+            historyRepository.addToHistory(new History(userRepository.getUserInSystem(), radioRepository.getCurrentUUID()));
+            startForegroundService(context, intent);
+            currentTrack.postValue("");
+        }
     }
     @OptIn(markerClass = UnstableApi.class)
     public void stop(){
         Intent intent = new Intent(context, PlayerService.class);
         intent.setAction(PlayerService.ACTION_STOP);
         startForegroundService(context, intent);
+        radioRepository.setCurrentUUID("");
     }
     @OptIn(markerClass = UnstableApi.class)
     public void play(){
@@ -160,7 +160,7 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     }
     public void addToFavorite(){
         try {
-            favoriteStationRepository.addToFavorite(-1, userRepository.getPlayingUUID());
+            favoriteStationRepository.addToFavorite(-1, radioRepository.getCurrentUUID());
         } catch (Exception e) {
             Log.e("PlayerVM", "Failed add to favorite");
         }
@@ -179,7 +179,7 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     }
     public void removeFromFavorite(){
         try {
-            favoriteStationRepository.removeFromFavorite(userRepository.getPlayingUUID());
+            favoriteStationRepository.removeFromFavorite(radioRepository.getCurrentUUID());
         } catch (Exception e) {
             Log.e("PlayerVM", "Failed remove from favorite: " + e.getMessage());
         }
@@ -201,19 +201,13 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     }
     public boolean isFavorite(){
         try {
-            return favoriteStationRepository.isStationFavorite(userRepository.getPlayingUUID());
+            return favoriteStationRepository.isStationFavorite(radioRepository.getCurrentUUID());
         } catch (Exception e) {
             Log.e("PlayerViewModel", "Failed check is favorite");
             return false;
         }
     }
-    public void setPlaying(String UUID){
-        try {
-            userRepository.setPlayingUUID(UUID);
-        } catch (Exception e){
-            Log.e("DB", "Ошибка при установке: " + UUID, e);
-        }
-    }
+
     public void requestSnapNearest() {
         snapNearest.postValue(true);
     }
@@ -221,7 +215,8 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
         snapPrevious.postValue(true);
     }
     public RadioStation getCurrentStation(){
-        return radioRepository.getPlayingStation();
+        return radioRepository.getStationById(radioRepository.getCurrentUUID());
+
     }
     public RadioStation getStationById(String uuid){
         return radioRepository.getStationById(uuid);
@@ -264,5 +259,12 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     public void onCleared(){
         super.onCleared();
         favoriteStationRepository.removeListener(this);
+        favoriteTrackRepository.removeListener(this);
+        radioRepository.removeListener(this);
+    }
+
+    @Override
+    public void onPlayingChanged() {
+        isPlayingChanged.postValue(getCurrentStation());
     }
 }

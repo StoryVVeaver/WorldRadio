@@ -29,13 +29,13 @@ public class PlayerService extends Service {
     public static final String ACTION_PLAY = "by.roman.worldradio0.ACTION_PLAY";
     public static final String ACTION_STOP = "by.roman.worldradio0.ACTION_STOP";
     public static final String ACTION_PAUSE = "by.roman.worldradio0.ACTION_PAUSE";
-    public static final String EXTRA_STREAM_URL = "stream_url";
+    public static final String EXTRA_STREAM_UUID = "stream_uuid";
 
     private static final int NOTIFICATION_ID = 1;
     private boolean isManuallyStopped = false;
 
     private String currentTrack;
-    private String currentStreamUrl;
+    private String currentStreamUUID;
     private boolean isPlayingBefore = false;
     private MediaSession mediaSession;
 
@@ -80,38 +80,39 @@ public class PlayerService extends Service {
                 break;
 
             case ACTION_START:
-                String newStreamUrl = intent.getStringExtra(EXTRA_STREAM_URL);
-                Log.d("RadioService", "Stream URL: " + newStreamUrl);
+                String newStreamUUID = intent.getStringExtra(EXTRA_STREAM_UUID);
+                Log.d("RadioService", "Stream UUID: " + newStreamUUID);
 
-                if (newStreamUrl != null) {
-                    currentStreamUrl = newStreamUrl;
+                if (newStreamUUID != null) {
+                    currentStreamUUID = newStreamUUID;
                     isManuallyStopped = false;
 
                     runOnMainThread(() -> {
                         try {
-                            RadioStation station = radioRepository.getStationByUrl(currentStreamUrl);
-                            if (station == null) {
+                            RadioStation station = radioRepository.getStationById(currentStreamUUID);
+                            if (station != null) {
+                                radioManager.play(station.getUrl());
+                                currentTrack = null;
+
+                                stopForeground(true);
+                                startForeground(NOTIFICATION_ID,
+                                        notificationService.startNotification(
+                                                currentTrack,
+                                                true,
+                                                radioRepository.getStationById(currentStreamUUID),
+                                                mediaSession));
+
+                                if (!isPlayingBefore) {
+                                    radioRepository.setStatePlayer(true);
+                                }
+                                isPlayingBefore = true;
+                            } else {
                                 Log.e("RadioService", "No station found for current stream URL");
+                                currentStreamUUID = null;
                             }
-
-                            radioManager.play(currentStreamUrl);
-                            currentTrack = null;
-
-                            stopForeground(true);
-                            startForeground(NOTIFICATION_ID,
-                                    notificationService.startNotification(
-                                            currentTrack,
-                                            true,
-                                            radioRepository.getPlayingStation(),
-                                            mediaSession));
-
-                            if (!isPlayingBefore) {
-                                radioRepository.setStatePlayer(true);
-                            }
-                            isPlayingBefore = true;
 
                         } catch (Exception e) {
-                            Log.e("RadioService", "Error during playback: " + e.getMessage(), e);
+                            Log.e("RadioService", "Error during playback: " + e.getMessage());
                             handleStop();
                         }
                     });
@@ -141,7 +142,6 @@ public class PlayerService extends Service {
             radioManager.stop();
             isManuallyStopped = true;
             isPlayingBefore = false;
-            userRepository.setPlayingUUID(null);
             stopForeground(true);
             radioRepository.setStatePlayer(false);
         });

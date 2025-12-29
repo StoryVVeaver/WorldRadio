@@ -63,23 +63,6 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
     @Override
-    public String getPlayingUUID(){
-        try {
-            return userDao.getColumnPlayingUUID(getUserInSystem());
-        } catch (Exception e) {
-            Log.e("UserRepositoryImp","Failed get playing UUID");
-            return null;
-        }
-    }
-    @Override
-    public void setPlayingUUID(String UUID){
-        try {
-            userDao.setColumnPlayingUUID(getUserInSystem(),UUID);
-        } catch (Exception e){
-            Log.e("UserRepositoryImp","Failed set playing UUID");
-        }
-    }
-    @Override
     public void useradd(UserDTO dto){
         try {
             userDao.addUser(dto);

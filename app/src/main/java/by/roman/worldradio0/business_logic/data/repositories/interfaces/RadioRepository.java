@@ -6,6 +6,8 @@ import java.util.List;
 
 import by.roman.worldradio0.business_logic.data.dto.RadioStationDTO;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
+import by.roman.worldradio0.business_logic.data.repositories.FavoriteStationRepositoryImpl;
+import by.roman.worldradio0.business_logic.data.repositories.RadioRepositoryImpl;
 
 public interface RadioRepository {
     LiveData<Boolean> getShowPlayer();
@@ -15,7 +17,10 @@ public interface RadioRepository {
     List<RadioStation> getAllStations(int currentPage, int pageSize);
     RadioStation getStationById(String uuid);
     RadioStation getStationByUrl(String url);
-    RadioStation getPlayingStation();
+    void addListener(RadioRepositoryImpl.OnPlayingChangedListener listener);
+    void removeListener(RadioRepositoryImpl.OnPlayingChangedListener listener);
+    String getCurrentUUID();
+    void setCurrentUUID(String uuid);
     List<String> getContriesCode();
     List<String> getLanguage();
     List<String> getTags();
