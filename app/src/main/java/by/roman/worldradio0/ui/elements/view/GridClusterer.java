@@ -43,8 +43,6 @@ public class GridClusterer {
     private final Map<String, Marker> markerByUuid = new HashMap<>();
     private final Map<String, Drawable> originalIconByUuid = new HashMap<>();
 
-    private String pendingHighlightUuid = null;
-    private Drawable pendingHighlightDrawable = null;
 
     private List<MapPoint> items = new ArrayList<>();
 
@@ -226,69 +224,12 @@ public class GridClusterer {
                     }
 
 
-                    if (pendingHighlightUuid != null && pendingHighlightDrawable != null) {
-                        Marker pending = markerByUuid.get(pendingHighlightUuid);
-                        if (pending != null) {
-                            if (!originalIconByUuid.containsKey(pendingHighlightUuid)) {
-                                originalIconByUuid.put(pendingHighlightUuid, pending.getIcon());
-                            }
-                            pending.setIcon(pendingHighlightDrawable);
-                        }
-                    }
-
                     map.invalidate();
                 });
 
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        });
-    }
-
-    public void highlightMarkerByUuid(final String uuid, final Drawable highlightDrawable) {
-        if (uuid == null) return;
-        pendingHighlightUuid = uuid;
-        pendingHighlightDrawable = highlightDrawable;
-
-        mainHandler.post(() -> {
-            Marker m = markerByUuid.get(uuid);
-            if (m != null) {
-                if (!originalIconByUuid.containsKey(uuid)) {
-                    originalIconByUuid.put(uuid, m.getIcon());
-                }
-                if (highlightDrawable != null) m.setIcon(highlightDrawable);
-                map.invalidate();
-            }
-        });
-    }
-
-    public void clearHighlightByUuid(final String uuid) {
-        if (uuid == null) return;
-        mainHandler.post(() -> {
-            if (uuid.equals(pendingHighlightUuid)) {
-                pendingHighlightUuid = null;
-                pendingHighlightDrawable = null;
-            }
-            Marker m = markerByUuid.get(uuid);
-            if (m != null) {
-                Drawable orig = originalIconByUuid.get(uuid);
-                m.setIcon(orig);
-                map.invalidate();
-            }
-        });
-    }
-
-    public void clearAllHighlights() {
-        mainHandler.post(() -> {
-            for (Map.Entry<String, Marker> e : markerByUuid.entrySet()) {
-                String uuid = e.getKey();
-                Marker m = e.getValue();
-                Drawable orig = originalIconByUuid.get(uuid);
-                if (m != null) m.setIcon(orig);
-            }
-            pendingHighlightUuid = null;
-            pendingHighlightDrawable = null;
-            map.invalidate();
         });
     }
 
@@ -345,7 +286,7 @@ public class GridClusterer {
 
     private Drawable getSinglePointDrawable() {
         try {
-            return AppCompatResources.getDrawable(context, R.drawable.map_point);
+            return AppCompatResources.getDrawable(context, R.drawable.point);
         } catch (Exception e) {
             return null;
         }
@@ -372,8 +313,6 @@ public class GridClusterer {
 
     public void shutdown() {
         try {
-            pendingHighlightUuid = null;
-            pendingHighlightDrawable = null;
             mainHandler.removeCallbacksAndMessages(null);
             if (executor != null) {
                 executor.shutdownNow();

@@ -76,7 +76,7 @@ public class MapDao {
                     null,
                     null,
                     null,
-                    "1" // Ограничение на 1 запись
+                    "1"
             );
 
             if (cursor != null && cursor.moveToFirst()) {

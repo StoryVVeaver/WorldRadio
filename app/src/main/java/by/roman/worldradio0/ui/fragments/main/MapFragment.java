@@ -20,6 +20,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import org.osmdroid.api.IMapController;
@@ -62,13 +63,11 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
     private final Handler clusterHandler = new Handler(Looper.getMainLooper());
     private final Runnable clusterRunnable = () -> clusterer.clusterAsync();
     private final Runnable updateVisibleRunnable = this::updateCenterSnapVisiblePointsImmediate;
-    private Drawable centerDrawable;
-    private Drawable centerSnappedDrawable;
-    private Drawable highlightMarkerDrawable;
     private String previousSnappedUuid = null;
     private List<MapPoint> allPoints;
     private IMapController mapController;
     private ImageButton snapOn, GPS;
+    private ImageView point;
     private Settings settings;
     private double lat, lon;
 
@@ -105,10 +104,6 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         super.onViewCreated(view, savedInstanceState);
         findViewByID(view);
 
-        centerDrawable = AppCompatResources.getDrawable(requireContext(), R.drawable.delete);
-        centerSnappedDrawable = AppCompatResources.getDrawable(requireContext(), R.drawable.fi_rs_filter);
-        highlightMarkerDrawable = AppCompatResources.getDrawable(requireContext(), R.drawable.history);
-
         viewModel = new ViewModelProvider(requireActivity()).get(MapViewModel.class);
         playerViewModel = new ViewModelProvider(requireActivity()).get(PlayerViewModel.class);
         historyViewModel = new ViewModelProvider(requireActivity()).get(HistoryViewModel.class);
@@ -138,6 +133,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         GPS = view.findViewById(R.id.GPSButtonView);
         map = view.findViewById(R.id.map);
         snapOn = view.findViewById(R.id.snapButtonView);
+        point = view.findViewById(R.id.center_point);
     }
     private void fav_snap(){
         if (centerSnap.isSnapEnabled()){
@@ -184,32 +180,25 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
             }
         });
 
-        centerSnap = new CenterSnapOverlay(map, 256, centerDrawable, centerSnappedDrawable, snapped -> {
-            if (snapped != null) {
-
-                if (playerViewModel.isInternetConnected()) {
-                    if ("ok".equals(playerViewModel.checkTypeInternet())) {
-                        playerViewModel.start(snapped.getUuid());
-                    } else {
-                        Toast.makeText(getContext(), getResources().getString(R.string.not_correct_internet), Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Toast.makeText(getContext(), getResources().getString(R.string.no_internet), Toast.LENGTH_SHORT).show();
-                }
-                clusterer.highlightMarkerByUuid(snapped.getUuid(), highlightMarkerDrawable);
-
-                if (currentSnappedUuid != null && !currentSnappedUuid.equals(snapped.getUuid())) {
-                    clusterer.clearHighlightByUuid(currentSnappedUuid);
-                }
-                currentSnappedUuid = snapped.getUuid();
-            } else {
-                if (currentSnappedUuid != null) {
-                    previousSnappedUuid = currentSnappedUuid;
-                    clusterer.clearHighlightByUuid(currentSnappedUuid);
-                    currentSnappedUuid = null;
-                }
+        centerSnap = new CenterSnapOverlay(map, 256, point, snapped -> {
+            if (snapped == null) {
+                playerViewModel.stop();
+                currentSnappedUuid = null;
+                return;
             }
-        });
+
+            String newUuid = snapped.getUuid();
+            RadioStation current = playerViewModel.getCurrentStation();
+
+            if (current != null && newUuid.equals(current.getStationUuid())) {
+                return;
+            }
+
+            if (playerViewModel.isInternetConnected()
+                    && "ok".equals(playerViewModel.checkTypeInternet())) {
+                playerViewModel.start(newUuid);
+            }
+    });
 
         centerSnap.setRequireFirstTouch(true);
         centerSnap.setSnapEnabled(true);
@@ -258,7 +247,6 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         });
         playerViewModel.getIsPlaying().observe(getViewLifecycleOwner(), status -> {
             if(status == false){
-                clusterer.clearAllHighlights();
                 centerSnap.clearSnapped();
                 currentSnappedUuid = null;
                 previousSnappedUuid = null;
@@ -370,9 +358,10 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
     }
     private void snapToNearest() {
         if (allPoints == null || allPoints.isEmpty() || map == null) return;
-
+        Log.v("map", "start");
         BoundingBox bbox = map.getBoundingBox();
         List<MapPoint> visible = new ArrayList<>(128);
+
         for (MapPoint p : allPoints) {
             double lat = p.getLatitude();
             double lon = p.getLongitude();
@@ -382,61 +371,53 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
             }
         }
 
-        if (visible.isEmpty()) {
-            //Toast.makeText(requireContext(), "Рядом нет радиостанций", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        if (visible.isEmpty()) return;
+        Log.v("map", "something");
+        String previousUuid = historyViewModel.getLastHistory().getUuid();
+        String currentUuid = playerViewModel.getCurrentStation().getStationUuid();
 
         final int cx = map.getWidth() / 2;
         final int cy = map.getHeight() / 2;
 
         MapPoint nearest = null;
         double bestDist2 = Double.MAX_VALUE;
-        android.graphics.Point tmp = new android.graphics.Point();
+        Point tmp = new Point();
 
         for (MapPoint p : visible) {
-            String uuid = p.getUuid();
-            if (uuid == null) continue;
-            if(uuid.equals(playerViewModel.getCurrentStation().getStationUuid())){
-                Log.v("MapFragment", "Skip " + uuid + ", " +playerViewModel.getCurrentStation().getName());
-                continue;
-            }
-            if(uuid.equals(historyViewModel.getLastHistory().getUuid())){
-                Log.v("MapFragment", "Skip " + uuid + ", history");
-                continue;
-            }
-            Log.v("MapFragment", uuid + " != " + historyViewModel.getLastHistory().getUuid());
-            org.osmdroid.util.GeoPoint gp = new org.osmdroid.util.GeoPoint(p.getLatitude(), p.getLongitude());
+            Log.v("map", " " + p.getUuid());
+            Log.v("map", " " + previousUuid);
+            Log.v("map", " " + currentUuid);
+            if (p.getUuid() == null) continue;
+            if (previousUuid != null && previousUuid.equals(p.getUuid())) continue;
+            if (currentUuid != null && currentUuid.equals(p.getUuid())) continue;
+            Log.v("map", "ok");
+            GeoPoint gp = new GeoPoint(p.getLatitude(), p.getLongitude());
             map.getProjection().toPixels(gp, tmp);
+
             double dx = tmp.x - cx;
             double dy = tmp.y - cy;
             double d2 = dx * dx + dy * dy;
+
             if (d2 < bestDist2) {
                 bestDist2 = d2;
                 nearest = p;
             }
         }
-
-        if (nearest == null) {
-            Toast.makeText(requireContext(), getResources().getString(R.string.no_stations), Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        final MapPoint target = nearest;
-        String snappedUuid = (centerSnap.getSnappedPoint() != null) ? centerSnap.getSnappedPoint().getUuid() : "null";
-        Log.v("MapFragment", "from " + snappedUuid + " to " + nearest.getUuid());
-        centerSnap.snapTo(target, true, true);
-    }
-    private void snapToPrevious(){
-        if(historyViewModel.getLastHistory().getUuid() != null){
-            MapPoint point = viewModel.getMapPointByUUID(historyViewModel.getLastHistory().getUuid());
-            currentSnappedUuid = previousSnappedUuid;
-            previousSnappedUuid = null;
-            centerSnap.snapTo(point, true, true);
-        } else {
-            Toast.makeText(requireActivity(), getResources().getString(R.string.no_last), Toast.LENGTH_SHORT).show();
+        Log.v("map", "near " + nearest.getUuid());
+        Log.v("map", "curr " + currentUuid);
+        if (nearest != null) {
+            centerSnap.snapTo(nearest, true, true);
         }
     }
+
+    private void snapToPrevious() {
+
+        MapPoint previous = viewModel.getMapPointByUUID(historyViewModel.getLastHistory().getUuid());
+        if (previous == null) return;
+
+        centerSnap.snapTo(previous, true, true);
+    }
+
     @Override
     public boolean singleTapConfirmedHelper(GeoPoint p) { return false; }
     @Override

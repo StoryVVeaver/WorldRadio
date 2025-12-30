@@ -46,7 +46,7 @@ public class AccountViewModel extends ViewModel {
     private final MutableLiveData<UiState<Boolean>> result = new MutableLiveData<>();
     private final MutableLiveData<UiState<Integer>> stationsLoading = new MutableLiveData<>();
     private String region;
-    private final boolean TEST = true;
+    private final boolean TEST = false;
 
     @Inject
     public AccountViewModel(UserRepository userRepository, SettingsRepository settingsRepository,
