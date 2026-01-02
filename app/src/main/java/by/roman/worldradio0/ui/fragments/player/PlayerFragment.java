@@ -50,6 +50,7 @@ public class PlayerFragment extends Fragment {
     private MotionLayout motionLayout;
     private ImageView save_btn;
     private ImageView large_save_btn;
+    private ImageView voteButton;
     private ImageView play_pause;
     private ImageView large_saveTrack;
     private ImageView large_play_pause;
@@ -102,6 +103,7 @@ public class PlayerFragment extends Fragment {
     }
 
     private void findAll(@NonNull View view){
+        voteButton = view.findViewById(R.id.large_vote);
         timerButton = view.findViewById(R.id.timerButtonView);
         filterButton = view.findViewById(R.id.filterButtonView);
         large_saveTrack = view.findViewById(R.id.large_save_unsave_Track);
@@ -356,6 +358,22 @@ public class PlayerFragment extends Fragment {
                         }
                     });
         });
+        viewModel.getVote().observe(getViewLifecycleOwner(), state -> {
+            switch (state.status){
+                case LOADING:
+                    break;
+                case SUCCESS:
+                    if(state.data.isOk()){
+                        Toast.makeText(requireActivity(), getResources().getString(R.string.vote_correct) , Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(requireActivity(), getResources().getString(R.string.vote_err) , Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                case ERROR:
+                    Toast.makeText(requireActivity(), state.message , Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        });
         if(!viewModel.getCurrentStation().getHomepage().isEmpty()){
             large_internet.setVisibility(VISIBLE);
         } else large_internet.setVisibility(INVISIBLE);
@@ -365,12 +383,9 @@ public class PlayerFragment extends Fragment {
 
     private void buttons(){
         icons();
-        timerButton.setOnClickListener(v -> {
-            stateViewModel.openFullscreen(new TimerFragment());
-        });
-        filterButton.setOnClickListener(v -> {
-            stateViewModel.openFullscreen(new FilterFragment());
-        });
+        voteButton.setOnClickListener(v -> viewModel.voteStation());
+        timerButton.setOnClickListener(v -> stateViewModel.openFullscreen(new TimerFragment()));
+        filterButton.setOnClickListener(v -> stateViewModel.openFullscreen(new FilterFragment()));
         large_internet.setOnClickListener(v -> {
             openUrlInBrowser(viewModel.getCurrentStation().getHomepage());
             large_internet.setEnabled(false);

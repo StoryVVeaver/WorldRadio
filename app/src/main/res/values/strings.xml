@@ -74,4 +74,6 @@
     <string name="audio">Audio</string>
     <string name="agc" translatable="false">AGC</string>
     <string name="crossfade" translatable="false">Crossfade</string>
+    <string name="vote_correct">Successfully voted for the station</string>
+    <string name="vote_err">You are voting for the same station too often</string>
 </resources>

@@ -11,6 +11,7 @@ import by.roman.worldradio0.business_logic.data.models.Settings;
 import by.roman.worldradio0.business_logic.data.models.User;
 import by.roman.worldradio0.business_logic.data.models.UserRequest;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FavoriteStationsCallback;
+import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FilterCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.PutCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.RequestCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.SettingsCallback;
@@ -39,6 +40,19 @@ public class DataFromUserAPI {
             public void onSuccess(List<FavoriteStationDTO> favoriteStations) {
                 callback.onSuccess(favoriteStations);
             }
+            @Override
+            public void onFailure(Throwable t) {
+                callback.onFailure(t);
+            }
+        });
+    }
+    public void getStationsFilter(FilterCallback callback){
+        userAPI.fetchFilters(new FilterCallback() {
+            @Override
+            public void onSuccess(List<String> t) {
+                callback.onSuccess(t);
+            }
+
             @Override
             public void onFailure(Throwable t) {
                 callback.onFailure(t);

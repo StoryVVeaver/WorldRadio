@@ -111,6 +111,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
 
         initializeMap();
 
+        map.setEnabled(!centerSnap.isAnimating);
 
         viewModel.loadPoints();
         observeData();
@@ -198,7 +199,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
                     && "ok".equals(playerViewModel.checkTypeInternet())) {
                 playerViewModel.start(newUuid);
             }
-    });
+        });
 
         centerSnap.setRequireFirstTouch(true);
         centerSnap.setSnapEnabled(true);
@@ -217,6 +218,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 centerSnap.notifyUserInteraction();
             }
+
             return false;
         });
 

@@ -1,19 +1,19 @@
 package by.roman.worldradio0.business_logic.view_models;
 
-import android.content.Context;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
-import by.roman.worldradio0.business_logic.LocationUtil;
 import by.roman.worldradio0.business_logic.UiState;
 import by.roman.worldradio0.business_logic.data.dto.FilterDTO;
 import by.roman.worldradio0.business_logic.data.dto.RadioStationDTO;
@@ -28,10 +28,10 @@ import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRep
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.SettingsRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.UserRepository;
 import by.roman.worldradio0.business_logic.network.radio.DataFromRadio;
-import by.roman.worldradio0.business_logic.network.radio.StationsCallback;
+import by.roman.worldradio0.business_logic.network.radio.callbacks.StationsCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.DataFromUserAPI;
+import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FilterCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.RequestCallback;
-import by.roman.worldradio0.business_logic.network.userAPI.callbacks.SettingsCallback;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
@@ -68,6 +68,9 @@ public class AccountViewModel extends ViewModel {
     public int isUserHere(){
         if(TEST && userRepository.isTableEmpty()){
             useradd();
+        }
+        if(TEST){
+            userRepository.setUserInSystem(0);
         }
         return userRepository.getUserInSystem();
     }
@@ -139,30 +142,52 @@ public class AccountViewModel extends ViewModel {
     public void loadStations(){
         if(!hasRecords()){
             stationsLoading.postValue(UiState.loading(0));
-            dataFromRadio.getStations(new StationsCallback() {
+            executor.execute(() -> dataFromUserAPI.getStationsFilter(new FilterCallback() {
                 @Override
-                public void onLoading() {
-                }
-                @Override
-                public void onSuccess(List<RadioStationDTO> stations) {
-                    long i = 0;
-                    for (RadioStationDTO dto : stations) {
-                        try {
-                            radioRepository.addRadioStation(dto);
-                            i++;
-                            stationsLoading.postValue(UiState.loading((int) (i * 100) / stations.size()));
-                        } catch (Exception e) {
-                            Log.e("DB", "Ошибка при добавлении: " + dto.getName(), e);
-                            stationsLoading.postValue(UiState.error("Уведомите разработчика о ошибке загрузки"));
+                public void onSuccess(List<String> filters) {
+                    Set<String> filter = new HashSet<>(filters);
+                    radioRepository.clearTable();
+                    executor.execute(() -> dataFromRadio.getStations(new StationsCallback() {
+                        @Override
+                        public void onSuccess(List<RadioStationDTO> stations) {
+                            long currentProgress = 0;
+                            int totalStations = stations.size();
+
+                            for (RadioStationDTO dto : stations) {
+                                try {
+                                    if (!filter.contains(dto.getCountryCode())) {
+                                        radioRepository.addRadioStation(dto);
+                                    }
+
+                                    currentProgress++;
+                                    stationsLoading.postValue(UiState.loading((int)((currentProgress * 100) / totalStations)));
+
+                                } catch (Exception e) {
+                                    Log.e("DB", "Ошибка при добавлении: " + dto.getName(), e);
+                                }
+                            }
+
+                            stationsLoading.postValue(UiState.success(100));
                         }
-                        stationsLoading.postValue(UiState.success(100));
-                    }
+
+                        @Override
+                        public void onFailure(Throwable t) {
+                            Log.e("API", "Ошибка загрузки данных станций", t);
+                            stationsLoading.postValue(UiState.error(t.getMessage()));
+                        }
+
+                        @Override
+                        public void onLoading() {
+                        }
+                    }));
                 }
+
                 @Override
                 public void onFailure(Throwable t) {
-                    stationsLoading.postValue(UiState.error("Retry load later"));
+                    Log.e("API", "Ошибка получения фильтров", t);
+                    stationsLoading.postValue(UiState.error("Не удалось получить фильтры: " + t.getMessage()));
                 }
-            });
+            }));
         } else stationsLoading.postValue(UiState.success(100));
     }
 }

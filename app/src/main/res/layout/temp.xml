@@ -1,312 +1,231 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/motionLayout"
+    android:id="@+id/large_player"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:layoutDescription="@xml/motion_scene"
-    tools:context=".ui.fragments.player.PlayerFragment">
+    android:background="@color/background"
+    android:visibility="visible"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.0"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintVertical_bias="1.0">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guide_bottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.5" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guide_start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.1" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guide_end"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.9" />
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/bottomPlayer"
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        tools:layout_editor_absoluteY="661dp"
-        android:background="@color/bottom_player">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <ImageView
-                android:id="@+id/bottom_player_logo"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginStart="10dp"
-                android:importantForAccessibility="no"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/bottom_player_station"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="15dp"
-                android:layout_marginEnd="10dp"
-                android:ellipsize="marquee"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:marqueeRepeatLimit="marquee_forever"
-                android:scrollHorizontally="true"
-                android:singleLine="true"
-                android:textSize="16sp"
-                app:layout_constraintEnd_toStartOf="@+id/bottom_player_play_pause"
-                app:layout_constraintStart_toEndOf="@+id/bottom_player_logo"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/bottom_player_track"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="4dp"
-                android:layout_marginEnd="10dp"
-                android:ellipsize="marquee"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:marqueeRepeatLimit="marquee_forever"
-                android:scrollHorizontally="true"
-                android:singleLine="true"
-                android:textSize="14sp"
-                app:layout_constraintEnd_toStartOf="@+id/bottom_player_play_pause"
-                app:layout_constraintStart_toEndOf="@+id/bottom_player_logo"
-                app:layout_constraintTop_toBottomOf="@+id/bottom_player_station" />
-
-            <ImageView
-                android:id="@+id/bottom_player_play_pause"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="60dp"
-                android:padding="10dp"
-                android:src="@drawable/pause"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="ContentDescription" />
-
-            <ImageView
-                android:id="@+id/bottom_player_save"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="10dp"
-                android:src="@drawable/unsaved"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/bottom_player_play_pause"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="ContentDescription" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/large_player"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="visible"
+        android:id="@+id/cardView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="15dp"
         android:background="@color/background"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:cardCornerRadius="15dp"
+        app:cardElevation="0dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0">
+        app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guide_bottom"
+        <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.5" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guide_start"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.1" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guide_end"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.9" />
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:layout_marginEnd="15dp"
-            android:background="@color/background"
-            app:cardCornerRadius="15dp"
-            app:cardElevation="0dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <FrameLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@color/background">
-
-                <ImageButton
-                    android:id="@+id/timerButtonView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:padding="10dp"
-                    android:src="@drawable/timer_home"
-                    app:tint="@color/white"
-                    tools:ignore="ContentDescription" />
-            </FrameLayout>
-        </androidx.cardview.widget.CardView>
-
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:layout_marginEnd="10dp"
-            app:cardCornerRadius="15dp"
-            app:cardElevation="0dp"
-            app:layout_constraintEnd_toStartOf="@+id/cardView"
-            app:layout_constraintTop_toTopOf="parent"
             android:background="@color/background">
 
-            <FrameLayout
+            <ImageButton
+                android:id="@+id/timerButtonView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@color/background"
-                android:clipToOutline="true"
-                tools:ignore="UnusedAttribute">
+                android:layout_gravity="center"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="10dp"
+                android:src="@drawable/timer_home"
+                app:tint="@color/white"
+                tools:ignore="ContentDescription" />
+        </FrameLayout>
+    </androidx.cardview.widget.CardView>
 
-                <ImageButton
-                    android:id="@+id/filterButtonView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="10dp"
-                    app:tint="@color/white"
-                    android:src="@drawable/fi_rs_filter"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:layout_gravity="center"
-                    tools:ignore="ContentDescription" />
-            </FrameLayout>
-        </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="10dp"
+        android:background="@color/background"
+        app:cardCornerRadius="15dp"
+        app:cardElevation="0dp"
+        app:layout_constraintEnd_toStartOf="@+id/cardView"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/background"
+            android:clipToOutline="true"
+            tools:ignore="UnusedAttribute">
+
+            <ImageButton
+                android:id="@+id/filterButtonView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="10dp"
+                android:src="@drawable/fi_rs_filter"
+                app:tint="@color/white"
+                tools:ignore="ContentDescription" />
+        </FrameLayout>
+    </androidx.cardview.widget.CardView>
+
+    <LinearLayout
+        android:id="@+id/info_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/guide_end"
+        app:layout_constraintStart_toStartOf="@+id/guide_start"
+        app:layout_constraintTop_toBottomOf="@+id/large_station_logo"
+        app:layout_constraintVertical_bias="0.2">
 
         <LinearLayout
-            android:id="@+id/info_container"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/guide_end"
-            app:layout_constraintStart_toStartOf="@+id/guide_start"
-            app:layout_constraintTop_toBottomOf="@+id/large_station_logo"
-            app:layout_constraintVertical_bias="0.2">
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/large_station_name"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1"
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:scrollHorizontally="true"
+                android:singleLine="true"
+                android:textSize="22dp" />
 
-                <TextView
-                    android:id="@+id/large_station_name"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:ellipsize="marquee"
-                    android:focusable="true"
-                    android:layout_marginEnd="5dp"
-                    android:focusableInTouchMode="true"
-                    android:marqueeRepeatLimit="marquee_forever"
-                    android:scrollHorizontally="true"
-                    android:singleLine="true"
-                    android:textSize="22dp" />
-
-                <ImageView
-                    android:id="@+id/large_internet"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:paddingBottom="5dp"
-                    android:visibility="invisible"
-                    app:srcCompat="@drawable/internet_explorer"
-                    tools:ignore="ContentDescription" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
+            <ImageView
+                android:id="@+id/large_internet"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/large_track_name"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:ellipsize="marquee"
-                    android:focusable="true"
-                    android:layout_marginEnd="5dp"
-                    android:focusableInTouchMode="true"
-                    android:marqueeRepeatLimit="marquee_forever"
-                    android:scrollHorizontally="true"
-                    android:singleLine="true"
-                    android:textSize="16dp" />
-
-                <ImageView
-                    android:id="@+id/large_save_unsave_Track"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:srcCompat="@drawable/unsaved"
-                    tools:ignore="ContentDescription" />
-            </LinearLayout>
-
+                android:layout_gravity="end"
+                android:paddingBottom="5dp"
+                android:visibility="invisible"
+                app:srcCompat="@drawable/internet_explorer"
+                tools:ignore="ContentDescription" />
         </LinearLayout>
 
-
-        <ImageView
-            android:id="@+id/large_station_logo"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginTop="20dp"
-            app:layout_constraintBottom_toTopOf="@+id/guide_bottom"
-            app:layout_constraintEnd_toStartOf="@+id/guide_end"
-            app:layout_constraintStart_toStartOf="@+id/guide_start"
-            app:layout_constraintTop_toBottomOf="@+id/cardView3"
-            tools:ignore="ContentDescription" />
-
-        <ImageView
-            android:id="@+id/large_play_pause"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/info_container"
-            tools:ignore="ContentDescription" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        <ImageView
-            android:id="@+id/large_save_unsave"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
-            app:layout_constraintBottom_toBottomOf="@+id/large_play_pause"
-            app:layout_constraintEnd_toStartOf="@+id/large_play_pause"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/large_play_pause"
-            app:srcCompat="@drawable/unsaved"
-            tools:ignore="ContentDescription" />
+            <TextView
+                android:id="@+id/large_track_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1"
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:scrollHorizontally="true"
+                android:singleLine="true"
+                android:textSize="16dp" />
 
-        <ImageView
-            android:id="@+id/large_back"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="15dp"
-            android:layout_marginTop="10dp"
-            android:padding="10dp"
-            android:rotation="270"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/back"
-            tools:ignore="ContentDescription" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <ImageView
+                android:id="@+id/large_save_unsave_Track"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/unsaved"
+                tools:ignore="ContentDescription" />
+        </LinearLayout>
 
-</androidx.constraintlayout.motion.widget.MotionLayout>
+    </LinearLayout>
+
+
+    <ImageView
+        android:id="@+id/large_station_logo"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintBottom_toTopOf="@+id/guide_bottom"
+        app:layout_constraintEnd_toStartOf="@+id/guide_end"
+        app:layout_constraintStart_toStartOf="@+id/guide_start"
+        app:layout_constraintTop_toBottomOf="@+id/cardView3"
+        tools:ignore="ContentDescription" />
+
+    <ImageView
+        android:id="@+id/large_play_pause"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/info_container"
+        tools:ignore="ContentDescription" />
+
+    <ImageView
+        android:id="@+id/large_save_unsave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        app:layout_constraintBottom_toBottomOf="@+id/large_play_pause"
+        app:layout_constraintEnd_toStartOf="@+id/large_play_pause"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/large_play_pause"
+        app:srcCompat="@drawable/unsaved"
+        tools:ignore="ContentDescription" />
+
+    <ImageView
+        android:id="@+id/large_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="10dp"
+        android:padding="10dp"
+        android:rotation="270"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/back"
+        tools:ignore="ContentDescription" />
+
+    <ImageView
+        android:id="@+id/large_vote"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/vote"
+        android:tint="#A29090"
+        app:layout_constraintBottom_toBottomOf="@+id/large_play_pause"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/large_play_pause"
+        app:layout_constraintTop_toTopOf="@+id/large_play_pause" />
+</androidx.constraintlayout.widget.ConstraintLayout>

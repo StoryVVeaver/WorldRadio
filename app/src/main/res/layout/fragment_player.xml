@@ -310,6 +310,17 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/back"
             tools:ignore="ContentDescription" />
+
+        <ImageView
+            android:id="@+id/large_vote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/vote"
+            android:tint="#A29090"
+            app:layout_constraintBottom_toBottomOf="@+id/large_play_pause"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/large_play_pause"
+            app:layout_constraintTop_toTopOf="@+id/large_play_pause" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.motion.widget.MotionLayout>

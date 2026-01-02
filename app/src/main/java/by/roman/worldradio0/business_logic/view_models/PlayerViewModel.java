@@ -15,9 +15,12 @@ import androidx.lifecycle.ViewModel;
 import androidx.media3.common.util.UnstableApi;
 
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
+import by.roman.worldradio0.business_logic.UiState;
 import by.roman.worldradio0.business_logic.data.models.History;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.data.models.Settings;
@@ -31,6 +34,11 @@ import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRep
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.SettingsRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.UserRepository;
 import by.roman.worldradio0.business_logic.network.NetworkUtil;
+import by.roman.worldradio0.business_logic.network.radio.ClickModel;
+import by.roman.worldradio0.business_logic.network.radio.DataFromRadio;
+import by.roman.worldradio0.business_logic.network.radio.VoteModel;
+import by.roman.worldradio0.business_logic.network.radio.callbacks.ClickCallback;
+import by.roman.worldradio0.business_logic.network.radio.callbacks.VoteCallback;
 import by.roman.worldradio0.business_logic.player.PlayerService;
 import by.roman.worldradio0.business_logic.player.RadioManager;
 import dagger.hilt.android.lifecycle.HiltViewModel;
@@ -41,11 +49,13 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
 
     @SuppressLint("StaticFieldLeak")
     private final Context context;
+    private final ExecutorService executor = Executors.newFixedThreadPool(4);
     private final RadioRepository radioRepository;
     private final HistoryRepository historyRepository;
     private final FavoriteStationRepository favoriteStationRepository;
     private final FavoriteTrackRepository favoriteTrackRepository;
     private final UserRepository userRepository;
+    private final DataFromRadio dataFromRadio;
     private final SettingsRepository settingsRepository;
     private final MutableLiveData<String> currentTrack = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isPlaying = new MutableLiveData<>();
@@ -56,14 +66,18 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     private final MutableLiveData<Boolean> snapPrevious = new MutableLiveData<>();
     private final MutableLiveData<Boolean> playNext = new MutableLiveData<>();
     private final MutableLiveData<Boolean> playPrevious = new MutableLiveData<>();
+    private final MutableLiveData<UiState<VoteModel>> vote = new MutableLiveData<>();
     private Settings settings;
 
     @OptIn(markerClass = UnstableApi.class)
     @Inject
-    public PlayerViewModel(@NonNull RadioManager radioManager,HistoryRepository historyRepository, FavoriteTrackRepository favoriteTrackRepository, FavoriteStationRepository favoriteStationRepository, @ApplicationContext Context context, RadioRepository radioRepository, UserRepository userRepository, SettingsRepository settingsRepository) {
+    public PlayerViewModel(@NonNull RadioManager radioManager,HistoryRepository historyRepository, FavoriteTrackRepository favoriteTrackRepository,
+                           FavoriteStationRepository favoriteStationRepository, @ApplicationContext Context context, DataFromRadio dataFromRadio,
+                           RadioRepository radioRepository, UserRepository userRepository, SettingsRepository settingsRepository) {
         this.context = context;
         this.radioRepository = radioRepository;
         this.userRepository = userRepository;
+        this.dataFromRadio = dataFromRadio;
         this.historyRepository = historyRepository;
         this.favoriteTrackRepository = favoriteTrackRepository;
         this.favoriteStationRepository = favoriteStationRepository;
@@ -92,6 +106,10 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     }
     public LiveData<String> getCurrentTrack() {
         return currentTrack;
+    }
+
+    public LiveData<UiState<VoteModel>> getVote() {
+        return vote;
     }
     public boolean isInternetConnected(){
         try {
@@ -130,6 +148,17 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
             historyRepository.addToHistory(new History(userRepository.getUserInSystem(), radioRepository.getCurrentUUID()));
             startForegroundService(context, intent);
             currentTrack.postValue("");
+            executor.execute(() -> dataFromRadio.click(uuid, new ClickCallback() {
+                @Override
+                public void onSuccess(ClickModel t) {
+
+                }
+
+                @Override
+                public void onFailure(Throwable t) {
+
+                }
+            }));
         }
     }
     @OptIn(markerClass = UnstableApi.class)
@@ -163,6 +192,23 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
             favoriteStationRepository.addToFavorite(-1, radioRepository.getCurrentUUID());
         } catch (Exception e) {
             Log.e("PlayerVM", "Failed add to favorite");
+        }
+    }
+    public void voteStation(){
+        String uuid = radioRepository.getCurrentUUID();
+        if(!uuid.isEmpty()){
+            vote.postValue(UiState.loading());
+            executor.execute(() -> dataFromRadio.vote(uuid, new VoteCallback() {
+                @Override
+                public void onSuccess(VoteModel t) {
+                    vote.postValue(UiState.success(t));
+                }
+
+                @Override
+                public void onFailure(Throwable t) {
+                    vote.postValue(UiState.error(t.getMessage()));
+                }
+            }));
         }
     }
     public void addTrackToFavorite(){

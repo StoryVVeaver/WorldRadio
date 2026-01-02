@@ -24,8 +24,10 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -43,9 +45,10 @@ import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRep
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.SettingsRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.UserRepository;
 import by.roman.worldradio0.business_logic.network.radio.DataFromRadio;
-import by.roman.worldradio0.business_logic.network.radio.StationsCallback;
+import by.roman.worldradio0.business_logic.network.radio.callbacks.StationsCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.DataFromUserAPI;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FavoriteStationsCallback;
+import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FilterCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.PutCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.SettingsCallback;
 import dagger.hilt.android.lifecycle.HiltViewModel;
@@ -242,33 +245,57 @@ public class SettingsViewModel extends ViewModel {
     private void loadFromAPI() {
         flag_stations = true;
         count.postValue(UiState.loading(0));
-        radioRepository.clearTable();
-        executor.execute(() -> dataFromRadio.getStations(new StationsCallback() {
+
+        executor.execute(() -> dataFromUserAPI.getStationsFilter(new FilterCallback() {
             @Override
-            public void onSuccess(List<RadioStationDTO> stations) {
-                long i = 0;
-                for (RadioStationDTO dto : stations) {
-                    try {
-                        radioRepository.addRadioStation(dto);
-                        i++;
-                        count.postValue(UiState.loading((int)(i * 100) / stations.size()));
-                    } catch (Exception e) {
-                        Log.e("DB", "Ошибка при добавлении: " + dto.getName(), e);
+            public void onSuccess(List<String> filters) {
+                Set<String> filter = new HashSet<>(filters);
+                radioRepository.clearTable();
+                executor.execute(() -> dataFromRadio.getStations(new StationsCallback() {
+                    @Override
+                    public void onSuccess(List<RadioStationDTO> stations) {
+                        long currentProgress = 0;
+                        int totalStations = stations.size();
+
+                        for (RadioStationDTO dto : stations) {
+                            try {
+                                if (!filter.contains(dto.getCountryCode())) {
+                                    radioRepository.addRadioStation(dto);
+                                }
+
+                                currentProgress++;
+                                count.postValue(UiState.loading((int)((currentProgress * 100) / totalStations)));
+
+                            } catch (Exception e) {
+                                Log.e("DB", "Ошибка при добавлении: " + dto.getName(), e);
+                            }
+                        }
+
+                        count.postValue(UiState.success(100));
+                        flag_stations = false;
                     }
-                }
-                count.postValue(UiState.success(100));
-                flag_stations = false;
+
+                    @Override
+                    public void onFailure(Throwable t) {
+                        Log.e("API", "Ошибка загрузки данных станций", t);
+                        count.postValue(UiState.error(t.getMessage()));
+                        flag_stations = false;
+                    }
+
+                    @Override
+                    public void onLoading() {
+                    }
+                }));
             }
+
             @Override
             public void onFailure(Throwable t) {
-                Log.e("API", "Ошибка загрузки данных", t);
-                count.postValue(UiState.error(t.getMessage()));
+                Log.e("API", "Ошибка получения фильтров", t);
+                count.postValue(UiState.error("Не удалось получить фильтры: " + t.getMessage()));
                 flag_stations = false;
             }
-            @Override
-            public void onLoading(){
-            }
         }));
+
     }
     private void loadDataFromUserAPI(){
         i = 0;

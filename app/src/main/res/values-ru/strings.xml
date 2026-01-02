@@ -72,4 +72,6 @@
     <string name="nav_type">Тип навигации</string>
     <string name="balance">Баланс</string>
     <string name="audio">Аудио</string>
+    <string name="vote_correct">Успешно проголосовали за станцию</string>
+    <string name="vote_err">Вы слишком часто голосуете за одну и ту же станцию</string>
 </resources>

@@ -7,8 +7,10 @@ import androidx.annotation.NonNull;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -23,6 +25,7 @@ import by.roman.worldradio0.business_logic.data.models.Settings;
 import by.roman.worldradio0.business_logic.data.models.User;
 import by.roman.worldradio0.business_logic.data.models.UserRequest;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FavoriteStationsCallback;
+import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FilterCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.PutCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.RequestCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.SettingsCallback;
@@ -139,6 +142,59 @@ public class UserAPI {
                     callback.onFailure(new Exception("Request failed with code: " + response.code()));
                 }
             }
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+                callback.onFailure(e);
+            }
+        });
+    }
+
+    public void fetchFilters(FilterCallback callback){
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(API_URL + "/get/filter")
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                if(response.isSuccessful()){
+                    try (response) {
+                        assert response.body() != null;
+                        String jsonResponse = response.body().string();
+                        Log.d("UserAPI: filters", "Response: " + jsonResponse);
+
+                        if (jsonResponse.isEmpty()) {
+                            Log.e("UserAPI: filters", "Empty response body.");
+                            callback.onFailure(new Exception("Empty response body"));
+                            return;
+                        }
+
+                        Gson gson = new GsonBuilder().create();
+                        try {
+                            Type listType = new TypeToken<List<String>>() {}.getType();
+                            List<String> filters = gson.fromJson(jsonResponse, listType);
+                            if (filters != null) {
+                                callback.onSuccess(filters);
+                            } else {
+                                callback.onFailure(new Exception("Parsed list is null"));
+                            }
+
+                        } catch (Exception e) {
+                            Log.e("UserAPI: filters", "JSON parsing error", e);
+                            callback.onFailure(e);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        callback.onFailure(e);
+                    }
+                } else {
+                    Log.e("UserAPI: filters", "Request failed with code: " + response.code());
+                    callback.onFailure(new Exception("Request failed with code: " + response.code()));
+                }
+            }
+
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 e.printStackTrace();

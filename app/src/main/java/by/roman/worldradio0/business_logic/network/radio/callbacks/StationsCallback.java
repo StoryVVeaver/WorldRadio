@@ -1,4 +1,4 @@
-package by.roman.worldradio0.business_logic.network.radio;
+package by.roman.worldradio0.business_logic.network.radio.callbacks;
 
 import java.util.List;
 

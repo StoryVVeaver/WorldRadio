@@ -1,5 +1,6 @@
 package by.roman.worldradio0.ui.elements.view;
 
+import android.annotation.SuppressLint;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -15,13 +16,19 @@ import org.osmdroid.views.overlay.Overlay;
 import java.util.ArrayList;
 import java.util.List;
 
+import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.data.models.MapPoint;
 
 public class CenterSnapOverlay extends Overlay {
 
-    private static final int SNAP_DISTANCE_PX = 100;
-    private static final int ESCAPE_DISTANCE_PX = 150;
-    private static final long ANIMATE_DURATION_MS = 420;
+    private static final int SNAP_DISTANCE_PX = 150;
+    private static final int ESCAPE_DISTANCE_PX = 200;
+    private static final long ANIMATE_DURATION_MS = 1000;
+    private static final long SNAP_INTERVAL_MS = 500;
+
+    private final Handler snapHandler = new Handler(Looper.getMainLooper());
+    private Runnable pendingSnap;
+    public boolean isAnimating = false;
 
     public interface OnSnappedCallback {
         void onSnapped(MapPoint point);
@@ -92,17 +99,12 @@ public class CenterSnapOverlay extends Overlay {
 
         snappedPoint = target;
 
-        GeoPoint gp = new GeoPoint(target.getLatitude(), target.getLongitude());
-        if (animate) {
-            map.getController().animateTo(gp);
-        } else {
-            map.getController().setCenter(gp);
+        if (pendingSnap != null) {
+            snapHandler.removeCallbacks(pendingSnap);
         }
 
-        if (notify && callback != null) {
-            callback.onSnapped(target);
-            point.setImageTintList(ColorStateList.valueOf(Color.RED));
-        }
+        pendingSnap = () -> executeSnap(target, animate, notify);
+        snapHandler.postDelayed(pendingSnap, SNAP_INTERVAL_MS);
     }
 
     private void evaluateSnap() {
@@ -172,6 +174,25 @@ public class CenterSnapOverlay extends Overlay {
         double dx = tmp.x + iconOffset.x - center.x;
         double dy = tmp.y + iconOffset.y - center.y;
         return Math.hypot(dx, dy);
+    }
+
+    @SuppressLint("ResourceAsColor")
+    private void executeSnap(MapPoint target, boolean animate, boolean notify){
+        if (target == null) return;
+
+        GeoPoint gp = new GeoPoint(target.getLatitude(), target.getLongitude());
+        if (animate) {
+            isAnimating = true;
+            map.getController().animateTo(gp);
+            snapHandler.postDelayed(() -> isAnimating = false, ANIMATE_DURATION_MS);
+        } else {
+            map.getController().setCenter(gp);
+        }
+
+        if (notify && callback != null) {
+            callback.onSnapped(target);
+            point.setImageTintList(ColorStateList.valueOf(Color.parseColor("#B10E0E")));
+        }
     }
 
     @Override

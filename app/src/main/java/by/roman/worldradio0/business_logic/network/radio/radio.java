@@ -23,11 +23,13 @@ import java.util.Vector;
 import javax.inject.Singleton;
 
 import by.roman.worldradio0.business_logic.data.dto.RadioStationDTO;
+import by.roman.worldradio0.business_logic.network.radio.callbacks.*;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 @Singleton
 public class radio {
@@ -65,13 +67,13 @@ public class radio {
         }.execute();
     }
 
-    private String normalizeUrl(String host) {
+    private String normalizeUrl(String host, String end) {
         if (host == null) return null;
 
         if (host.startsWith("http://") || host.startsWith("https://")) {
             return host;
         }
-        return "http://" + host + API_URL;
+        return "http://" + host + end;
     }
 
 
@@ -81,7 +83,7 @@ public class radio {
         OkHttpClient client = new OkHttpClient();
 
         Request request = new Request.Builder()
-                .url(normalizeUrl(address.get(r.nextInt(address.size()))))
+                .url(normalizeUrl(address.get(r.nextInt(address.size())), API_URL))
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -121,7 +123,6 @@ public class radio {
                                 }
                                 callback.onSuccess(dto);
                             } else {
-                                //Log.e("RadioAPI", "Unexpected response: " + jsonResponse);
                                 Log.e("RadioAPI", "Unexpected request url: " + request.url());
                                 callback.onFailure(new Exception("Unexpected response: " + jsonResponse));
                             }
@@ -143,6 +144,107 @@ public class radio {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 e.printStackTrace();
+                callback.onFailure(e);
+            }
+        });
+    }
+
+    public void click(String uuid, ClickCallback callback) {
+        OkHttpClient client = new OkHttpClient();
+        Random r = new Random();
+
+        Request request = new Request.Builder()
+                .url(normalizeUrl(address.get(r.nextInt(address.size())), "/json/url/" + uuid))
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                try (ResponseBody body = response.body()) {
+                    if (!response.isSuccessful()) {
+                        Log.e("RadioAPI", "Click failed: " + response.code());
+                        callback.onFailure(new Exception("Click failed: " + response.code()));
+                        return;
+                    }
+
+                    if (body == null) {
+                        callback.onFailure(new Exception("Response body is null"));
+                        return;
+                    }
+
+                    String jsonResponse = body.string();
+                    Log.d("RadioAPI", "Click response: " + jsonResponse);
+
+                    if (jsonResponse.isEmpty()) {
+                        callback.onFailure(new Exception("Empty JSON response"));
+                        return;
+                    }
+
+                    Gson gson = new Gson();
+                    try {
+                        ClickModel model = gson.fromJson(jsonResponse, ClickModel.class);
+
+                        if (model != null) {
+                            callback.onSuccess(model);
+                        } else {
+                            callback.onFailure(new Exception("API error: " + "Unknown"));
+                        }
+
+                    } catch (JsonSyntaxException e) {
+                        Log.e("RadioAPI", "JSON parsing error", e);
+                        callback.onFailure(e);
+                    }
+
+                } catch (Exception e) {
+                    Log.e("RadioAPI", "Execution error", e);
+                    callback.onFailure(e);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.e("RadioAPI", "Network error", e);
+                callback.onFailure(e);
+            }
+        });
+    }
+
+    public void vote(String uuid, VoteCallback callback) {
+        OkHttpClient client = new OkHttpClient();
+        Random r = new Random();
+
+        Request request = new Request.Builder()
+                .url(normalizeUrl(address.get(r.nextInt(address.size())), "/json/vote/" + uuid))
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                try (ResponseBody body = response.body()) {
+                    if (!response.isSuccessful()) {
+                        callback.onFailure(new Exception("Vote error: " + response.code()));
+                        return;
+                    }
+
+                    if (body != null) {
+                        String json = body.string();
+                        Log.d("RadioAPI", "Vote response: " + json);
+                        VoteModel model = new Gson().fromJson(json, VoteModel.class);
+
+                        if (model != null) {
+                            callback.onSuccess(model);
+                        } else {
+                            String errorMsg = "empty";
+                            callback.onFailure(new Exception("API message: " + errorMsg));
+                        }
+                    }
+                } catch (Exception e) {
+                    callback.onFailure(e);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 callback.onFailure(e);
             }
         });
