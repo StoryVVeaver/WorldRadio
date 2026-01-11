@@ -130,7 +130,8 @@ public class NotificationService extends Service {
                         if (isStopped || radioStation == null) return;
                         fallbackNotify(errorDrawable);
                     }
-                });
+                }
+                );
     }
 
     private void fallbackNotify(@Nullable Drawable drawable) {

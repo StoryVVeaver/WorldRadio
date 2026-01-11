@@ -42,7 +42,7 @@ import okhttp3.ResponseBody;
 public class UserAPI {
     //private static final String API_URL = "http://192.168.43.146:8080/api/v1/user";
     //private static final String API_URL = "http://192.168.0.86:8080/api/v1/user";
-    private static final String API_URL = "https://kkvxmvg9-8080.euw.devtunnels.ms/api/v1/user";
+    private static final String API_URL = "https://jds25q4d-8000.euw.devtunnels.ms/api/v1/user";
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     public UserAPI(){
 
