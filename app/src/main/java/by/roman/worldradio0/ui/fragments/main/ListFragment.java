@@ -15,9 +15,8 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.PopupMenu;
 import android.widget.Toast;
-import java.util.List;
+
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.adapters.RadioAdapter;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
@@ -106,7 +105,7 @@ public class ListFragment extends Fragment {
             @Override
             public void onStationItemClick(int position) {
                 if (!isVisibleToUser) return;
-                play(adapter.getUUID(position));
+                play(adapter.getStation(position));
             }
 
             @Override
@@ -136,11 +135,11 @@ public class ListFragment extends Fragment {
         String[] options = {getResources().getString(R.string.schedule_playback)};
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle(playerViewModel.getStationById(adapter.getUUID(position)).getName());
+        builder.setTitle(adapter.getStation(position).getName());
         builder.setItems(options, (dialog, which) -> {
             switch (which) {
                 case 0:
-                    AlarmFragment fragment = AlarmFragment.newInstance(adapter.getUUID(position));
+                    AlarmFragment fragment = AlarmFragment.newInstance(adapter.getStation(position).getStationUuid());
                     stateViewModel.openFullscreen(fragment);
                     break;
             }
@@ -153,7 +152,7 @@ public class ListFragment extends Fragment {
         }
         dialog.show();
     }
-    private void play(String uuid) {
+    private void play(RadioStation station) {
         if (!playerViewModel.isInternetConnected()) {
             Toast.makeText(getContext(), getResources().getString(R.string.not_correct_internet), Toast.LENGTH_SHORT).show();
             return;
@@ -163,7 +162,7 @@ public class ListFragment extends Fragment {
             Toast.makeText(getContext(), getResources().getString(R.string.no_internet), Toast.LENGTH_SHORT).show();
             return;
         }
-        playerViewModel.start(uuid);
+        playerViewModel.start(station);
     }
 
     private void observeAndLoad() {
@@ -177,27 +176,18 @@ public class ListFragment extends Fragment {
                     }
                     break;
                 case SUCCESS:
-                    handler.post(() -> {
-                        if (isVisibleToUser && adapter != null) {
-                            adapter.hideLoading();
-                            List<RadioStation> data = stations.data;
-                            if (data != null) {
-                                adapter.replaceAll(data);
-                            }
-                            isLoadingNextPage = false;
-                        }
-                    });
+                    adapter.hideLoading();
+                    if (stations.data != null) {
+                        adapter.replaceAll(stations.data);
+                    }
+                    isLoadingNextPage = false;
                     break;
                 case ERROR:
-                    handler.post(() -> {
-                        if (isVisibleToUser && adapter != null) {
-                            adapter.hideLoading();
-                            if (stations.message != null && !stations.message.isEmpty()) {
-                                Toast.makeText(getContext(), stations.message, Toast.LENGTH_SHORT).show();
-                            }
-                            isLoadingNextPage = false;
-                        }
-                    });
+                    adapter.hideLoading();
+                    if (stations.message != null) {
+                        Toast.makeText(getContext(), stations.message, Toast.LENGTH_SHORT).show();
+                    }
+                    isLoadingNextPage = false;
                     break;
             }
         });
@@ -207,7 +197,7 @@ public class ListFragment extends Fragment {
                 String currentUuid = playerViewModel.getCurrentStation().getStationUuid();
                 int pos = adapter.findCurrentStation(currentUuid);
                 if(pos > 0){
-                    play(adapter.getUUID(pos - 1));
+                    play(adapter.getStation(pos - 1));
                 }
             }
         });
@@ -217,7 +207,7 @@ public class ListFragment extends Fragment {
                 String currentUuid = playerViewModel.getCurrentStation().getStationUuid();
                 int pos = adapter.findCurrentStation(currentUuid);
                 if(pos != -1 && pos < adapter.getItemCount() - 1){
-                    play(adapter.getUUID(pos + 1));
+                    play(adapter.getStation(pos + 1));
                 }
             }
         });

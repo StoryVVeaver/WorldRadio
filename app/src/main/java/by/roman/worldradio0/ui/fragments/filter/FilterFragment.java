@@ -75,7 +75,6 @@ public class FilterFragment extends Fragment {
 
     private void findAllId(View view){
         toolbar = view.findViewById(R.id.toolbar);
-        countText = view.findViewById(R.id.StationCount);
         btnReset = view.findViewById(R.id.btnReset);
 
         chipAlphabet = view.findViewById(R.id.chipAlphabet);
@@ -131,7 +130,6 @@ public class FilterFragment extends Fragment {
         }
         filter.setSort(currentSort);
         viewModel.setFilters(filter);
-        viewModel.loadCount();
     }
 
     private void resetAllFilters() {
@@ -150,7 +148,6 @@ public class FilterFragment extends Fragment {
         filter.setCountry(null);
         filter.setLang(null);
         viewModel.setFilters(filter);
-        viewModel.loadCount();
     }
 
     private void handleSelection(String selectedItem, MaterialAutoCompleteTextView actv, String fieldType) {
@@ -172,30 +169,10 @@ public class FilterFragment extends Fragment {
                 break;
         }
         viewModel.setFilters(filter);
-        viewModel.loadCount();
     }
 
     @SuppressLint("SetTextI18n")
     private void observeAndLoad() {
-        viewModel.getCountFilteredStations().observe(getViewLifecycleOwner(), count -> {
-            if (count == null) return;
-            switch (count.status) {
-                case SUCCESS:
-                    if (count.data != null) {
-                        String stationText = count.data + " " + getResources().getString(R.string.filter_count);
-                        countText.setText(stationText);
-                    }
-                    break;
-                case LOADING:
-                    countText.setText(getResources().getString(R.string.loading));
-                    break;
-                case ERROR:
-                    countText.setText(getResources().getString(R.string.err_loading));
-                    break;
-            }
-        });
-
-        viewModel.loadCount();
 
         viewModel.getCountriesLive().observe(getViewLifecycleOwner(), list ->
                 setupAutoComplete(actvCountry, list, "country"));
@@ -222,7 +199,6 @@ public class FilterFragment extends Fragment {
                         }
 
                         viewModel.setFilters(filter);
-                        viewModel.loadCount();
                     }
                 });
         });

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">WorldRadio</string>
+    <string name="app_name" translatable="false">RadioManager</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>

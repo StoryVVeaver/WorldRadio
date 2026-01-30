@@ -21,8 +21,8 @@ import by.roman.worldradio0.business_logic.data.models.MapPoint;
 
 public class CenterSnapOverlay extends Overlay {
 
-    private static final int SNAP_DISTANCE_PX = 150;
-    private static final int ESCAPE_DISTANCE_PX = 200;
+    private static final int SNAP_DISTANCE_PX = 70;
+    private static final int ESCAPE_DISTANCE_PX = 100;
     private static final long ANIMATE_DURATION_MS = 1000;
     private static final long SNAP_INTERVAL_MS = 500;
 

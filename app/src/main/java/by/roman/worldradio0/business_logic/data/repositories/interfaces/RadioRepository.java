@@ -12,7 +12,7 @@ import by.roman.worldradio0.business_logic.data.repositories.RadioRepositoryImpl
 public interface RadioRepository {
     LiveData<Boolean> getShowPlayer();
     void setStatePlayer(boolean state);
-    List<RadioStation> getFavoriteStations(int currentPage, int pageSize);
+    List<String> getFavoriteStations();
     List<RadioStation> getFilteredStations(int currentPage, int pageSize);
     List<RadioStation> getAllStations(int currentPage, int pageSize);
     RadioStation getStationById(String uuid);

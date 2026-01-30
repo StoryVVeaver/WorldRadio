@@ -26,9 +26,9 @@ import by.roman.worldradio0.business_logic.data.models.UserRequest;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FilterRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.SettingsRepository;
+import by.roman.worldradio0.business_logic.data.repositories.interfaces.StationFilterRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.UserRepository;
 import by.roman.worldradio0.business_logic.network.radio.DataFromRadio;
-import by.roman.worldradio0.business_logic.network.radio.callbacks.StationsCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.DataFromUserAPI;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FilterCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.RequestCallback;
@@ -37,6 +37,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 @HiltViewModel
 public class AccountViewModel extends ViewModel {
     private final UserRepository userRepository;
+    private final StationFilterRepository stationFilterRepository;
     private final SettingsRepository settingsRepository;
     private final RadioRepository radioRepository;
     private final FilterRepository filterRepository;
@@ -51,13 +52,15 @@ public class AccountViewModel extends ViewModel {
     @Inject
     public AccountViewModel(UserRepository userRepository, SettingsRepository settingsRepository,
                             FilterRepository filterRepository, DataFromUserAPI dataFromUserAPI,
-                            RadioRepository radioRepository, DataFromRadio dataFromRadio){
+                            RadioRepository radioRepository, DataFromRadio dataFromRadio,
+                            StationFilterRepository stationFilterRepository){
         this.userRepository = userRepository;
         this.radioRepository = radioRepository;
         this.dataFromRadio = dataFromRadio;
         this.settingsRepository = settingsRepository;
         this.filterRepository = filterRepository;
         this.dataFromUserAPI = dataFromUserAPI;
+        this.stationFilterRepository = stationFilterRepository;
     }
     public LiveData<UiState<Boolean>> getUser(){
         return result;
@@ -145,41 +148,10 @@ public class AccountViewModel extends ViewModel {
             executor.execute(() -> dataFromUserAPI.getStationsFilter(new FilterCallback() {
                 @Override
                 public void onSuccess(List<String> filters) {
-                    Set<String> filter = new HashSet<>(filters);
-                    radioRepository.clearTable();
-                    executor.execute(() -> dataFromRadio.getStations(new StationsCallback() {
-                        @Override
-                        public void onSuccess(List<RadioStationDTO> stations) {
-                            long currentProgress = 0;
-                            int totalStations = stations.size();
-
-                            for (RadioStationDTO dto : stations) {
-                                try {
-                                    if (!filter.contains(dto.getCountryCode())) {
-                                        radioRepository.addRadioStation(dto);
-                                    }
-
-                                    currentProgress++;
-                                    stationsLoading.postValue(UiState.loading((int)((currentProgress * 100) / totalStations)));
-
-                                } catch (Exception e) {
-                                    Log.e("DB", "Ошибка при добавлении: " + dto.getName(), e);
-                                }
-                            }
-
-                            stationsLoading.postValue(UiState.success(100));
-                        }
-
-                        @Override
-                        public void onFailure(Throwable t) {
-                            Log.e("API", "Ошибка загрузки данных станций", t);
-                            stationsLoading.postValue(UiState.error(t.getMessage()));
-                        }
-
-                        @Override
-                        public void onLoading() {
-                        }
-                    }));
+                    for(String i: filters){
+                        stationFilterRepository.addFilter(i);
+                    }
+                    stationsLoading.postValue(UiState.success(100));
                 }
 
                 @Override

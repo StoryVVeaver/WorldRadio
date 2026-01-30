@@ -14,15 +14,11 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.PopupMenu;
 import android.widget.Toast;
-
-import java.util.List;
 
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.adapters.EndlessRecyclerViewScrollListener;
 import by.roman.worldradio0.business_logic.adapters.RadioAdapter;
-import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.view_models.FavoriteViewModel;
 import by.roman.worldradio0.business_logic.view_models.PlayerViewModel;
 import by.roman.worldradio0.business_logic.view_models.StateViewModel;
@@ -56,7 +52,6 @@ public class FavoriteStationsFragment extends Fragment {
         findAllId(view);
         initAll();
         observeAndLoad();
-        //TODO drag and drop
         Log.v("FavoriteFragment: performance", "onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
     }
     private void findAllId(@NonNull View view){
@@ -68,7 +63,7 @@ public class FavoriteStationsFragment extends Fragment {
             public void onStationItemClick(int position) {
                 if(playerViewModel.isInternetConnected()){
                     if(playerViewModel.checkTypeInternet().equals("ok")){
-                        playerViewModel.start(adapter.getUUID(position));
+                        playerViewModel.start(adapter.getStation(position));
                     } else {
                         Toast.makeText(getContext(), getResources().getString(R.string.not_correct_internet), Toast.LENGTH_SHORT).show();
                     }
@@ -78,7 +73,7 @@ public class FavoriteStationsFragment extends Fragment {
             }
             @Override
             public void onDeleteClick(int position) {
-                viewModel.removeStationFromFavorite(adapter.getUUID(position));
+                viewModel.removeStationFromFavorite(adapter.getStation(position).getStationUuid());
             }
 
             @Override
@@ -86,7 +81,6 @@ public class FavoriteStationsFragment extends Fragment {
                 showMenu(position);
             }
         });
-        //adapter.setMode(1);
         playerViewModel = new ViewModelProvider(requireActivity()).get(PlayerViewModel.class);
         stateViewModel = new ViewModelProvider(requireActivity()).get(StateViewModel.class);
         viewModel = new ViewModelProvider(requireActivity()).get(FavoriteViewModel.class);
@@ -105,15 +99,15 @@ public class FavoriteStationsFragment extends Fragment {
         String[] options = {getResources().getString(R.string.schedule_playback), getResources().getString(R.string.remove_favorite)};
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle(playerViewModel.getStationById(adapter.getUUID(position)).getName());
+        builder.setTitle(adapter.getStation(position).getName());
         builder.setItems(options, (dialog, which) -> {
             switch (which) {
                 case 0:
-                    AlarmFragment fragment = AlarmFragment.newInstance(adapter.getUUID(position));
+                    AlarmFragment fragment = AlarmFragment.newInstance(adapter.getStation(position).getStationUuid());
                     stateViewModel.openFullscreen(fragment);
                     break;
                 case 1:
-                    viewModel.removeStationFromFavorite(adapter.getUUID(position));
+                    viewModel.removeStationFromFavorite(adapter.getStation(position).getStationUuid());
                     break;
             }
         });

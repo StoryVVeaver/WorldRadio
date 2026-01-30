@@ -1,6 +1,5 @@
 package by.roman.worldradio0.business_logic.adapters;
 
-import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
@@ -13,14 +12,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
-import androidx.cardview.widget.CardView;
-import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -104,9 +100,9 @@ public class RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public int getItemCount() {
         return stations.size() + (isLoading ? 1 : 0);
     }
-    public String getUUID(int position){
+    public RadioStation getStation(int position){
         if (position >= 0 && position < stations.size()) {
-            return stations.get(position).getStationUuid();
+            return stations.get(position);
         }
         Log.e("RadioAdapter","getUUID: invalid position " + position + " size=" + stations.size());
         return null;

@@ -30,12 +30,15 @@ public class PlayerService extends Service {
     public static final String ACTION_STOP = "by.roman.worldradio0.ACTION_STOP";
     public static final String ACTION_PAUSE = "by.roman.worldradio0.ACTION_PAUSE";
     public static final String EXTRA_STREAM_UUID = "stream_uuid";
+    public static final String EXTRA_URL = "EXTRA_URL";
+    public static final String EXTRA_NAME = "EXTRA_NAME";
+    public static final String EXTRA_ICON = "EXTRA_ICON";
 
     private static final int NOTIFICATION_ID = 1;
     private boolean isManuallyStopped = false;
 
     private String currentTrack;
-    private String currentStreamUUID;
+    private RadioStation currentStation;
     private boolean isPlayingBefore = false;
     private MediaSession mediaSession;
 
@@ -92,41 +95,29 @@ public class PlayerService extends Service {
                 break;
 
             case ACTION_START:
-                String newStreamUUID = intent.getStringExtra(EXTRA_STREAM_UUID);
-                Log.d("RadioService", "Stream UUID: " + newStreamUUID);
+                String uuid = intent.getStringExtra(EXTRA_STREAM_UUID);
+                String url = intent.getStringExtra(EXTRA_URL);
+                String name = intent.getStringExtra(EXTRA_NAME);
+                String icon = intent.getStringExtra(EXTRA_ICON);
 
-                if (newStreamUUID != null) {
-                    currentStreamUUID = newStreamUUID;
-                    isManuallyStopped = false;
-
+                if (url != null) {
                     runOnMainThread(() -> {
-                        try {
-                            RadioStation station = radioRepository.getStationById(currentStreamUUID);
-                            if (station != null) {
-                                radioManager.play(station.getUrl());
-                                currentTrack = null;
-
-                                stopForeground(true);
-                                startForeground(NOTIFICATION_ID,
-                                        notificationService.startNotification(
-                                                currentTrack,
-                                                true,
-                                                radioRepository.getStationById(currentStreamUUID),
-                                                mediaSession));
-
-                                if (!isPlayingBefore) {
-                                    radioRepository.setStatePlayer(true);
-                                }
-                                isPlayingBefore = true;
-                            } else {
-                                Log.e("RadioService", "No station found for current stream URL");
-                                currentStreamUUID = null;
+                        if (currentStation == null || !uuid.equals(currentStation.getStationUuid())) {
+                            radioManager.play(url);
+                            if (!isPlayingBefore) {
+                                radioRepository.setStatePlayer(true);
                             }
-
-                        } catch (Exception e) {
-                            Log.e("RadioService", "Error during playback: " + e.getMessage());
-                            handleStop();
+                            isPlayingBefore = true;
                         }
+
+                        currentStation = new RadioStation(uuid, name, url,icon,"");
+
+                        startForeground(NOTIFICATION_ID,
+                                notificationService.startNotification(
+                                        null,
+                                        true,
+                                        currentStation,
+                                        mediaSession));
                     });
                 }
                 break;
@@ -139,6 +130,7 @@ public class PlayerService extends Service {
             case ACTION_STOP:
                 Log.d("RadioService", "Stop playback completely");
                 handleStop();
+                isPlayingBefore = false;
                 break;
         }
 

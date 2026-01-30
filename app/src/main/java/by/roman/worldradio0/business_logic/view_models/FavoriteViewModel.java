@@ -1,7 +1,5 @@
 package by.roman.worldradio0.business_logic.view_models;
 
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
@@ -10,7 +8,6 @@ import androidx.lifecycle.ViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -24,11 +21,14 @@ import by.roman.worldradio0.business_logic.data.repositories.FavoriteTrackReposi
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteStationRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteTrackRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRepository;
+import by.roman.worldradio0.business_logic.network.radio.DataFromRadio;
+import by.roman.worldradio0.business_logic.network.radio.callbacks.RadioCallback;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
 public class FavoriteViewModel extends ViewModel implements FavoriteStationRepositoryImpl.OnFavoriteStationsChangedListener, FavoriteTrackRepositoryImpl.OnFavoriteTracksChangedListener {
     private final RadioRepository radioRepository;
+    private final DataFromRadio dataFromRadio;
     private final FavoriteStationRepository favoriteStationRepository;
     private final FavoriteTrackRepository favoriteTrackRepository;
     private final MutableLiveData<UiState<List<RadioStation>>> favoriteStations = new MutableLiveData<>();
@@ -36,7 +36,7 @@ public class FavoriteViewModel extends ViewModel implements FavoriteStationRepos
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
 
     private int currentTrackPage = 0;
-    private int currentStationPage = 0;
+    private int currentStationCount = 0;
     private final int pageSize = 30;
     private boolean allLoadedTrack = false;
     private boolean allLoadedStation = false;
@@ -46,12 +46,13 @@ public class FavoriteViewModel extends ViewModel implements FavoriteStationRepos
         return allLoadedStation;
     }
     @Inject
-    public FavoriteViewModel(RadioRepository radioRepository, FavoriteStationRepository favoriteStationRepository, FavoriteTrackRepository favoriteTrackRepository) {
+    public FavoriteViewModel(RadioRepository radioRepository, FavoriteStationRepository favoriteStationRepository, FavoriteTrackRepository favoriteTrackRepository, DataFromRadio dataFromRadio) {
         this.radioRepository = radioRepository;
         this.favoriteTrackRepository = favoriteTrackRepository;
         this.favoriteStationRepository = favoriteStationRepository;
         favoriteStationRepository.addListener(this);
         favoriteTrackRepository.addListener(this);
+        this.dataFromRadio = dataFromRadio;
     }
     public LiveData<UiState<List<RadioStation>>> getFavoriteStations(){
         return favoriteStations;
@@ -62,45 +63,56 @@ public class FavoriteViewModel extends ViewModel implements FavoriteStationRepos
     public void loadStationNextPage() {
         if (isLoadingStation || allLoadedStation) return;
 
-        isLoadingStation = true;
-        UiState<List<RadioStation>> currentState = null;
-        if(currentStationPage != 0){
-            currentState = favoriteStations.getValue();
+        List<String> allFavoriteUuids = radioRepository.getFavoriteStations();
+
+        if (allFavoriteUuids == null || currentStationCount >= allFavoriteUuids.size()) {
+            allLoadedStation = true;
+            return;
         }
-        List<RadioStation> currentList = currentState != null && currentState.data != null
+
+        isLoadingStation = true;
+
+        UiState<List<RadioStation>> currentState = favoriteStations.getValue();
+        List<RadioStation> currentList = (currentState != null && currentState.data != null)
                 ? new ArrayList<>(currentState.data)
                 : new ArrayList<>();
 
         favoriteStations.postValue(UiState.loading());
 
         executor.execute(() -> {
-            try {
-                List<RadioStation> newList = radioRepository.getFavoriteStations(currentStationPage, pageSize);
+            int fromIndex = currentStationCount;
+            int toIndex = Math.min(fromIndex + pageSize, allFavoriteUuids.size());
 
-                if (newList.size() < pageSize) allLoadedStation = true;
+            List<String> pageUuids = allFavoriteUuids.subList(fromIndex, toIndex);
 
-                currentList.addAll(newList);
-                favoriteStations.postValue(UiState.success(currentList));
-                currentStationPage++;
-            } catch (Exception e) {
-                favoriteStations.postValue(UiState.error("Ошибка загрузки: " + e.getMessage()));
-            } finally {
-                isLoadingStation = false;
-            }
+            dataFromRadio.getStationsByUUID(new RadioCallback<>() {
+                @Override
+                public void onSuccess(List<RadioStation> radioStations) {
+                    currentList.addAll(radioStations);
+                    favoriteStations.postValue(UiState.success(currentList));
+
+                    currentStationCount = toIndex;
+
+                    isLoadingStation = false;
+
+                    if (currentStationCount >= allFavoriteUuids.size()) {
+                        allLoadedStation = true;
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable t) {
+                    isLoadingStation = false;
+                    favoriteStations.postValue(UiState.error("Ошибка загрузки: " + t.getMessage()));
+                }
+
+                @Override
+                public void onLoading() {
+                }
+            }, pageUuids);
         });
     }
-    private void loadStationsStart(){
-        favoriteStations.setValue(UiState.loading());
-        executor.execute(() -> {
-            try {
-                Log.d("FavoriteViewModel","loadStart");
-                List<RadioStation> list = radioRepository.getFavoriteStations(currentStationPage,1000);
-                favoriteStations.postValue(UiState.success(list));
-            } catch (Exception e) {
-                favoriteStations.postValue(UiState.error("Ошибка загрузки: " + e.getMessage()));
-            }
-        });
-    }
+
     public void loadTrackNextPage() {
         if (isLoadingTrack || allLoadedTrack) return;
 
@@ -149,7 +161,7 @@ public class FavoriteViewModel extends ViewModel implements FavoriteStationRepos
     @Override
     public void onFavoriteStationsChanged() {
         Log.d("PlayerViewModel","Trig, stations");
-        currentStationPage = 0;
+        currentStationCount = 0;
         allLoadedStation = false;
         loadStationNextPage();
     }

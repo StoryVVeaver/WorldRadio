@@ -45,9 +45,9 @@ public class HistoryRepositoryImpl implements HistoryRepository {
         }
     }
     @Override
-    public List<History> getHistoryList(int page, int page_size) {
+    public List<History> getHistoryList(int offset, int page_size) {
         try {
-            return historyDao.getHistoryByUser(userDao.getIdUserInSystem(), page,page_size);
+            return historyDao.getHistoryByUser(userDao.getIdUserInSystem(), offset,page_size);
         } catch (Exception e) {
             Log.e("HistoryRepositoryImpl", "Failed get history list");
             return null;

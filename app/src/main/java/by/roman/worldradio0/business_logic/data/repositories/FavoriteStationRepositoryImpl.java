@@ -3,6 +3,7 @@ package by.roman.worldradio0.business_logic.data.repositories;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import by.roman.worldradio0.business_logic.data.database.FavoriteStationDao;
@@ -36,6 +37,8 @@ public class FavoriteStationRepositoryImpl implements FavoriteStationRepository 
             listener.onFavoriteStationsChanged();
         }
     }
+
+
     @Override
     public void addToFavorite(int id, String UUID){
         try {
@@ -61,15 +64,6 @@ public class FavoriteStationRepositoryImpl implements FavoriteStationRepository 
         } catch (Exception e) {
             Log.e("FavoriteStationRepositoryImpl","Failed check favorite: " + e.getMessage());
             return false;
-        }
-    }
-    @Override
-    public List<String> getFavoritesById(int currentPage, int pagSize){
-        try {
-            return favoriteStationDao.getFavoritesByUser(userDao.getIdUserInSystem(),currentPage,pagSize);
-        } catch (Exception e) {
-            Log.e("FavoriteStationRepositoryImpl","Failed get favorites list: " + e.getMessage());
-            return null;
         }
     }
     @Override

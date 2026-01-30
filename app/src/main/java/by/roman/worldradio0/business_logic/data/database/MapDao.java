@@ -45,7 +45,7 @@ public class MapDao {
                     String uuid = cursor.getString(idxUuid);
                     double lat = cursor.getDouble(idxLat);
                     double lon = cursor.getDouble(idxLon);
-                    result.add(new MapPoint(lat, lon, uuid));
+                    result.add(new MapPoint(lat, lon, uuid, "","","",""));
                 }
             }
         } finally {
@@ -82,7 +82,7 @@ public class MapDao {
             if (cursor != null && cursor.moveToFirst()) {
                 double lat = cursor.getDouble(cursor.getColumnIndexOrThrow(RadioStationDao.COLUMN_GEO_LATITUDE_STATION));
                 double lon = cursor.getDouble(cursor.getColumnIndexOrThrow(RadioStationDao.COLUMN_GEO_LONGITUDE_STATION));
-                return new MapPoint(lat, lon, uuid);
+                return new MapPoint(lat, lon, uuid, "","","","");
             }
             return null;
         } finally {

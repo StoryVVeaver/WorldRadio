@@ -24,12 +24,17 @@ import by.roman.worldradio0.business_logic.data.models.Filter;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FilterRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRepository;
+import by.roman.worldradio0.business_logic.network.radio.CountryModel;
+import by.roman.worldradio0.business_logic.network.radio.DataFromRadio;
+import by.roman.worldradio0.business_logic.network.radio.LangModel;
+import by.roman.worldradio0.business_logic.network.radio.callbacks.RadioCallback;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
 public class FilterViewModel extends ViewModel {
     private final RadioRepository radioRepository;
     private final FilterRepository filterRepository;
+    private final DataFromRadio dataFromRadio;
     private final MutableLiveData<UiState<List<RadioStation>>> stations = new MutableLiveData<>();
     private final MutableLiveData<List<String>> countriesLive = new MutableLiveData<>();
     private final MutableLiveData<List<String>> languagesLive = new MutableLiveData<>();
@@ -39,9 +44,9 @@ public class FilterViewModel extends ViewModel {
     private final MutableLiveData<UiState<Integer>> count = new MutableLiveData<>();
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
     private final AtomicBoolean isActive = new AtomicBoolean(true);
-    private int currentPage = 0;
+    private int currentOffset = 0;
     private boolean isLastPage = false;
-    private final int pageSize = 20;
+    private final int pageSize = 100;
     private List<RadioStation> allStations = new ArrayList<>();
 
     public boolean getIsLastPage() {
@@ -52,8 +57,8 @@ public class FilterViewModel extends ViewModel {
         this.isLastPage = isLastPage;
     }
 
-    public void setPage(int page) {
-        this.currentPage = page;
+    public void setOffset(int offset) {
+        this.currentOffset = offset;
     }
 
     public int getPageSize() {
@@ -61,9 +66,10 @@ public class FilterViewModel extends ViewModel {
     }
 
     @Inject
-    public FilterViewModel(RadioRepository radioRepository, FilterRepository filterRepository) {
+    public FilterViewModel(RadioRepository radioRepository, FilterRepository filterRepository, DataFromRadio dataFromRadio) {
         this.radioRepository = radioRepository;
         this.filterRepository = filterRepository;
+        this.dataFromRadio = dataFromRadio;
     }
 
     public LiveData<UiState<List<RadioStation>>> getFilteredStations() {
@@ -73,75 +79,35 @@ public class FilterViewModel extends ViewModel {
     public LiveData<UiState<Integer>> getCountFilteredStations() {
         return count;
     }
-
-    public void loadCount() {
-        if (!isActive.get()) return;
-
-        count.setValue(UiState.loading());
-        executor.execute(() -> {
-            if (!isActive.get()) return;
-
-            try {
-                int cnt = radioRepository.getCountFilteredStations();
-                if (isActive.get()) {
-                    count.postValue(UiState.success(cnt));
-                }
-            } catch (Exception e) {
-                if (isActive.get()) {
-                    count.postValue(UiState.error("Ошибка загрузки: " + e.getMessage()));
-                }
-            }
-        });
-    }
     public void loadStart() {
         if (!isActive.get()) return;
-
+        resetState();
         stations.setValue(UiState.loading());
-        executor.execute(() -> {
-            if (!isActive.get()) return;
-
-            try {
-                List<RadioStation> list = radioRepository.getFilteredStations(0, pageSize);
-                if (!isActive.get()) return;
-
-                if (list.isEmpty()) {
-                    stations.postValue(UiState.error("Лист пуст"));
-                } else {
-                    Set<String> uuids = new HashSet<>();
-                    List<RadioStation> uniqueList = new ArrayList<>();
-                    for (RadioStation rs : list) {
-                        if (!uuids.contains(rs.getStationUuid())) {
-                            uuids.add(rs.getStationUuid());
-                            uniqueList.add(rs);
-                        }
-                    }
-
-                    allStations = new ArrayList<>(uniqueList);
-                    stations.postValue(UiState.success(allStations));
-                    currentPage = 1;
-                    isLastPage = uniqueList.size() < pageSize;
-                }
-            } catch (Exception e) {
-                if (isActive.get()) {
-                    stations.postValue(UiState.error("Ошибка загрузки: " + e.getMessage()));
-                }
-            }
-        });
+        loadData(0);
     }
 
     public void loadNextPage() {
-        if (!isActive.get() || isLastPage) return;
+        if (!isActive.get() || isLastPage || stations.getValue() != null && stations.getValue().status == UiState.Status.LOADING) return;
+        loadData(currentOffset);
+    }
 
-        executor.execute(() -> {
-            if (!isActive.get()) return;
+    private void loadData(int offset) {
+        if (!isActive.get()) return;
+        stations.postValue(UiState.loading());
+        Filter filter = filterRepository.getFilters();
 
-            try {
-                List<RadioStation> list = radioRepository.getFilteredStations(currentPage, pageSize);
+        dataFromRadio.getStations(new RadioCallback<>() {
+            @Override
+            public void onSuccess(List<RadioStation> list) {
                 if (!isActive.get()) return;
 
                 if (list.isEmpty()) {
-                    isLastPage = true;
-                    stations.postValue(UiState.success(allStations));
+                    if (offset == 0) {
+                        stations.postValue(UiState.error("Лист пуст"));
+                    } else {
+                        isLastPage = true;
+                        stations.postValue(UiState.success(allStations));
+                    }
                 } else {
                     Set<String> existingUuids = allStations.stream()
                             .map(RadioStation::getStationUuid)
@@ -151,57 +117,90 @@ public class FilterViewModel extends ViewModel {
                             .filter(rs -> !existingUuids.contains(rs.getStationUuid()))
                             .collect(Collectors.toList());
 
+                    if (offset == 0) allStations.clear();
                     allStations.addAll(uniqueNew);
+                    stations.postValue(UiState.success(new ArrayList<>(allStations)));
 
-                    stations.postValue(UiState.success(allStations));
-                    currentPage++;
+                    currentOffset += pageSize;
                     isLastPage = list.size() < pageSize;
                 }
-            } catch (Exception e) {
+                count.postValue(UiState.success(allStations.size()));
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
                 if (isActive.get()) {
-                    stations.postValue(UiState.error("Ошибка загрузки: " + e.getMessage()));
+                    stations.postValue(UiState.error("Ошибка сети: " + t.getMessage()));
                 }
             }
-        });
+
+            @Override
+            public void onLoading() {
+            }
+        }, filter, offset, pageSize);
     }
 
-    public void cancelPendingOperations() {
-        isActive.set(false);
-    }
     public void resetState() {
         isActive.set(true);
-        currentPage = 0;
+        currentOffset = 0;
         isLastPage = false;
         allStations.clear();
     }
     public void loadAutocompleteData() {
-        executor.execute(() -> {
-            try {
-                List<String> c = radioRepository.getContriesCode();
-                List<String> l = radioRepository.getLanguage();
-                List<String> t = radioRepository.getTags();
-                List<String> n = radioRepository.getNames();
-                List<String> co = radioRepository.getCodecs();
-
+        dataFromRadio.getCountries(new RadioCallback<>() {
+            @Override
+            public void onSuccess(List<CountryModel> c) {
                 if (!isActive.get()) return;
-
                 countriesLive.postValue(c != null ? LocationUtil.getCountryNamesFromIso(c) : new ArrayList<>());
-                languagesLive.postValue(l != null ? l : new ArrayList<>());
-                tagsLive.postValue(t != null ? t : new ArrayList<>());
-                namesLive.postValue(n != null ? n : new ArrayList<>());
-                codecsLive.postValue(co != null ? co : new ArrayList<>());
-            } catch (Exception e) {
-                Log.e("FilterViewModel", e.getMessage() + " ");
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+            }
+
+            @Override
+            public void onLoading() {
             }
         });
+        dataFromRadio.getLang(new RadioCallback<>() {
+            @Override
+            public void onSuccess(List<LangModel> list) {
+                if (!isActive.get()) return;
+                List<String> l = new ArrayList<>();
+                for(LangModel i: list){
+                    l.add(i.getName());
+                }
+                languagesLive.postValue(l);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+            }
+
+            @Override
+            public void onLoading() {
+            }
+        });
+
+
+//        executor.execute(() -> {
+//            try {
+//                List<String> t = radioRepository.getTags();
+//                List<String> n = radioRepository.getNames();
+//
+//                if (!isActive.get()) return;
+//
+//                tagsLive.postValue(t != null ? t : new ArrayList<>());
+//                namesLive.postValue(n != null ? n : new ArrayList<>());
+//            } catch (Exception e) {
+//                Log.e("FilterViewModel", e.getMessage() + " ");
+//            }
+//        });
     }
     public void setFilters(Filter filter) {
         filterRepository.setFilters(new FilterDTO().fromModel(filter));
         resetState();
         loadNextPage();
-    }
-    public void clearFilters(){
-        filterRepository.removeFilters();
     }
     public Filter getFilters() {
         return filterRepository.getFilters();
@@ -217,9 +216,6 @@ public class FilterViewModel extends ViewModel {
     }
     public LiveData<List<String>> getNamesLive() {
         return namesLive;
-    }
-    public LiveData<List<String>> getCodecsLive() {
-        return codecsLive;
     }
     @Override
     protected void onCleared() {

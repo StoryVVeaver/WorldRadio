@@ -9,6 +9,6 @@ public interface HistoryRepository {
     void addToHistory(History history);
     void removeFromHistory(String uuid);
     void removeFromHistoryById(int userId);
-    List<History> getHistoryList(int page, int page_size);
+    List<History> getHistoryList(int offset, int page_size);
     History getLastHistory();
 }

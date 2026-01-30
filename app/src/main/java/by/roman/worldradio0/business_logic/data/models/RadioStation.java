@@ -1,24 +1,24 @@
 package by.roman.worldradio0.business_logic.data.models;
 
 public class RadioStation {
-    private final String stationUuid;
-    private final String name;
-    private final String url;
-    private final String urlResolved;
-    private final String homepage;
-    private final String favicon;
-    private final String tags;
-    private final String country;
-    private final String countryCode;
-    private final String state;
-    private final String language;
-    private final String languageCodes;
-    private final int votes;
-    private final String codec;
-    private final int bitrate;
-    private final int hls;
-    private final double geoLat;
-    private final double geoLong;
+    private String stationUuid;
+    private String name;
+    private String url;
+    private String urlResolved;
+    private String homepage;
+    private String favicon;
+    private String tags;
+    private String country;
+    private String countryCode;
+    private String state;
+    private String language;
+    private String languageCodes;
+    private int votes;
+    private String codec;
+    private int bitrate;
+    private int hls;
+    private double geoLat;
+    private double geoLong;
     public RadioStation(String stationUuid, String name, String url, String urlResolved, String homepage,
                         String favicon, String tags, String country, String countryCode, String state,
                         String language, String languageCodes, int votes, String codec, int bitrate,
@@ -42,7 +42,14 @@ public class RadioStation {
         this.geoLat = geoLat;
         this.geoLong = geoLong;
     }
-    // Getters
+    public RadioStation(String uuid, String name, String url, String favicon, String homepage){
+        this.stationUuid = uuid;
+        this.name = name;
+        this.url = url;
+        this.favicon = favicon;
+        this.homepage = homepage;
+    }
+
     public String getStationUuid() {
         return stationUuid;
     }

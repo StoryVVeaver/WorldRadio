@@ -88,9 +88,8 @@ public class HistoryDao {
     }
 
 
-    public List<History> getHistoryByUser(int userId, int currentPage, int pageSize) {
+    public List<History> getHistoryByUser(int userId, int offset, int pageSize) {
         List<History> histories = new ArrayList<>();
-        int offset = currentPage * pageSize;
 
         String query = "SELECT " + COLUMN_USER_ID_HISTORY + ", " + COLUMN_UUID_STATION_HISTORY +
                 " FROM " + TABLE_HISTORY +

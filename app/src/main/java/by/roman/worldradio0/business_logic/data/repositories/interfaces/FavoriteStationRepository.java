@@ -6,7 +6,6 @@ import by.roman.worldradio0.business_logic.data.models.FavoriteStation;
 import by.roman.worldradio0.business_logic.data.repositories.FavoriteStationRepositoryImpl;
 
 public interface FavoriteStationRepository {
-    List<String> getFavoritesById(int currentPage, int pageSize);
     void addToFavorite(int id, String uuid);
     void removeFromFavorite(String uuid);
     boolean isStationFavorite(String uuid);

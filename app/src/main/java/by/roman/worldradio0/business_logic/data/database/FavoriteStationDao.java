@@ -66,18 +66,14 @@ public class FavoriteStationDao {
         }
         return isFavorite;
     }
-    public List<String> getFavoritesByUser(int userId, int currentPage, int pageSize) {
+    public List<String> getFavoritesByUser(int userId) {
         List<String> favorites = new ArrayList<>();
-        int offset = currentPage * pageSize;
 
         String query = "SELECT " + COLUMN_STATION_UUID_FAVORITE + " FROM " + TABLE_FAVORITE_STATION +
-                " WHERE " + COLUMN_USER_ID_FAVORITE + " = ?" +
-                " LIMIT ? OFFSET ?";
+                " WHERE " + COLUMN_USER_ID_FAVORITE + " = ?";
 
         Cursor cursor = db.rawQuery(query, new String[]{
                 valueOf(userId),
-                valueOf(pageSize),
-                valueOf(offset)
         });
 
         if (cursor != null) {

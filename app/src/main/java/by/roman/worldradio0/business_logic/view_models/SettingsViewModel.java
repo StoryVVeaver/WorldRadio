@@ -24,6 +24,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -37,6 +38,7 @@ import by.roman.worldradio0.business_logic.UiState;
 import by.roman.worldradio0.business_logic.data.dto.FavoriteStationDTO;
 import by.roman.worldradio0.business_logic.data.dto.RadioStationDTO;
 import by.roman.worldradio0.business_logic.data.dto.SettingsDTO;
+import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.data.models.Settings;
 import by.roman.worldradio0.business_logic.data.models.User;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.FavoriteStationRepository;
@@ -45,7 +47,7 @@ import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRep
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.SettingsRepository;
 import by.roman.worldradio0.business_logic.data.repositories.interfaces.UserRepository;
 import by.roman.worldradio0.business_logic.network.radio.DataFromRadio;
-import by.roman.worldradio0.business_logic.network.radio.callbacks.StationsCallback;
+import by.roman.worldradio0.business_logic.network.radio.callbacks.RadioCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.DataFromUserAPI;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FavoriteStationsCallback;
 import by.roman.worldradio0.business_logic.network.userAPI.callbacks.FilterCallback;
@@ -206,12 +208,6 @@ public class SettingsViewModel extends ViewModel {
                 }
                 break;
 
-            case UPDATE_STATIONS_DATA:
-                if(!flag_stations){
-                    loadFromAPI();
-                }
-                break;
-
             case EXIT_FROM_ACCOUNT:
                 userRepository.exit();
                 timeToLeave.postValue(UiState.success(true));
@@ -242,32 +238,36 @@ public class SettingsViewModel extends ViewModel {
                 break;
         }
     }
-    private void loadFromAPI() {
-        flag_stations = true;
-        count.postValue(UiState.loading(0));
+    private void loadFromAPI(int offset, int limit) {
+
+
+
+
 
         executor.execute(() -> dataFromUserAPI.getStationsFilter(new FilterCallback() {
             @Override
             public void onSuccess(List<String> filters) {
                 Set<String> filter = new HashSet<>(filters);
                 radioRepository.clearTable();
-                executor.execute(() -> dataFromRadio.getStations(new StationsCallback() {
+                Log.v("SettViewModel","filters loaded, start stations");
+                executor.execute(() -> dataFromRadio.getStations(new RadioCallback<>() {
                     @Override
-                    public void onSuccess(List<RadioStationDTO> stations) {
+                    public void onSuccess(List<RadioStation> stations) {
                         long currentProgress = 0;
                         int totalStations = stations.size();
-
-                        for (RadioStationDTO dto : stations) {
+                        Log.v("SettViewModel", "stations loaded, " + totalStations);
+                        List<RadioStation> list = new ArrayList<>();
+                        for (RadioStation raw : stations) {
                             try {
-                                if (!filter.contains(dto.getCountryCode())) {
-                                    radioRepository.addRadioStation(dto);
+                                if (!filter.contains(raw.getCountryCode())) {
+                                    list.add(raw);
                                 }
 
                                 currentProgress++;
-                                count.postValue(UiState.loading((int)((currentProgress * 100) / totalStations)));
+                                count.postValue(UiState.loading((int) ((currentProgress * 100) / totalStations)));
 
                             } catch (Exception e) {
-                                Log.e("DB", "Ошибка при добавлении: " + dto.getName(), e);
+                                Log.e("DB", "Ошибка при добавлении: " + raw.getName(), e);
                             }
                         }
 
@@ -285,7 +285,7 @@ public class SettingsViewModel extends ViewModel {
                     @Override
                     public void onLoading() {
                     }
-                }));
+                }, filterRepository.getFilters(), offset, limit));
             }
 
             @Override
@@ -295,6 +295,11 @@ public class SettingsViewModel extends ViewModel {
                 flag_stations = false;
             }
         }));
+
+
+
+
+
 
     }
     private void loadDataFromUserAPI(){

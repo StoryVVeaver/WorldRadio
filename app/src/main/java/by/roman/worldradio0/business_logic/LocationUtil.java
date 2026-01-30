@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import by.roman.worldradio0.business_logic.network.radio.CountryModel;
+
 public class LocationUtil {
 
     public interface LocationCallback {
@@ -221,20 +223,20 @@ public class LocationUtil {
                 .show();
     }
 
-    public static List<String> getCountryNamesFromIso(List<String> isoCodes) {
+    public static List<String> getCountryNamesFromIso(List<CountryModel> isoCodes) {
         Locale userLocale = Locale.getDefault();
         List<String> result = new ArrayList<>();
 
-        for (String iso : isoCodes) {
-            if (iso == null || iso.trim().isEmpty()) continue;
+        for (CountryModel iso : isoCodes) {
+            if (iso.getCode() == null || iso.getCode().trim().isEmpty()) continue;
 
-            Locale locale = new Locale("", iso);
+            Locale locale = new Locale("", iso.getCode());
             String name = locale.getDisplayCountry(userLocale);
 
             if (!name.isEmpty()) {
                 result.add(name);
             } else {
-                result.add(iso);
+                result.add(iso.getCode());
             }
         }
 

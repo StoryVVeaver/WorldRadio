@@ -14,6 +14,7 @@ import by.roman.worldradio0.business_logic.data.database.MapDao;
 import by.roman.worldradio0.business_logic.data.database.RadioStationDao;
 import by.roman.worldradio0.business_logic.data.database.SQLiteDatabaseManager;
 import by.roman.worldradio0.business_logic.data.database.SettingsDao;
+import by.roman.worldradio0.business_logic.data.database.StationFilterDao;
 import by.roman.worldradio0.business_logic.data.database.UserDao;
 import dagger.Module;
 import dagger.Provides;
@@ -73,6 +74,11 @@ public class DatabaseModule {
     @Singleton
     public MapDao provideMapDao(SQLiteDatabase db) {
         return new MapDao(db);
+    }
+    @Provides
+    @Singleton
+    public StationFilterDao provideStationFilterDao(SQLiteDatabase db){
+        return new StationFilterDao(db);
     }
 }
 

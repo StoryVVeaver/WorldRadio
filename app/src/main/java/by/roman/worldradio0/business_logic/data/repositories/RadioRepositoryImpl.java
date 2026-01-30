@@ -60,14 +60,9 @@ public class RadioRepositoryImpl implements RadioRepository {
         showPlayer.postValue(state);
     }
     @Override
-    public List<RadioStation> getFavoriteStations(int currentPage, int pageSize){
+    public List<String> getFavoriteStations(){
         try {
-            List<String> favoriteUUID = favoriteStationDao.getFavoritesByUser(userDao.getIdUserInSystem(), currentPage, pageSize);
-            List<RadioStation> stations = new ArrayList<>();
-            for(String i : favoriteUUID){
-                stations.add(radioStationDao.getStationById(i));
-            }
-            return stations;
+            return favoriteStationDao.getFavoritesByUser(userDao.getIdUserInSystem());
         } catch (Exception e) {
             Log.e("RadioRepositoryImp","Failed load favorite stations");
             return null;

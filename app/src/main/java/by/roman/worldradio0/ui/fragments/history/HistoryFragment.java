@@ -138,7 +138,7 @@ public class HistoryFragment extends Fragment {
 
                 if (playerViewModel.isInternetConnected()) {
                     if (playerViewModel.checkTypeInternet().equals("ok")) {
-                        playerViewModel.start(adapter.getUUID(position));
+                        playerViewModel.start(adapter.getStation(position));
                     } else {
                         Toast.makeText(requireActivity(), getResources().getString(R.string.not_correct_internet), Toast.LENGTH_SHORT).show();
                     }
@@ -164,15 +164,15 @@ public class HistoryFragment extends Fragment {
         String[] options = {getResources().getString(R.string.schedule_playback), getResources().getString(R.string.delete_record)};
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle(playerViewModel.getStationById(adapter.getUUID(position)).getName());
+        builder.setTitle(adapter.getStation(position).getName());
         builder.setItems(options, (dialog, which) -> {
             switch (which) {
                 case 0:
-                    AlarmFragment fragment = AlarmFragment.newInstance(adapter.getUUID(position));
+                    AlarmFragment fragment = AlarmFragment.newInstance(adapter.getStation(position).getStationUuid());
                     stateViewModel.openFullscreen(fragment);
                     break;
                 case 1:
-                    viewModel.deleteOneFromHistory(adapter.getUUID(position));
+                    viewModel.deleteOneFromHistory(adapter.getStation(position).getStationUuid());
                     viewModel.resetState();
                     viewModel.loadStart();
                     break;
@@ -204,8 +204,11 @@ public class HistoryFragment extends Fragment {
                         if (isVisibleToUser && adapter != null) {
                             adapter.hideLoading();
                             List<RadioStation> data = list.data;
+
                             adapter.replaceAll(data);
+
                             isLoadingNextPage = false;
+                            back.setEnabled(true);
                         }
                     });
                     break;
@@ -213,7 +216,7 @@ public class HistoryFragment extends Fragment {
                     handler.post(() -> {
                         if (isVisibleToUser && adapter != null) {
                             adapter.hideLoading();
-                            if (!list.message.isEmpty() && !list.message.equals("")) {
+                            if (!list.message.isEmpty()) {
                                 if(list.message.equals("Лист пуст")){
                                     Toast.makeText(requireActivity(), getResources().getString(R.string.no_history), Toast.LENGTH_SHORT).show();
                                 } else {
