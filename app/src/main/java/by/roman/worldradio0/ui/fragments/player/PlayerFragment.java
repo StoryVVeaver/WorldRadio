@@ -7,11 +7,13 @@ import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.motion.widget.MotionLayout;
@@ -37,6 +39,8 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 
 import by.roman.worldradio0.R;
+import by.roman.worldradio0.business_logic.UiState;
+import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.view_models.PlayerViewModel;
 import by.roman.worldradio0.business_logic.view_models.StateViewModel;
 import by.roman.worldradio0.ui.fragments.filter.FilterFragment;
@@ -97,7 +101,7 @@ public class PlayerFragment extends Fragment {
         long startTime = System.nanoTime();
         findAll(view);
         initAll();
-        putData(view);
+        initObservers();
         buttons();
         Log.v("CollapsedPlayerFragment","Performance - onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
     }
@@ -274,109 +278,87 @@ public class PlayerFragment extends Fragment {
 
 
     @SuppressLint("SetTextI18n")
-    private void putData(@NonNull View view){
-        station.setText(viewModel.getCurrentStation().getName());
-        large_station.setText(viewModel.getCurrentStation().getName());
+    private void initObservers() {
+        viewModel.getCurrentTrack().observe(getViewLifecycleOwner(), currentTrack -> {
+            track.setText(currentTrack);
+            large_track.setText(currentTrack);
+        });
 
-        Glide.with(view.getContext())
-                .load(viewModel.getCurrentStation().getFavicon())
-                .error(AppCompatResources.getDrawable(requireContext(),R.drawable.no_icon))
+        viewModel.getIsPlaying().observe(getViewLifecycleOwner(), isPlaying -> {
+            this.isPlaying = isPlaying;
+            icons();
+        });
+
+        viewModel.getIsFavorite().observe(getViewLifecycleOwner(), isFavorite -> {
+            this.isFavorite = isFavorite;
+            fav_icons();
+        });
+
+        viewModel.getIsFavoriteTrack().observe(getViewLifecycleOwner(), isFavoriteTrack -> {
+            this.isFavoriteTrack = isFavoriteTrack;
+            favTrack_icons();
+        });
+
+        stateViewModel.isMapOpen().observe(getViewLifecycleOwner(), flag -> {
+            this.isMap = flag;
+        });
+
+
+        viewModel.getIsPlayingChanged().observe(getViewLifecycleOwner(), this::putData);
+
+        viewModel.getVote().observe(getViewLifecycleOwner(), state -> {
+            if (state.status == UiState.Status.SUCCESS && state.data != null) {
+                if(state.data.isOk()){
+                    Toast.makeText(requireActivity(), getString(R.string.vote_correct), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(requireActivity(), getString(R.string.vote_err), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private void putData(RadioStation radioStation) {
+        if (radioStation == null) {
+            station.setText("");
+            large_station.setText("");
+            return;
+        }
+
+        station.setText(radioStation.getName());
+        large_station.setText(radioStation.getName());
+
+        // 3. Загрузка картинок через Glide
+        Glide.with(this)
+                .load(radioStation.getFavicon())
+                .error(R.drawable.no_icon)
                 .into(logo);
 
-        Glide.with(view.getContext())
+        Glide.with(this)
                 .asBitmap()
-                .load(viewModel.getCurrentStation().getFavicon())
-                .error(AppCompatResources.getDrawable(requireContext(), R.drawable.no_icon))
+                .load(radioStation.getFavicon())
+                .error(R.drawable.no_icon)
                 .into(new CustomTarget<Bitmap>() {
                     @Override
-                    public void onResourceReady(@NonNull Bitmap resource, Transition<? super Bitmap> transition) {
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                         large_logo.setImageBitmap(resource);
                         int centerColor = getCenterColor(resource);
-
                         applyLargePlayerBackground(centerColor);
                         applyBottomPlayerBackground(centerColor);
                     }
 
                     @Override
-                    public void onLoadCleared(android.graphics.drawable.Drawable placeholder) {
-                        largePlayer.setBackgroundResource(R.color.background);
-                        bottomPlayer.setBackgroundResource(R.color.bottom_player);
-                        large_logo.setImageDrawable(AppCompatResources.getDrawable(requireContext(),R.drawable.no_icon));
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+                        large_logo.setImageResource(R.drawable.no_icon);
                     }
                 });
 
-        viewModel.getCurrentTrack().observe(getViewLifecycleOwner(), currentTrack -> {
-            track.setText(currentTrack);
-            large_track.setText(currentTrack);
-        });
-        viewModel.getIsPlaying().observe(getViewLifecycleOwner(), isPlaying -> {
-            this.isPlaying = isPlaying;
-            icons();
-        });
-        viewModel.getIsFavorite().observe(getViewLifecycleOwner(), isFavorite -> {
-            this.isFavorite = isFavorite;
-            fav_icons();
-        });
-        viewModel.getIsFavoriteTrack().observe(getViewLifecycleOwner(), isFavoriteTrack -> {
-            this.isFavoriteTrack = isFavoriteTrack;
-            favTrack_icons();
-        });
-        stateViewModel.isMapOpen().observe(getViewLifecycleOwner(), flag -> {
-            this.isMap = flag;
-        });
-        viewModel.getIsPlayingChanged().observe(getViewLifecycleOwner(), currentStation -> {
-            isFavorite = viewModel.isFavorite();
-            isFavoriteTrack = viewModel.isFavoriteTrack();
-            fav_icons();
-            favTrack_icons();
-            station.setText(currentStation.getName());
-            large_station.setText(currentStation.getName());
+        // 4. Проверка homepage (тут был твой краш в конце метода)
+        String homepage = radioStation.getHomepage();
+        large_internet.setVisibility(homepage != null && !homepage.isEmpty() ? VISIBLE : INVISIBLE);
 
-            Glide.with(view.getContext())
-                    .load(currentStation.getFavicon())
-                    .error(AppCompatResources.getDrawable(requireContext(),R.drawable.no_icon))
-                    .into(logo);
-
-            Glide.with(view.getContext())
-                    .asBitmap()
-                    .load(currentStation.getFavicon())
-                    .error(AppCompatResources.getDrawable(requireContext(),R.drawable.no_icon))
-                    .into(new CustomTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(@NonNull Bitmap resource, Transition<? super Bitmap> transition) {
-                            large_logo.setImageBitmap(resource);
-                            int centerColor = getCenterColor(resource);
-
-                            applyLargePlayerBackground(centerColor);
-                            applyBottomPlayerBackground(centerColor);
-                        }
-                        @Override
-                        public void onLoadCleared(android.graphics.drawable.Drawable placeholder) {
-                            largePlayer.setBackgroundResource(R.color.background);
-                            bottomPlayer.setBackgroundResource(R.color.bottom_player);
-                            large_logo.setImageDrawable(AppCompatResources.getDrawable(requireContext(),R.drawable.no_icon));
-                        }
-                    });
-        });
-        viewModel.getVote().observe(getViewLifecycleOwner(), state -> {
-            switch (state.status){
-                case LOADING:
-                    break;
-                case SUCCESS:
-                    if(state.data.isOk()){
-                        Toast.makeText(requireActivity(), getResources().getString(R.string.vote_correct) , Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(requireActivity(), getResources().getString(R.string.vote_err) , Toast.LENGTH_SHORT).show();
-                    }
-                    break;
-                case ERROR:
-                    Toast.makeText(requireActivity(), state.message , Toast.LENGTH_SHORT).show();
-                    break;
-            }
-        });
-        if(!viewModel.getCurrentStation().getHomepage().isEmpty()){
-            large_internet.setVisibility(VISIBLE);
-        } else large_internet.setVisibility(INVISIBLE);
+        // 5. Обновление иконок
+        isFavorite = viewModel.isFavorite();
+        isFavoriteTrack = viewModel.isFavoriteTrack();
         fav_icons();
         favTrack_icons();
     }
