@@ -121,6 +121,9 @@ public class FavoriteStationsFragment extends Fragment {
     }
 
     private void observeAndLoad() {
+        playerViewModel.getSelectedCard().observe(getViewLifecycleOwner(), uuid -> {
+            adapter.setSelectedStationUuid(uuid);
+        });
         viewModel.getFavoriteStations().observe(getViewLifecycleOwner(), stations -> {
             switch (stations.status) {
                 case LOADING:

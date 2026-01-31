@@ -166,6 +166,9 @@ public class ListFragment extends Fragment {
     }
 
     private void observeAndLoad() {
+        playerViewModel.getSelectedCard().observe(getViewLifecycleOwner(), uuid -> {
+            adapter.setSelectedStationUuid(uuid);
+        });
         viewModel.getFilteredStations().observe(getViewLifecycleOwner(), stations -> {
             if (!isVisibleToUser) return;
 

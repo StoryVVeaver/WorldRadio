@@ -5,11 +5,13 @@ import static android.view.View.VISIBLE;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Build;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -17,6 +19,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -27,6 +30,7 @@ import java.util.List;
 
 import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
+import by.roman.worldradio0.ui.elements.view.InnerGlowMaterialCardView;
 
 public class RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int TYPE_STATION = 0;
@@ -36,6 +40,7 @@ public class RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private List<RadioStation> stations = new ArrayList<>();
     private final OnItemClickListener listener;
     private boolean isLoading = false;
+    private String selectedStationUuid = null;
 
     public interface OnItemClickListener {
         void onStationItemClick(int position);
@@ -52,6 +57,24 @@ public class RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public void setMode(int mode) {
         this.mode = mode;
         notifyDataSetChanged();
+    }
+
+    public void setSelectedStationUuid(String uuid) {
+        String oldUuid = this.selectedStationUuid;
+        this.selectedStationUuid = uuid;
+
+        notifyItemChangedByUuid(oldUuid);
+        notifyItemChangedByUuid(uuid);
+    }
+
+    private void notifyItemChangedByUuid(String uuid) {
+        if (uuid == null) return;
+        for (int i = 0; i < stations.size(); i++) {
+            if (uuid.equals(stations.get(i).getStationUuid())) {
+                notifyItemChanged(i);
+                break;
+            }
+        }
     }
 
     @NonNull
@@ -72,12 +95,11 @@ public class RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof StationViewHolder) {
             RadioStation station = stations.get(position);
-            boolean isLast = false;
-            if(position + 1 == stations.size()){
-                isLast = true;
-            }
+            boolean isLast = (position + 1 == stations.size());
+            boolean isSelected = station.getStationUuid().equals(selectedStationUuid);
+
             StationViewHolder stationHolder = (StationViewHolder) holder;
-            stationHolder.bind(station, isLast);
+            stationHolder.bind(station, isLast, isSelected);
 
             holder.itemView.setOnClickListener(v -> {
                 int pos = holder.getBindingAdapterPosition();
@@ -124,6 +146,7 @@ public class RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         return result;
     }
 
+
     public void addStations(List<RadioStation> newStations) {
         if (newStations == null || newStations.isEmpty()) return;
         int start;
@@ -142,6 +165,48 @@ public class RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         new android.os.Handler(android.os.Looper.getMainLooper()).post(this::notifyDataSetChanged);
     }
 
+    private void glow(@NonNull InnerGlowMaterialCardView card) {
+        Context context = card.getContext();
+        card.setGlowColor(ContextCompat.getColor(context, R.color.buttonBackgroundColor));
+        int glowColor = ContextCompat.getColor(context, R.color.buttonBackgroundColor);
+        int spotColor = ContextCompat.getColor(context, R.color.bottom_player);
+
+        card.setOutlineSpotShadowColor(ContextCompat.getColor(context, R.color.buttonBackgroundColor));
+        card.setOutlineAmbientShadowColor(ContextCompat.getColor(context, R.color.bottom_player));
+
+        float elevationPx = dpToPx(context, 15);
+        int strokePx = (int) dpToPx(context, 2);
+
+        card.setInnerGlowEnabled(true);
+        card.setCardElevation(elevationPx);
+        card.setStrokeWidth(strokePx);
+        card.setStrokeColor(glowColor);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            card.setOutlineAmbientShadowColor(glowColor);
+            card.setOutlineSpotShadowColor(spotColor);
+        }
+    }
+
+    private void resetStyle(@NonNull InnerGlowMaterialCardView card) {
+        card.setInnerGlowEnabled(false);
+        card.setCardElevation(dpToPx(card.getContext(), 2)); // Базовая тень
+        card.setStrokeWidth(0);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            int defaultColor = ContextCompat.getColor(card.getContext(), android.R.color.black);
+            card.setOutlineAmbientShadowColor(defaultColor);
+            card.setOutlineSpotShadowColor(defaultColor);
+        }
+    }
+
+    private float dpToPx(Context context, int dp) {
+        return TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                dp,
+                context.getResources().getDisplayMetrics()
+        );
+    }
 
     @SuppressLint("NotifyDataSetChanged")
     public void clear() {
@@ -165,6 +230,7 @@ public class RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         private final TextView nameStation, country, quality;
         private final ImageView logoStation, flag, button;
         private final FrameLayout card;
+        private final InnerGlowMaterialCardView cardView;
 
         public StationViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -175,16 +241,20 @@ public class RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             button = itemView.findViewById(R.id.delButton_card);
             quality = itemView.findViewById(R.id.quality_collapsed_player);
             card = itemView.findViewById(R.id.radio_card);
+            cardView = itemView.findViewById(R.id.station_card);
         }
 
         @SuppressLint("SetTextI18n")
-        void bind(@NonNull RadioStation station, boolean isLast) {
+        void bind(@NonNull RadioStation station, boolean isLast, boolean isSelected) {
             nameStation.setText(station.getName());
             nameStation.setSelected(true);
             country.setText(station.getCountry());
-            int bitrate = station.getBitrate();
             card.setPadding(0, 0, 0, 0);
-
+            if (isSelected) {
+                glow(cardView);
+            } else {
+                resetStyle(cardView);
+            }
             if(isLast){
                 int bottomPaddingPx = (int) TypedValue.applyDimension(
                         TypedValue.COMPLEX_UNIT_DIP,
@@ -193,21 +263,7 @@ public class RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 );
                 card.setPadding(0, 0, 0, bottomPaddingPx);
             }
-            if(bitrate > 400){
-                if(bitrate > 5000){
-                    bitrate = bitrate / 100;
-                    if(bitrate < 129){
-                        quality.setText("LQ");
-                    } else if (bitrate < 320 ) {
-                    } else quality.setText("HQ");
-                } else quality.setText("LQ");
-            } else {
-                if(bitrate < 129){
-                    quality.setText("LQ");
-                } else if (bitrate > 319 ) {
-                    quality.setText("HQ");
-                }
-            }
+
             if (mode == 1) {
                 button.setVisibility(VISIBLE);
                 quality.setVisibility(GONE);

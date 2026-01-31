@@ -21,9 +21,15 @@ public class InnerGlowMaterialCardView extends MaterialCardView {
     private final float blurRadius;
     private final RectF innerRect = new RectF();
     private boolean innerGlowEnabled = false;
+    private int glowColor = ContextCompat.getColor(getContext(), R.color.red);
 
     public InnerGlowMaterialCardView(@NonNull Context context) {
         this(context, null);
+    }
+    public void setGlowColor(int color) {
+        this.glowColor = color;
+        glowPaint.setColor(color);
+        invalidate();
     }
 
     public InnerGlowMaterialCardView(@NonNull Context context, @Nullable AttributeSet attrs) {
@@ -35,7 +41,7 @@ public class InnerGlowMaterialCardView extends MaterialCardView {
                 getResources().getDisplayMetrics()
         );
 
-        int glowColor = ContextCompat.getColor(getContext(), R.color.red);
+
         glowPaint.setStyle(Paint.Style.STROKE);
         glowPaint.setStrokeWidth(
                 TypedValue.applyDimension(

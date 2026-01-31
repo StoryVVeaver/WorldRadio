@@ -67,6 +67,7 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     private final MutableLiveData<Boolean> playNext = new MutableLiveData<>();
     private final MutableLiveData<Boolean> playPrevious = new MutableLiveData<>();
     private final MutableLiveData<UiState<VoteModel>> vote = new MutableLiveData<>();
+    private final MutableLiveData<String> selectedCard = new MutableLiveData<>();
     private Settings settings;
     private RadioStation currentStation;
 
@@ -142,6 +143,8 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     public void start(RadioStation station) {
         String uuid = station.getStationUuid();
         currentStation = station;
+        selectedCard.postValue(uuid);
+        radioRepository.setCurrentUUID(uuid);
         Intent intent = new Intent(context, PlayerService.class);
         intent.setAction(PlayerService.ACTION_START);
         intent.putExtra(PlayerService.EXTRA_STREAM_UUID, uuid);
@@ -284,6 +287,9 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     public RadioStation getStationById(String uuid){
         return radioRepository.getStationById(uuid);
     }
+    public LiveData<String> getSelectedCard(){
+        return selectedCard;
+    }
     public LiveData<Boolean> getIsPlaying(){
         return isPlaying;
     }
@@ -329,5 +335,6 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     @Override
     public void onPlayingChanged() {
         isPlayingChanged.postValue(getCurrentStation());
+        currentTrack.postValue("");
     }
 }

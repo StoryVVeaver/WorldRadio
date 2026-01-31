@@ -187,6 +187,9 @@ public class HistoryFragment extends Fragment {
         dialog.show();
     }
     private void observeAndLoad(){
+        playerViewModel.getSelectedCard().observe(getViewLifecycleOwner(), uuid -> {
+            adapter.setSelectedStationUuid(uuid);
+        });
         viewModel.getHistoryList().observe(getViewLifecycleOwner(), list -> {
             back.setEnabled(true);
             switch (list.status){

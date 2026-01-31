@@ -72,10 +72,15 @@ public class FavoriteViewModel extends ViewModel implements FavoriteStationRepos
 
         isLoadingStation = true;
 
-        UiState<List<RadioStation>> currentState = favoriteStations.getValue();
-        List<RadioStation> currentList = (currentState != null && currentState.data != null)
-                ? new ArrayList<>(currentState.data)
-                : new ArrayList<>();
+        List<RadioStation> currentList;
+        if (currentStationCount == 0) {
+            currentList = new ArrayList<>();
+        } else {
+            UiState<List<RadioStation>> currentState = favoriteStations.getValue();
+            currentList = (currentState != null && currentState.data != null)
+                    ? new ArrayList<>(currentState.data)
+                    : new ArrayList<>();
+        }
 
         favoriteStations.postValue(UiState.loading());
 
