@@ -7,6 +7,7 @@ import static android.view.View.VISIBLE;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.FrameLayout;
 
 import androidx.activity.EdgeToEdge;
@@ -93,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setAdapter(adapter);
         viewPager.setUserInputEnabled(true);
         viewPager.setOffscreenPageLimit(2);
+        setViewPagerSensitivity(viewPager, 3);
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
@@ -230,6 +232,21 @@ public class MainActivity extends AppCompatActivity {
             });
         } else {
             super.onBackPressed();
+        }
+    }
+    private void setViewPagerSensitivity(ViewPager2 viewPager, int multiplier) {
+        try {
+            java.lang.reflect.Field recyclerViewField = ViewPager2.class.getDeclaredField("mRecyclerView");
+            recyclerViewField.setAccessible(true);
+            androidx.recyclerview.widget.RecyclerView recyclerView = (androidx.recyclerview.widget.RecyclerView) recyclerViewField.get(viewPager);
+
+            java.lang.reflect.Field touchSlopField = androidx.recyclerview.widget.RecyclerView.class.getDeclaredField("mTouchSlop");
+            touchSlopField.setAccessible(true);
+
+            int touchSlop = (int) touchSlopField.get(recyclerView);
+            touchSlopField.set(recyclerView, touchSlop * multiplier);
+        } catch (Exception e) {
+            Log.e("MainActivity", "Error changing ViewPager sensitivity", e);
         }
     }
 }

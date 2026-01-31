@@ -145,6 +145,7 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
         currentStation = station;
         selectedCard.postValue(uuid);
         radioRepository.setCurrentUUID(uuid);
+        historyRepository.addToHistory(new History(userRepository.getUserInSystem(), uuid));
         Intent intent = new Intent(context, PlayerService.class);
         intent.setAction(PlayerService.ACTION_START);
         intent.putExtra(PlayerService.EXTRA_STREAM_UUID, uuid);

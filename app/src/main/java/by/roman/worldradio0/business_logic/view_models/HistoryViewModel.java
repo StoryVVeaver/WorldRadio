@@ -28,12 +28,12 @@ public class HistoryViewModel extends ViewModel {
     private final HistoryRepository historyRepository;
     private final UserRepository userRepository;
     private final RadioRepository radioRepository;
-    private final DataFromRadio dataFromRadio; // Добавлено
+    private final DataFromRadio dataFromRadio;
 
     private final AtomicBoolean isActive = new AtomicBoolean(true);
     private int currentPage = 0;
     private boolean isLastPage = false;
-    private final int pageSize = 20;
+    private final int pageSize = 100;
 
     private List<RadioStation> allStations = new ArrayList<>();
     private final MutableLiveData<UiState<List<RadioStation>>> historyList = new MutableLiveData<>();
