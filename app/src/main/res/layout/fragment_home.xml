@@ -49,13 +49,13 @@
                     android:id="@+id/mapMode"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:background="@color/selectedMode">
+                    android:background="@color/unselectedMode">
 
                     <ImageView
                         android:id="@+id/mapImage"
                         android:layout_width="55dp"
                         android:layout_height="40dp"
-                        android:src="@drawable/map"
+                        android:src="@drawable/unselected_map"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -67,13 +67,13 @@
                     android:id="@+id/listMode"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:background="@color/unselectedMode">
+                    android:background="@color/selectedMode">
 
                     <ImageView
                         android:id="@+id/listImage"
                         android:layout_width="55dp"
                         android:layout_height="40dp"
-                        android:src="@drawable/unselected_list"
+                        android:src="@drawable/list"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -85,7 +85,7 @@
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/fragmentContainerView_Home"
-            android:name="by.roman.worldradio0.ui.fragments.main.MapFragment"
+            android:name="by.roman.worldradio0.ui.fragments.main.ListFragment"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"

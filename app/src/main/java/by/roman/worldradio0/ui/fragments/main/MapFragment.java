@@ -214,12 +214,12 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         GeoPoint center = (GeoPoint) map.getMapCenter();
         BoundingBox box = map.getBoundingBox();
 
-        // Радиус до угла экрана
         GeoPoint northEast = new GeoPoint(box.getLatNorth(), box.getLonEast());
         double radius = center.distanceToAsDouble(northEast);
 
         lastLoadCenter = center;
         lastZoom = map.getZoomLevelDouble();
+        if(center.getLatitude() == 0 && center.getLongitude() == 0) return;
 
         viewModel.loadPointsByLocation(center.getLatitude(), center.getLongitude(), radius);
     }

@@ -10,6 +10,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.OptIn;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.media3.common.AudioAttributes;
+import androidx.media3.common.C;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
@@ -35,12 +37,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 @UnstableApi
+@Singleton
 public class RadioManager {
     private static final String TAG = "RadioManager";
 
-    private final ExoPlayer player;
+    private ExoPlayer player;
     private final Context context;
     private final MutableLiveData<String> currentTrack = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isPlaying = new MutableLiveData<>();
@@ -50,27 +54,42 @@ public class RadioManager {
 
     @Inject
     public RadioManager(Context context) {
-        this.context = context;
+        this.context = context.getApplicationContext();
+    }
 
-        DataSource.Factory dataSourceFactory = createDataSourceFactory();
-        MediaSource.Factory mediaSourceFactory = new DefaultMediaSourceFactory(dataSourceFactory);
+    private void ensurePlayerInitialized() {
+        if (player == null) {
+            synchronized (this) {
+                if (player == null) {
+                    Log.d(TAG, "Initializing ExoPlayer instance...");
 
-        this.player = new ExoPlayer.Builder(context)
-                .setMediaSourceFactory(mediaSourceFactory)
-                .build();
+                    DataSource.Factory dataSourceFactory = createDataSourceFactory();
+                    MediaSource.Factory mediaSourceFactory = new DefaultMediaSourceFactory(dataSourceFactory);
 
-        player.setPlayWhenReady(false);
+                    AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                            .setUsage(C.USAGE_MEDIA)
+                            .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+                            .build();
 
-        setupPlayerListeners();
+                    this.player = new ExoPlayer.Builder(context)
+                            .setMediaSourceFactory(mediaSourceFactory)
+                            .setAudioAttributes(audioAttributes, true)
+                            .setHandleAudioBecomingNoisy(true)
+                            .build();
+
+                    player.setPlayWhenReady(false);
+                    setupPlayerListeners();
+                }
+            }
+        }
     }
 
     private DataSource.Factory createDataSourceFactory() {
         HttpDataSource.Factory httpDataSourceFactory = new DefaultHttpDataSource.Factory()
-                .setUserAgent("App/1.0 (Linux; Android) ExoPlayer")
+                .setUserAgent("WorldRadio/1.0 (Android) ExoPlayer")
                 .setConnectTimeoutMs(15000)
                 .setReadTimeoutMs(15000)
-                .setAllowCrossProtocolRedirects(true)
-                .setKeepPostFor302Redirects(true);
+                .setAllowCrossProtocolRedirects(true);
 
         return new DefaultDataSource.Factory(context, httpDataSourceFactory);
     }
@@ -85,7 +104,6 @@ public class RadioManager {
                     if (entry instanceof IcyInfo) {
                         IcyInfo icy = (IcyInfo) entry;
                         String streamTitle = icy.title;
-                        Log.d(TAG, "Stream Title: " + streamTitle);
                         if (streamTitle != null && !streamTitle.trim().isEmpty()) {
                             currentTrack.postValue(streamTitle);
                         }
@@ -97,14 +115,12 @@ public class RadioManager {
         player.addListener(new Player.Listener() {
             @Override
             public void onPlaybackStateChanged(int playbackState) {
-                Log.d(TAG, "Playback state changed: " + playbackState);
                 switch (playbackState) {
                     case Player.STATE_READY:
                         isPlaying.postValue(player.getPlayWhenReady());
                         playbackError.postValue(null);
                         break;
                     case Player.STATE_BUFFERING:
-                        isPlaying.postValue(false);
                         break;
                     case Player.STATE_ENDED:
                     case Player.STATE_IDLE:
@@ -115,64 +131,43 @@ public class RadioManager {
 
             @Override
             public void onIsPlayingChanged(boolean playing) {
-                Log.d(TAG, "Is playing changed: " + playing);
                 isPlaying.postValue(playing);
             }
 
             @Override
             public void onPlayerError(@NonNull PlaybackException error) {
-                Log.e(TAG, "Playback error: " + error.getMessage(), error);
+                Log.e(TAG, "Playback error: " + error.getErrorCodeName(), error);
                 isPlaying.postValue(false);
-
-                String errorMessage = getErrorMessage(error);
-                playbackError.postValue(errorMessage);
-
+                playbackError.postValue(getErrorMessage(error));
                 player.stop();
             }
         });
     }
 
     private String getErrorMessage(PlaybackException error) {
-        String baseMessage;
         switch (error.errorCode) {
             case PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED:
-                baseMessage = "Ошибка сети: проверьте подключение";
-                break;
+                return "Ошибка сети: проверьте подключение";
             case PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS:
-                baseMessage = "Ошибка сервера (HTTP-статус): " + error.getMessage();
-                break;
-            case PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND:
-                baseMessage = "Поток не найден (404)";
-                break;
+                return "Ошибка сервера (404/500)";
             case PlaybackException.ERROR_CODE_DECODING_FAILED:
-                baseMessage = "Формат аудио не поддерживается устройством";
-                break;
-            case PlaybackException.ERROR_CODE_IO_UNSPECIFIED:
-                if (error.getMessage() != null && error.getMessage().toLowerCase().contains("ssl")) {
-                    baseMessage = "Ошибка SSL/TLS: проблема с безопасным соединением";
-                } else {
-                    baseMessage = "Ошибка ввода/вывода: " + error.getMessage();
-                }
-                break;
+                return "Формат аудио не поддерживается";
             default:
-                baseMessage = "Ошибка воспроизведения: " + error.getMessage();
-                break;
+                return "Ошибка воспроизведения";
         }
-        return baseMessage;
     }
 
     public void play(String streamUrl) {
-        Log.d(TAG, "Attempting to play: " + streamUrl);
-
         if (streamUrl == null || streamUrl.isEmpty()) {
-            playbackError.postValue("Неверный URL потока");
+            playbackError.postValue("Неверный URL");
             return;
         }
+
+        ensurePlayerInitialized();
 
         stop();
 
         if (isPlaylistUrl(streamUrl)) {
-            Log.d(TAG, "Detected playlist, parsing...");
             parseAndPlayPlaylist(streamUrl);
         } else {
             playDirectStream(streamUrl);
@@ -180,14 +175,12 @@ public class RadioManager {
     }
 
     private boolean isPlaylistUrl(String url) {
-        return url.toLowerCase().endsWith(".m3u") ||
-                url.toLowerCase().endsWith(".m3u8") ||
-                url.toLowerCase().endsWith(".pls");
+        String lower = url.toLowerCase();
+        return lower.endsWith(".m3u") || lower.endsWith(".m3u8") || lower.endsWith(".pls");
     }
 
     private void parseAndPlayPlaylist(String playlistUrl) {
-        if (playlistUrl.toLowerCase().endsWith(".m3u8") || playlistUrl.toLowerCase().endsWith(".mpd")) {
-            Log.d(TAG, "HLS/DASH detected, playing directly.");
+        if (playlistUrl.toLowerCase().contains("m3u8")) {
             mainHandler.post(() -> playDirectStream(playlistUrl));
             return;
         }
@@ -195,26 +188,10 @@ public class RadioManager {
         executorService.execute(() -> {
             try {
                 List<String> streamUrls = parsePlaylist(playlistUrl);
-
-                if (streamUrls.isEmpty()) {
-                    mainHandler.post(() -> {
-                        playbackError.postValue("В плейлисте не найдено действующих потоков. Попытка воспроизвести оригинальный URL.");
-                        playDirectStream(playlistUrl);
-                    });
-                    return;
-                }
-
-                Log.d(TAG, "Found " + streamUrls.size() + " streams in playlist, using first one");
-
-                String firstStream = streamUrls.get(0);
-                mainHandler.post(() -> playDirectStream(firstStream));
-
+                String urlToPlay = streamUrls.isEmpty() ? playlistUrl : streamUrls.get(0);
+                mainHandler.post(() -> playDirectStream(urlToPlay));
             } catch (Exception e) {
-                Log.e(TAG, "Error parsing playlist: " + e.getMessage(), e);
-                mainHandler.post(() -> {
-                    playbackError.postValue("Ошибка парсинга плейлиста. Попытка воспроизвести оригинальный URL.");
-                    playDirectStream(playlistUrl);
-                });
+                mainHandler.post(() -> playDirectStream(playlistUrl));
             }
         });
     }
@@ -223,151 +200,85 @@ public class RadioManager {
         List<String> streamUrls = new ArrayList<>();
         HttpURLConnection connection = null;
         BufferedReader reader = null;
-
         try {
             URL url = new URL(playlistUrl);
             connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
             connection.setConnectTimeout(10000);
             connection.setReadTimeout(10000);
-            connection.setRequestProperty("User-Agent", "WorldRadio/1.0");
-
-            int responseCode = connection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                InputStream inputStream = connection.getInputStream();
-                reader = new BufferedReader(new InputStreamReader(inputStream));
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String line;
-
                 while ((line = reader.readLine()) != null) {
                     line = line.trim();
-
-                    if (line.isEmpty() || line.startsWith("#")) {
-                        continue;
-                    }
-
-                    if (playlistUrl.toLowerCase().endsWith(".pls")) {
-                        if (line.toLowerCase().startsWith("file")) {
-                            int equalsIndex = line.indexOf('=');
-                            if (equalsIndex > 0) {
-                                String urlPart = line.substring(equalsIndex + 1).trim();
-                                if (isValidUrl(urlPart)) {
-                                    streamUrls.add(urlPart);
-                                }
-                            }
-                        }
-                    } else {
-                        if (isValidUrl(line)) {
-                            streamUrls.add(line);
-                        }
+                    if (line.isEmpty() || line.startsWith("#")) continue;
+                    if (playlistUrl.endsWith(".pls") && line.toLowerCase().startsWith("file")) {
+                        int idx = line.indexOf('=');
+                        if (idx > 0) streamUrls.add(line.substring(idx + 1).trim());
+                    } else if (line.startsWith("http")) {
+                        streamUrls.add(line);
                     }
                 }
             }
-
         } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (Exception e) {
-                    Log.e(TAG, "Error closing reader", e);
-                }
-            }
-            if (connection != null) {
-                connection.disconnect();
-            }
+            if (reader != null) reader.close();
+            if (connection != null) connection.disconnect();
         }
-
         return streamUrls;
     }
 
-    private boolean isValidUrl(String url) {
-        return url != null &&
-                (url.startsWith("http://") || url.startsWith("https://")) &&
-                url.length() > 10;
-    }
-
-
     private void playDirectStream(String streamUrl) {
-        try {
-            currentTrack.postValue(null);
-            playbackError.postValue(null);
+        ensurePlayerInitialized();
+        mainHandler.post(() -> {
+            try {
+                currentTrack.setValue(null);
+                playbackError.setValue(null);
 
-            MediaItem mediaItem = new MediaItem.Builder()
-                    .setUri(Uri.parse(streamUrl))
-                    .build();
-
-            player.setMediaItem(mediaItem);
-            player.prepare();
-            player.setPlayWhenReady(true);
-
-            Log.d(TAG, "Playback started successfully: " + streamUrl);
-
-        } catch (Exception e) {
-            Log.e(TAG, "Error starting playback: " + e.getMessage(), e);
-            playbackError.postValue("Не удалось начать воспроизведение: " + e.getMessage());
-            isPlaying.postValue(false);
-        }
+                MediaItem mediaItem = MediaItem.fromUri(streamUrl);
+                player.setMediaItem(mediaItem);
+                player.prepare();
+                player.setPlayWhenReady(true);
+            } catch (Exception e) {
+                playbackError.postValue("Ошибка старта");
+            }
+        });
     }
 
     public void stop() {
-        Log.d(TAG, "Stopping playback");
-        try {
-            if (player.isPlaying() || player.getPlaybackState() != Player.STATE_IDLE) {
-                player.stop();
-                player.clearMediaItems();
-            }
-            player.setPlayWhenReady(false);
-            currentTrack.postValue(null);
-            playbackError.postValue(null);
-        } catch (Exception e) {
-            Log.e(TAG, "Error stopping playback: " + e.getMessage(), e);
-        }
+        if (player == null) return;
+        mainHandler.post(() -> {
+            player.stop();
+            player.clearMediaItems();
+            currentTrack.setValue(null);
+        });
     }
 
     public void pause() {
-        Log.d(TAG, "Pausing playback");
-        player.setPlayWhenReady(false);
+        if (player != null) player.setPlayWhenReady(false);
     }
 
     public void resume() {
-        Log.d(TAG, "Resuming playback");
-        if (player.getPlaybackState() == Player.STATE_READY) {
+        if (player != null && player.getPlaybackState() == Player.STATE_READY) {
             player.setPlayWhenReady(true);
         }
     }
 
     public void setVolume(float volume) {
-        player.setVolume(volume);
+        if (player != null) player.setVolume(volume);
     }
 
-    public LiveData<String> getCurrentTrack() {
-        return currentTrack;
-    }
-
-    public LiveData<Boolean> getLiveIsPlaying() {
-        return isPlaying;
-    }
-
-    public LiveData<String> getPlaybackError() {
-        return playbackError;
-    }
+    public LiveData<String> getCurrentTrack() { return currentTrack; }
+    public LiveData<Boolean> getLiveIsPlaying() { return isPlaying; }
+    public LiveData<String> getPlaybackError() { return playbackError; }
 
     public ExoPlayer getPlayer() {
+        ensurePlayerInitialized();
         return player;
     }
 
-    public boolean getIsPlaying() {
-        return player != null && player.getPlayWhenReady() && player.getPlaybackState() == Player.STATE_READY;
-    }
-
     public void release() {
-        Log.d(TAG, "Releasing player resources");
-        try {
-            if (player != null) {
-                player.stop();
-                player.release();
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error releasing player: " + e.getMessage(), e);
+        if (player != null) {
+            player.release();
+            player = null;
         }
         executorService.shutdownNow();
     }

@@ -35,6 +35,8 @@ public class HomeFragment extends Fragment {
     private ConstraintLayout list;
     private ImageView mapImage;
     private ImageView listImage;
+    private MapFragment mapFragment;
+    private ListFragment listFragment;
     private boolean isMap = true;
 
     @Override
@@ -61,10 +63,14 @@ public class HomeFragment extends Fragment {
         Log.v("HomeFragment: performance", "onViewCreated started");
         findAllId(view);
         stateViewModel = new ViewModelProvider(requireActivity()).get(StateViewModel.class);
-        mode(new ListFragment(),1);
-        map.setOnClickListener(v1 -> mode(new MapFragment(),0));
-        list.setOnClickListener(v1 -> mode(new ListFragment(),1));
-        //TODO  перелистывание экранов только по краям карты
+        view.postDelayed(() -> {
+            if (isAdded()) {
+                mode(1);
+            }
+        }, 50);
+        map.setOnClickListener(v1 -> mode(0));
+        list.setOnClickListener(v1 -> mode(1));
+
         Log.v("HomeFragment: performance", "onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
         timerButton.setOnClickListener(v -> {
             stateViewModel.openFullscreen(new TimerFragment());
@@ -73,33 +79,44 @@ public class HomeFragment extends Fragment {
             stateViewModel.openFullscreen(new FilterFragment());
         });
     }
-    
-    private void mode(Fragment f, int num){
-        change(f);
-        switch (num){
-            case 0:
-                isMap = true;
-                stateViewModel.setMapOpen(isMap);
-                map.setBackgroundColor(getColor(requireContext(), R.color.selectedMode));
-                mapImage.setImageDrawable(AppCompatResources.getDrawable(requireContext(),R.drawable.map));
-                list.setBackgroundColor(getColor(requireContext(), R.color.unselectedMode));
-                listImage.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.unselected_list));
-                break;
-            case 1:
-                isMap = false;
-                stateViewModel.setMapOpen(isMap);
-                map.setBackgroundColor(getColor(requireContext(), R.color.unselectedMode));
-                mapImage.setImageDrawable(AppCompatResources.getDrawable(requireContext(),R.drawable.unselected_map));
-                list.setBackgroundColor(getColor(requireContext(), R.color.selectedMode));
-                listImage.setImageDrawable(AppCompatResources.getDrawable(requireContext(),R.drawable.list));
-                break;
-        }
-    }
-    private void change(Fragment f){
+
+    private void mode(int num) {
         FragmentTransaction ft = getChildFragmentManager().beginTransaction();
-        ft.setCustomAnimations(R.anim.fade_in,R.anim.fade_out);
-        ft.replace(R.id.fragmentContainerView_Home,f);
+        ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
+
+        if (mapFragment == null) {
+            mapFragment = new MapFragment();
+            ft.add(R.id.fragmentContainerView_Home, mapFragment, "MAP");
+        }
+        if (listFragment == null) {
+            listFragment = new ListFragment();
+            ft.add(R.id.fragmentContainerView_Home, listFragment, "LIST");
+        }
+
+        if (num == 0) {
+            isMap = true;
+            ft.show(mapFragment).hide(listFragment);
+            updateTabUI(true);
+        } else {
+            isMap = false;
+            ft.show(listFragment).hide(mapFragment);
+            updateTabUI(false);
+        }
         ft.commit();
+        stateViewModel.setMapOpen(isMap);
+    }
+
+    private void updateTabUI(boolean isMapActive) {
+        int selected = getColor(requireContext(), R.color.selectedMode);
+        int unselected = getColor(requireContext(), R.color.unselectedMode);
+
+        map.setBackgroundColor(isMapActive ? selected : unselected);
+        mapImage.setImageDrawable(AppCompatResources.getDrawable(requireContext(),
+                isMapActive ? R.drawable.map : R.drawable.unselected_map));
+
+        list.setBackgroundColor(isMapActive ? unselected : selected);
+        listImage.setImageDrawable(AppCompatResources.getDrawable(requireContext(),
+                isMapActive ? R.drawable.unselected_list : R.drawable.list));
     }
     private void findAllId(View view){
         timerButton = view.findViewById(R.id.timerButtonView);

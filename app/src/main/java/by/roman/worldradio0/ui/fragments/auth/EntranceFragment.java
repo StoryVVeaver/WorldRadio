@@ -195,7 +195,7 @@ public class EntranceFragment extends Fragment {
         int errorColor = ContextCompat.getColor(requireContext(), R.color.red);
         int lightErrorColor = ContextCompat.getColor(requireContext(), R.color.lightRed);
 
-        text.setText("");
+        text.getText().clear();
 
         float elevationPx = dpToPx(30);
         int strokePx     = (int) dpToPx(2);
