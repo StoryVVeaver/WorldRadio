@@ -1,6 +1,9 @@
 package by.roman.worldradio0.business_logic.data.models;
 
-public class RadioStation {
+import java.io.Serializable;
+
+public class RadioStation implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String stationUuid;
     private String name;
     private String url;

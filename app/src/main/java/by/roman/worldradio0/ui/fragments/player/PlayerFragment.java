@@ -76,11 +76,13 @@ public class PlayerFragment extends Fragment {
     private boolean isMap = true;
     private final int MIN_SWIPE_DISTANCE = 10;
     private final int MAX_TAP_MOVEMENT = 5;
+    private RadioStation currentStation = null;
 
     @Override
     public void onResume(){
         super.onResume();
         large_internet.setEnabled(true);
+        if(currentStation == null) viewModel.loadCurrentStation();
     }
 
     @Override
@@ -279,6 +281,20 @@ public class PlayerFragment extends Fragment {
 
     @SuppressLint("SetTextI18n")
     private void initObservers() {
+        viewModel.getCurrentStationLive().observe(getViewLifecycleOwner(), station -> {
+            switch (station.status){
+                case LOADING:
+                    break;
+                case SUCCESS:
+                    if(station.data != null){
+                        currentStation = station.data;
+                        putData(currentStation);
+                    }
+                    break;
+                case ERROR:
+                    break;
+            }
+        });
         viewModel.getCurrentTrack().observe(getViewLifecycleOwner(), currentTrack -> {
             track.setText(currentTrack);
             large_track.setText(currentTrack);
@@ -304,7 +320,12 @@ public class PlayerFragment extends Fragment {
         });
 
 
-        viewModel.getIsPlayingChanged().observe(getViewLifecycleOwner(), this::putData);
+        viewModel.getIsPlayingChanged().observe(getViewLifecycleOwner(), state -> {
+            if(state != null){
+                currentStation = state;
+                putData(currentStation);
+            }
+        });
 
         viewModel.getVote().observe(getViewLifecycleOwner(), state -> {
             if (state.status == UiState.Status.SUCCESS && state.data != null) {
@@ -321,6 +342,7 @@ public class PlayerFragment extends Fragment {
         if (radioStation == null) {
             station.setText("");
             large_station.setText("");
+            viewModel.loadCurrentStation();
             return;
         }
 

@@ -3,8 +3,12 @@ package by.roman.worldradio0.business_logic.view_models;
 import static androidx.core.content.ContextCompat.startForegroundService;
 
 import android.annotation.SuppressLint;
+import android.app.Application;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -15,6 +19,8 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.media3.common.util.UnstableApi;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -57,6 +63,7 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     private final UserRepository userRepository;
     private final DataFromRadio dataFromRadio;
     private final SettingsRepository settingsRepository;
+    private final Application application;
     private final MutableLiveData<String> currentTrack = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isPlaying = new MutableLiveData<>();
     private final MutableLiveData<RadioStation> isPlayingChanged = new MutableLiveData<>();
@@ -68,6 +75,7 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     private final MutableLiveData<Boolean> playPrevious = new MutableLiveData<>();
     private final MutableLiveData<UiState<VoteModel>> vote = new MutableLiveData<>();
     private final MutableLiveData<String> selectedCard = new MutableLiveData<>();
+    private final MutableLiveData<UiState<RadioStation>> station = new MutableLiveData<>();
     private Settings settings;
     private RadioStation currentStation;
 
@@ -75,7 +83,7 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     @Inject
     public PlayerViewModel(@NonNull RadioManager radioManager,HistoryRepository historyRepository, FavoriteTrackRepository favoriteTrackRepository,
                            FavoriteStationRepository favoriteStationRepository, @ApplicationContext Context context, DataFromRadio dataFromRadio,
-                           RadioRepository radioRepository, UserRepository userRepository, SettingsRepository settingsRepository) {
+                           RadioRepository radioRepository, UserRepository userRepository, SettingsRepository settingsRepository, Application application) {
         this.context = context;
         this.radioRepository = radioRepository;
         this.userRepository = userRepository;
@@ -84,6 +92,7 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
         this.favoriteTrackRepository = favoriteTrackRepository;
         this.favoriteStationRepository = favoriteStationRepository;
         this.settingsRepository = settingsRepository;
+        this.application = application;
         radioManager.getCurrentTrack().observeForever(track -> {
             if (track != null) {
                 currentTrack.setValue(track);
@@ -197,6 +206,76 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
         intent.setAction(PlayerService.ACTION_PAUSE);
         context.startService(intent);
     }
+    public void loadCurrentStation() {
+        station.postValue(UiState.loading());
+        Log.v("PlayerViewModel", "ищем станцию");
+        String currentUUID = radioRepository.getCurrentUUID();
+
+        if (currentUUID == null || currentUUID.isEmpty()) {
+            Log.v("PlayerViewModel", "ищем станцию в сервисе");
+            requestUuidFromService();
+        } else {
+            Log.v("PlayerViewModel", "нашлось в репе");
+            fetchStationFromApi(currentUUID);
+        }
+    }
+
+    @OptIn(markerClass = UnstableApi.class)
+    private void requestUuidFromService() {
+        BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                RadioStation stationFromService = (RadioStation) intent.getSerializableExtra(PlayerService.EXTRA_STATION_DATA);
+
+                if (stationFromService != null && stationFromService.getStationUuid() != null) {
+                    Log.v("PlayerViewModel", "в сервисе нашли " + stationFromService.getStationUuid());
+                    fetchStationFromApi(stationFromService.getStationUuid());
+                } else {
+                    station.postValue(UiState.error("No active station in service"));
+                }
+
+                application.unregisterReceiver(this);
+            }
+        };
+
+        IntentFilter filter = new IntentFilter(PlayerService.ACTION_SEND_CURRENT_STATION);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            application.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            application.registerReceiver(receiver, filter);
+        }
+
+        Intent requestIntent = new Intent(application, PlayerService.class);
+        requestIntent.setAction(PlayerService.ACTION_GET_CURRENT_STATION);
+        application.startService(requestIntent);
+    }
+
+    private void fetchStationFromApi(String uuid) {
+        List<String> uuids = new ArrayList<>();
+        uuids.add(uuid);
+
+        dataFromRadio.getStationsByUUID(new RadioCallback<List<RadioStation>>() {
+            @Override
+            public void onSuccess(List<RadioStation> radioStations) {
+                if (radioStations != null && !radioStations.isEmpty()) {
+                    station.postValue(UiState.success(radioStations.get(0)));
+                } else {
+                    station.postValue(UiState.error("Station not found in API"));
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.e("PlayerViewModel", "Error: " + t.getMessage());
+                station.postValue(UiState.error(t.getMessage()));
+            }
+
+            @Override
+            public void onLoading() {
+
+            }
+        }, uuids);
+    }
     public void playNext(){
         Log.v("PlayerViewModel","start next");
         playNext.postValue(true);
@@ -288,6 +367,9 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     }
     public RadioStation getStationById(String uuid){
         return radioRepository.getStationById(uuid);
+    }
+    public LiveData<UiState<RadioStation>> getCurrentStationLive(){
+        return station;
     }
     public LiveData<String> getSelectedCard(){
         return selectedCard;

@@ -33,6 +33,9 @@ public class PlayerService extends Service {
     public static final String EXTRA_URL = "EXTRA_URL";
     public static final String EXTRA_NAME = "EXTRA_NAME";
     public static final String EXTRA_ICON = "EXTRA_ICON";
+    public static final String ACTION_GET_CURRENT_STATION = "by.roman.worldradio0.ACTION_GET_CURRENT_STATION";
+    public static final String ACTION_SEND_CURRENT_STATION = "by.roman.worldradio0.ACTION_SEND_CURRENT_STATION";
+    public static final String EXTRA_STATION_DATA = "extra_station_data";
 
     private static final int NOTIFICATION_ID = 1;
     private boolean isManuallyStopped = false;
@@ -89,6 +92,9 @@ public class PlayerService extends Service {
         Log.d("RadioService", "Received action: " + action);
 
         switch (action) {
+            case ACTION_GET_CURRENT_STATION:
+                sendCurrentStationBroadcast();
+                break;
             case ACTION_PLAY:
                 Log.d("RadioService", "Resume playback");
                 runOnMainThread(radioManager::resume);
@@ -149,6 +155,16 @@ public class PlayerService extends Service {
             stopForeground(true);
             radioRepository.setStatePlayer(false);
         });
+    }
+    private void sendCurrentStationBroadcast() {
+        Log.v("PlayerService", "отправляем " + currentStation.getStationUuid());
+        Intent responseIntent = new Intent(ACTION_SEND_CURRENT_STATION);
+        if (currentStation != null) {
+            responseIntent.putExtra(EXTRA_STATION_DATA, currentStation);
+        }
+        responseIntent.setPackage(getPackageName());
+        responseIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        sendBroadcast(responseIntent);
     }
 
     private void runOnMainThread(Runnable runnable) {
