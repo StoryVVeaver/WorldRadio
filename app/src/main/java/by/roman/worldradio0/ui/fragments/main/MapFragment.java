@@ -74,8 +74,10 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
     private Settings settings;
 
     private double lat, lon;
+    private boolean isAnimating = false;
     private GeoPoint lastLoadCenter = new GeoPoint(0.0, 0.0);
     private double lastZoom = 0;
+    private boolean isManuallySelecting = false;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -104,8 +106,9 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
             mapController.animateTo(new GeoPoint(lat, lon));
             if (map.getZoomLevelDouble() < 12) mapController.setZoom(12.0);
         });
-
-        centerMap(playerViewModel.getCurrentStation());
+        if(playerViewModel.getCurrentStation() == null){
+            centerMap(playerViewModel.getCurrentStation());
+        }
     }
 
     private void findViewByID(@NonNull View view) {
@@ -128,6 +131,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         map.addMapListener(new MapListener() {
             @Override
             public boolean onScroll(ScrollEvent event) {
+                if (isAnimating) return false;
                 scheduleCluster();
                 scheduleUpdateVisibleForCenterSnap();
                 checkAndScheduleApiLoad();
@@ -135,6 +139,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
             }
             @Override
             public boolean onZoom(ZoomEvent event) {
+                if (isAnimating) return false;
                 scheduleCluster();
                 scheduleUpdateVisibleForCenterSnap();
                 checkAndScheduleApiLoad();
@@ -150,6 +155,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
             if(playerViewModel.isInternetConnected()){
                 if(playerViewModel.checkTypeInternet().equals("ok")){
                     RadioStation stationToStart = new RadioStation(snapped.getUuid(), snapped.getName(),snapped.getUrl(), snapped.getFavicon(), snapped.getHomepage());
+                    isManuallySelecting = true;
                     playerViewModel.start(stationToStart);
                 } else {
                     Toast.makeText(getContext(), getResources().getString(R.string.not_correct_internet), Toast.LENGTH_SHORT).show();
@@ -161,9 +167,9 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
 
         centerSnap.setRequireFirstTouch(true);
 
-        Drawable markerDrawable = AppCompatResources.getDrawable(requireContext(), R.drawable.map_point);
-        int iconH = (markerDrawable != null) ? markerDrawable.getIntrinsicHeight() : 100;
-        centerSnap.setDefaultIconOffset(new Point(0, -(iconH / 2)));
+
+
+
 
         clusterer.setOnClusterMarkerClickListener(mp -> centerSnap.snapTo(mp, true, true));
         map.setOnTouchListener((v, event) -> {
@@ -178,6 +184,15 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         updateSnapButtonUI();
     }
 
+    private void onPlayingStationChanged(@Nullable RadioStation station) {
+        if (isManuallySelecting) {
+            isManuallySelecting = false;
+            return;
+        }
+        map.setZoomLevel(17);
+        loadStationsForVisibleRegion();
+        centerMap(station, 17);
+    }
     private void observeData() {
         viewModel.getListPoints().observe(getViewLifecycleOwner(), state -> {
             if (state.status == UiState.Status.SUCCESS && state.data != null) {
@@ -195,7 +210,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
             if (!isPlaying) centerSnap.clearSnapped();
         });
 
-        playerViewModel.getIsPlayingChanged().observe(getViewLifecycleOwner(), this::centerMap);
+        playerViewModel.getIsPlayingChanged().observe(getViewLifecycleOwner(), this::onPlayingStationChanged);
     }
 
     private void checkAndScheduleApiLoad() {
@@ -238,8 +253,35 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
 
     private void centerMap(@Nullable RadioStation station) {
         if (station != null && isValidLocation(station.getGeoLat(), station.getGeoLong())) {
-            mapController.animateTo(new GeoPoint(station.getGeoLat(), station.getGeoLong()));
-            ensureZoom();
+            GeoPoint target = new GeoPoint(station.getGeoLat(), station.getGeoLong());
+            isAnimating = true;
+            centerSnap.setSnapEnabled(false);
+
+            mapController.animateTo(target, 12.0, 1000L);
+
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                isAnimating = false;
+                centerSnap.setSnapEnabled(settings.getSnapEnabled() == 1);
+                centerSnap.snapTo(viewModel.getMapPointByUUID(station.getStationUuid()), false, false);
+            }, 1100);
+        } else {
+            requestUserLocation();
+        }
+    }
+
+    private void centerMap(@Nullable RadioStation station, double zoom) {
+        if (station != null && isValidLocation(station.getGeoLat(), station.getGeoLong())) {
+            GeoPoint target = new GeoPoint(station.getGeoLat(), station.getGeoLong());
+            isAnimating = true;
+            centerSnap.setSnapEnabled(false);
+
+            mapController.animateTo(target, zoom, 1000L);
+
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                isAnimating = false;
+                centerSnap.setSnapEnabled(settings.getSnapEnabled() == 1);
+                centerSnap.snapTo(viewModel.getMapPointByUUID(station.getStationUuid()), true, true);
+            }, 1100);
         } else {
             requestUserLocation();
         }
@@ -252,7 +294,6 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
                 lat = latitude; lon = longitude;
                 mapController.animateTo(new GeoPoint(lat, lon));
                 ensureZoom();
-                // После того как нашли пользователя, грузим станции вокруг него
                 loadStationsForVisibleRegion();
             }
             @Override
