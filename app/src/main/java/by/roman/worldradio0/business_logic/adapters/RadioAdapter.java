@@ -63,7 +63,6 @@ public class RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public void setSelectedStationUuid(String uuid) {
         String oldUuid = this.selectedStationUuid;
         this.selectedStationUuid = uuid;
-
         notifyItemChangedByUuid(oldUuid);
         notifyItemChangedByUuid(uuid);
     }
@@ -75,6 +74,14 @@ public class RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 notifyItemChanged(i);
                 break;
             }
+        }
+    }
+
+    public void clearSelectedStation() {
+        if (this.selectedStationUuid != null) {
+            String oldUuid = this.selectedStationUuid;
+            this.selectedStationUuid = null;
+            notifyItemChangedByUuid(oldUuid);
         }
     }
 

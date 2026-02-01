@@ -183,6 +183,7 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
         intent.setAction(PlayerService.ACTION_STOP);
         context.startService(intent);
         radioRepository.setCurrentUUID("");
+        selectedCard.postValue(null);
     }
     @OptIn(markerClass = UnstableApi.class)
     public void play(){
