@@ -71,6 +71,7 @@ public class FilterViewModel extends ViewModel {
         this.radioRepository = radioRepository;
         this.filterRepository = filterRepository;
         this.dataFromRadio = dataFromRadio;
+        this.isActive.set(true);
     }
 
     public LiveData<UiState<List<RadioStation>>> getFilteredStations() {

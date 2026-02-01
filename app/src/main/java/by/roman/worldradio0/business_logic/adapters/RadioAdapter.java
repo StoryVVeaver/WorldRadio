@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.target.Target;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -280,15 +281,24 @@ public class RadioAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
             Glide.with(itemView.getContext())
                     .load("https://flagsapi.com/" + station.getCountryCode() + "/flat/64.png")
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .thumbnail(0.25f)
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                     .error(AppCompatResources.getDrawable(context,R.drawable.no_icon))
                     .into(flag);
 
-            Glide.with(itemView.getContext())
-                    .load(station.getFavicon())
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .error(AppCompatResources.getDrawable(context,R.drawable.no_icon))
-                    .into(logoStation);
+            String favicon = station.getFavicon();
+            if (favicon != null && !favicon.isEmpty()) {
+                Glide.with(itemView.getContext())
+                        .load(favicon)
+                        .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                        .dontAnimate()
+                        .override(Target.SIZE_ORIGINAL)
+                        .placeholder(R.drawable.no_icon)
+                        .error(R.drawable.no_icon)
+                        .into(logoStation);
+            } else {
+                logoStation.setImageResource(R.drawable.no_icon);
+            }
         }
     }
     static class LoadingViewHolder extends RecyclerView.ViewHolder {

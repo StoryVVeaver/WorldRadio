@@ -42,11 +42,8 @@ public class ListFragment extends Fragment {
     public void onResume() {
         super.onResume();
         isVisibleToUser = true;
-
-        if (isFirstLoad) {
-            viewModel.resetState();
+        if (viewModel.getFilteredStations().getValue() == null) {
             viewModel.loadStart();
-            isFirstLoad = false;
         }
     }
 
@@ -73,6 +70,14 @@ public class ListFragment extends Fragment {
         initAll();
         observeAndLoad();
         setupScrollListener();
+
+        if (viewModel.getFilteredStations().getValue() == null ||
+                viewModel.getFilteredStations().getValue().data == null ||
+                viewModel.getFilteredStations().getValue().data.isEmpty()) {
+
+            viewModel.resetState();
+            viewModel.loadStart();
+        }
 
         Log.v("HomeFragment: performance", "onViewCreated total execution time: " + (System.nanoTime() - startTime) / 1_000_000.0 + "ms");
     }
@@ -170,7 +175,6 @@ public class ListFragment extends Fragment {
             adapter.setSelectedStationUuid(uuid);
         });
         viewModel.getFilteredStations().observe(getViewLifecycleOwner(), stations -> {
-            if (!isVisibleToUser) return;
 
             switch (stations.status) {
                 case LOADING:
