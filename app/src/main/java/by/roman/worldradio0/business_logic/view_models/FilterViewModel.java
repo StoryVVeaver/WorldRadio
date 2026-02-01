@@ -27,6 +27,7 @@ import by.roman.worldradio0.business_logic.data.repositories.interfaces.RadioRep
 import by.roman.worldradio0.business_logic.network.radio.CountryModel;
 import by.roman.worldradio0.business_logic.network.radio.DataFromRadio;
 import by.roman.worldradio0.business_logic.network.radio.LangModel;
+import by.roman.worldradio0.business_logic.network.radio.TagModel;
 import by.roman.worldradio0.business_logic.network.radio.callbacks.RadioCallback;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
@@ -181,21 +182,40 @@ public class FilterViewModel extends ViewModel {
             public void onLoading() {
             }
         });
-
-
-//        executor.execute(() -> {
-//            try {
-//                List<String> t = radioRepository.getTags();
-//                List<String> n = radioRepository.getNames();
-//
-//                if (!isActive.get()) return;
-//
-//                tagsLive.postValue(t != null ? t : new ArrayList<>());
-//                namesLive.postValue(n != null ? n : new ArrayList<>());
-//            } catch (Exception e) {
-//                Log.e("FilterViewModel", e.getMessage() + " ");
-//            }
-//        });
+    }
+    public void loadTags(String query) {
+        if (query.length() < 2) return;
+        dataFromRadio.getTags(new RadioCallback<>() {
+            @Override
+            public void onSuccess(List<TagModel> list) {
+                if (!isActive.get() || list == null) return;
+                List<String> tags = list.stream()
+                        .map(TagModel::getName)
+                        .collect(Collectors.toList());
+                tagsLive.postValue(tags);
+            }
+            @Override
+            public void onFailure(Throwable t) { Log.e("FilterVM", "Tags error: " + t.getMessage()); }
+            @Override
+            public void onLoading() {}
+        }, query);
+    }
+    public void loadNames(String query) {
+        if (query.length() < 2) return;
+        dataFromRadio.getNames(new RadioCallback<>() {
+            @Override
+            public void onSuccess(List<RadioStation> list) {
+                if (!isActive.get() || list == null) return;
+                List<String> names = list.stream()
+                        .map(RadioStation::getName)
+                        .collect(Collectors.toList());
+                namesLive.postValue(names);
+            }
+            @Override
+            public void onFailure(Throwable t) { Log.e("FilterVM", "Names error: " + t.getMessage()); }
+            @Override
+            public void onLoading() {}
+        }, query);
     }
     public void setFilters(Filter filter) {
         filterRepository.setFilters(new FilterDTO().fromModel(filter));

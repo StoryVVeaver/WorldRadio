@@ -13,6 +13,8 @@ import androidx.appcompat.widget.AppCompatTextView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -55,6 +57,9 @@ public class FilterFragment extends Fragment {
     private Filter filter;
     private Chip chipAlphabet, chipRating, chipBitrate;
     private int currentSort = 0;
+
+    private final Handler searchHandler = new Handler(Looper.getMainLooper());
+    private Runnable searchRunnable;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -117,19 +122,14 @@ public class FilterFragment extends Fragment {
     }
 
     private void handleChipSelection(int sortType) {
-        if (currentSort == sortType) {
-            currentSort = 0;
-            chipAlphabet.setChecked(false);
-            chipRating.setChecked(false);
-            chipBitrate.setChecked(false);
-        } else {
+        if (currentSort != sortType) {
             currentSort = sortType;
             chipAlphabet.setChecked(sortType == 1);
             chipRating.setChecked(sortType == 2);
             chipBitrate.setChecked(sortType == 3);
+            filter.setSort(currentSort);
+            viewModel.setFilters(filter);
         }
-        filter.setSort(currentSort);
-        viewModel.setFilters(filter);
     }
 
     private void resetAllFilters() {
@@ -138,7 +138,6 @@ public class FilterFragment extends Fragment {
         actvTags.setText("");
         actvLang.setText("");
 
-        currentSort = 0;
         chipAlphabet.setChecked(false);
         chipRating.setChecked(false);
         chipBitrate.setChecked(false);
@@ -151,12 +150,13 @@ public class FilterFragment extends Fragment {
     }
 
     private void handleSelection(String selectedItem, MaterialAutoCompleteTextView actv, String fieldType) {
+        actv.clearFocus();
         switch (fieldType) {
             case "country":
                 filter.setCountry(LocationUtil.getIsoFromCountryName(selectedItem));
                 break;
             case "tags":
-                filter.setTag(selectedItem);
+                filter.setTag(selectedItem.toLowerCase().trim());
                 break;
             case "language":
                 filter.setLang(selectedItem);
@@ -169,41 +169,57 @@ public class FilterFragment extends Fragment {
                 break;
         }
         viewModel.setFilters(filter);
+        actv.dismissDropDown();
     }
 
     @SuppressLint("SetTextI18n")
     private void observeAndLoad() {
+        viewModel.getCountriesLive().observe(getViewLifecycleOwner(), list -> setupAutoComplete(actvCountry, list, "country"));
+        viewModel.getLanguagesLive().observe(getViewLifecycleOwner(), list -> setupAutoComplete(actvLang, list, "language"));
 
-        viewModel.getCountriesLive().observe(getViewLifecycleOwner(), list ->
-                setupAutoComplete(actvCountry, list, "country"));
-        viewModel.getTagsLive().observe(getViewLifecycleOwner(), list ->
-                setupAutoComplete(actvTags, list, "tags"));
-        viewModel.getLanguagesLive().observe(getViewLifecycleOwner(), list ->
-                setupAutoComplete(actvLang, list, "language"));
-        viewModel.getNamesLive().observe(getViewLifecycleOwner(), list -> {
-                setupAutoComplete(actvName, list, "name");
-                actvName.addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        viewModel.getTagsLive().observe(getViewLifecycleOwner(), list -> updateAdapter(actvTags, list));
+        viewModel.getNamesLive().observe(getViewLifecycleOwner(), list -> updateAdapter(actvName, list));
 
-                    @Override
-                    public void afterTextChanged(Editable s) {
-                        String text = s.toString();
+        actvName.addTextChangedListener(new SimpleTextWatcher(s -> {
+            filter.setName(s.isEmpty() ? null : s);
+            viewModel.setFilters(filter);
+            debounceSearch(() -> viewModel.loadNames(s));
+        }));
 
-                        if (text.isEmpty()) {
-                            filter.setName(null);
-                        } else {
-                            filter.setName(text);
-                        }
-
-                        viewModel.setFilters(filter);
-                    }
-                });
-        });
+        actvTags.addTextChangedListener(new SimpleTextWatcher(s -> {
+            String lowerTag = s.toLowerCase().trim();
+            filter.setTag(lowerTag.isEmpty() ? null : lowerTag);
+            viewModel.setFilters(filter);
+            debounceSearch(() -> viewModel.loadTags(s));
+        }));
 
         viewModel.loadAutocompleteData();
+    }
+
+    private void debounceSearch(Runnable runnable) {
+        searchHandler.removeCallbacks(searchRunnable);
+        searchRunnable = runnable;
+        searchHandler.postDelayed(searchRunnable, 500);
+    }
+
+    private void updateAdapter(MaterialAutoCompleteTextView actv, List<String> list) {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, list);
+        actv.setAdapter(adapter);
+        if (actv.hasFocus() && !list.isEmpty()) {
+            actv.showDropDown();
+        }
+    }
+
+    private interface TextChangedListener {
+        void onTextChanged(String s);
+    }
+
+    private static class SimpleTextWatcher implements TextWatcher {
+        private final TextChangedListener listener;
+        public SimpleTextWatcher(TextChangedListener listener) { this.listener = listener; }
+        @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+        @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        @Override public void afterTextChanged(Editable s) { listener.onTextChanged(s.toString()); }
     }
 
     private void setupAutoComplete(MaterialAutoCompleteTextView actv, List<String> list, String fieldType) {

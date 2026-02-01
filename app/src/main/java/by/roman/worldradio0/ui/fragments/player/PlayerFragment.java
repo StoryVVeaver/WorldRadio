@@ -327,7 +327,6 @@ public class PlayerFragment extends Fragment {
         station.setText(radioStation.getName());
         large_station.setText(radioStation.getName());
 
-        // 3. Загрузка картинок через Glide
         Glide.with(this)
                 .load(radioStation.getFavicon())
                 .error(R.drawable.no_icon)
@@ -352,11 +351,9 @@ public class PlayerFragment extends Fragment {
                     }
                 });
 
-        // 4. Проверка homepage (тут был твой краш в конце метода)
         String homepage = radioStation.getHomepage();
         large_internet.setVisibility(homepage != null && !homepage.isEmpty() ? VISIBLE : INVISIBLE);
 
-        // 5. Обновление иконок
         isFavorite = viewModel.isFavorite();
         isFavoriteTrack = viewModel.isFavoriteTrack();
         fav_icons();

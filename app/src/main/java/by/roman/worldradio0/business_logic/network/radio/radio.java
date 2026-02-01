@@ -418,7 +418,7 @@ public class radio {
         String currentHost = address.get(index);
 
         Request request = new Request.Builder()
-                .url(normalizeUrl(currentHost, "/json/tags/" + filter))
+                .url(normalizeUrl(currentHost, "/json/tags/" + filter+ "?limit=50"))
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -504,7 +504,9 @@ public class radio {
         okhttp3.HttpUrl.Builder urlBuilder = okhttp3.HttpUrl.parse(currentHost + "/json/stations/search").newBuilder();
 
         urlBuilder.addQueryParameter("name", String.valueOf(filter));
-        urlBuilder.addQueryParameter("limit", String.valueOf(100));
+        urlBuilder.addQueryParameter("limit", String.valueOf(50));
+        urlBuilder.addQueryParameter("order", "votes");
+        urlBuilder.addQueryParameter("reverse", "true");
 
         String fullUrl = urlBuilder.build().toString();
         Log.v("radio", fullUrl);
