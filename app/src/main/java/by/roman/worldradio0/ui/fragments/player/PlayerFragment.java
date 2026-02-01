@@ -70,9 +70,9 @@ public class PlayerFragment extends Fragment {
     private ConstraintLayout largePlayer;
     private PlayerViewModel viewModel;
     private StateViewModel stateViewModel;
-    private boolean isPlaying;
-    private boolean isFavorite;
-    private boolean isFavoriteTrack;
+    private boolean isPlaying = false;
+    private boolean isFavorite = false;
+    private boolean isFavoriteTrack = false;
     private boolean isMap = true;
     private final int MIN_SWIPE_DISTANCE = 10;
     private final int MAX_TAP_MOVEMENT = 5;
@@ -361,6 +361,7 @@ public class PlayerFragment extends Fragment {
                 .into(new CustomTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        if (!isAdded() || getContext() == null) return;
                         large_logo.setImageBitmap(resource);
                         int centerColor = getCenterColor(resource);
                         applyLargePlayerBackground(centerColor);
@@ -388,8 +389,12 @@ public class PlayerFragment extends Fragment {
         timerButton.setOnClickListener(v -> stateViewModel.openFullscreen(new TimerFragment()));
         filterButton.setOnClickListener(v -> stateViewModel.openFullscreen(new FilterFragment()));
         large_internet.setOnClickListener(v -> {
-            openUrlInBrowser(viewModel.getCurrentStation().getHomepage());
-            large_internet.setEnabled(false);
+            if (station != null && currentStation.getHomepage() != null && !currentStation.getHomepage().isEmpty()) {
+                openUrlInBrowser(currentStation.getHomepage());
+                large_internet.setEnabled(false);
+            } else {
+                Toast.makeText(getContext(), "URL not available", Toast.LENGTH_SHORT).show();
+            }
         });
         play_pause.setOnClickListener(v -> {
             if(isPlaying){
@@ -437,6 +442,7 @@ public class PlayerFragment extends Fragment {
         });
     }
     private void icons(){
+        if (!isAdded() || getContext() == null ) return;
         if (!isPlaying) {
             play_pause.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.play));
             large_play_pause.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.playbutton));

@@ -42,9 +42,6 @@ public class ListFragment extends Fragment {
     public void onResume() {
         super.onResume();
         isVisibleToUser = true;
-        if (viewModel.getFilteredStations().getValue() == null) {
-            viewModel.loadStart();
-        }
     }
 
     @Override
@@ -171,6 +168,9 @@ public class ListFragment extends Fragment {
     }
 
     private void observeAndLoad() {
+        playerViewModel.getShowPlayer().observe(getViewLifecycleOwner(), state ->{
+            if(!state) adapter.clearSelectedStation();
+        });
         playerViewModel.getSelectedCard().observe(getViewLifecycleOwner(), uuid -> {
             if(uuid == null) adapter.clearSelectedStation();
             adapter.setSelectedStationUuid(uuid);

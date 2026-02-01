@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.google.android.material.appbar.MaterialToolbar;
@@ -49,6 +50,7 @@ public class FilterFragment extends Fragment {
     private MaterialAutoCompleteTextView actvTags;
     private MaterialAutoCompleteTextView actvLang;
     private MaterialAutoCompleteTextView actvName;
+    private ScrollView scrollView;
     private MaterialToolbar toolbar;
     private TextView countText;
     private MaterialButton btnReset;
@@ -81,6 +83,7 @@ public class FilterFragment extends Fragment {
     private void findAllId(View view){
         toolbar = view.findViewById(R.id.toolbar);
         btnReset = view.findViewById(R.id.btnReset);
+        scrollView = view.findViewById(R.id.scrollView);
 
         chipAlphabet = view.findViewById(R.id.chipAlphabet);
         chipRating = view.findViewById(R.id.chipRating);
@@ -248,6 +251,12 @@ public class FilterFragment extends Fragment {
             case 2: chipRating.setChecked(true); break;
             case 3: chipBitrate.setChecked(true); break;
         }
+
+        scrollView.getViewTreeObserver().addOnScrollChangedListener(() -> {
+            if (scrollView.getScrollY() > 0) {
+                hideKeyboard();
+            }
+        });
     }
 
     private void fillFields() {
@@ -258,6 +267,17 @@ public class FilterFragment extends Fragment {
             if (filter.getName() != null) actvName.setText(filter.getName());
         } catch (Exception e) {
             Log.e("FilterFragment", "Error filling fields", e);
+        }
+    }
+    private void hideKeyboard() {
+        View view = requireActivity().getCurrentFocus();
+        if (view != null) {
+            android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager)
+                    requireActivity().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                view.clearFocus(); // Чтобы убрать курсор из поля ввода
+            }
         }
     }
 }

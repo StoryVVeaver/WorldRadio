@@ -108,7 +108,7 @@ public class PlayerService extends Service {
 
                 if (url != null) {
                     runOnMainThread(() -> {
-                        if (currentStation == null || !uuid.equals(currentStation.getStationUuid())) {
+                        if (!isPlayingBefore || (currentStation == null || !uuid.equals(currentStation.getStationUuid()))) {
                             radioManager.play(url);
                             if (!isPlayingBefore) {
                                 radioRepository.setStatePlayer(true);

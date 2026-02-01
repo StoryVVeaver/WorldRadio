@@ -2,6 +2,8 @@ package by.roman.worldradio0.business_logic.network.radio;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import by.roman.worldradio0.business_logic.data.models.Filter;
 import by.roman.worldradio0.business_logic.data.models.MapPoint;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
@@ -10,8 +12,9 @@ import by.roman.worldradio0.business_logic.network.radio.callbacks.RadioCallback
 public class DataFromRadio {
     private final radio radio;
 
-    public DataFromRadio() {
-        this.radio = new radio();
+    @Inject
+    public DataFromRadio(radio radio) {
+        this.radio = radio;
     }
     public void getStations(RadioCallback<List<RadioStation>> callback, Filter filter, int offset, int limit) {
         radio.fetchStations(callback, filter, offset, limit);

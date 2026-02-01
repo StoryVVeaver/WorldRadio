@@ -126,6 +126,7 @@ public class SettingsFragment extends Fragment {
     }
 
     private void checkPermissionsAndPickImage() {
+        if (!isAdded() || getContext() == null) return;
         if (ContextCompat.checkSelfPermission(requireActivity(),
                 Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
@@ -151,9 +152,14 @@ public class SettingsFragment extends Fragment {
     }
 
     private void openImagePicker() {
+        if (!isAdded()) return;
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType("image/*");
-        startActivityForResult(intent, PICK_IMAGE_REQUEST);
+        if (intent.resolveActivity(requireActivity().getPackageManager()) != null) {
+            startActivityForResult(intent, PICK_IMAGE_REQUEST);
+        } else {
+            Toast.makeText(getContext(), "No photo app found", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -197,6 +203,9 @@ public class SettingsFragment extends Fragment {
             compressedBitmap.compress(Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream);
             byte[] byteArray = byteArrayOutputStream.toByteArray();
 
+            if (compressedBitmap != bitmap) bitmap.recycle();
+            compressedBitmap.recycle();
+
             return Base64.encodeToString(byteArray, Base64.DEFAULT);
 
         } catch (Exception e) {
@@ -232,8 +241,10 @@ public class SettingsFragment extends Fragment {
 
     @SuppressLint("SetTextI18n")
     private void initAll(){
+        if (!isAdded()) return;
         viewModel = new ViewModelProvider(requireActivity()).get(SettingsViewModel.class);
         stateViewModel = new ViewModelProvider(requireActivity()).get(StateViewModel.class);
+        if (viewModel.getSettingsModel() == null) return;
         SettingsAdapter adapter = new SettingsAdapter(SettingsList.getSettingsList(viewModel.getSettingsModel(), requireActivity()), new SettingsChangeListener() {
             @Override
             public void onToggleChanged(@NonNull String key, boolean isChecked) {
@@ -260,10 +271,15 @@ public class SettingsFragment extends Fragment {
 
         handler = new Handler(Looper.getMainLooper());
         runnable = () -> {
-            text_status.setVisibility(INVISIBLE);
-            text_status.setTextColor(AppCompatResources.getColorStateList(requireContext(),R.color.white));
+            if (isAdded() && text_status != null) {
+                text_status.setVisibility(INVISIBLE);
+                text_status.setTextColor(ContextCompat.getColor(requireContext(), R.color.white));
+            }
         };
-        textView.setText(getResources().getString(R.string.hello) + " " + viewModel.getUserData().getLogin());
+        User user = viewModel.getUserData();
+        if (user != null && user.getLogin() != null) {
+            textView.setText(getString(R.string.hello) + " " + user.getLogin());
+        }
 
         loadCurrentAvatar();
     }
@@ -279,6 +295,7 @@ public class SettingsFragment extends Fragment {
     @SuppressLint("SetTextI18n")
     private void observeStatus(){
         viewModel.getStationsCount().observe(getViewLifecycleOwner(),count -> {
+            if (count == null || !isAdded()) return;
             switch (count.status){
                 case LOADING:
                     if(count.data == 0){
@@ -355,12 +372,13 @@ public class SettingsFragment extends Fragment {
             }
         });
         viewModel.getTimeToLeave().observe(getViewLifecycleOwner(), timeToLeave -> {
+            if (getActivity() == null) return;
             requireActivity().startActivity(new Intent(requireContext(), AccountActivity.class));
             requireActivity().finish();
         });
 
         viewModel.getAddAvatar().observe(getViewLifecycleOwner(), avatarState -> {
-            if (avatarState != null) {
+            if (avatarState != null && isAdded()) {
                 switch (avatarState.status) {
                     case SUCCESS:
                         Toast.makeText(requireContext(), getResources().getString(R.string.avatar_saved), Toast.LENGTH_SHORT).show();

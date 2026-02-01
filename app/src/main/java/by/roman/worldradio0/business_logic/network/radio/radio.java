@@ -1,15 +1,20 @@
 package by.roman.worldradio0.business_logic.network.radio;
 
+import static com.google.common.reflect.Reflection.getPackageName;
+
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -19,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.Vector;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.inject.Singleton;
 
@@ -26,6 +32,7 @@ import by.roman.worldradio0.business_logic.data.dto.RadioStationDTO;
 import by.roman.worldradio0.business_logic.data.models.Filter;
 import by.roman.worldradio0.business_logic.data.models.RadioStation;
 import by.roman.worldradio0.business_logic.network.radio.callbacks.RadioCallback;
+import dagger.hilt.android.qualifiers.ApplicationContext;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.HttpUrl;
@@ -37,12 +44,30 @@ import okhttp3.ResponseBody;
 @Singleton
 public class radio {
     private List<String> address = new ArrayList<>();
-    private final OkHttpClient client = new OkHttpClient();
+    private List<String> fullAddress = new ArrayList<>();
+    private final OkHttpClient client;
+    private static final int MAX_RETRY_ATTEMPTS = 3;
+    private int attempts = 0;
+    private Context context;
     private final Gson gson = new GsonBuilder()
             .create();
 
-    public radio() {
+    public radio(@ApplicationContext Context context) {
         updateDnsList();
+        this.context = context;
+        this.client = new OkHttpClient.Builder()
+                .addInterceptor(chain -> {
+                    Request original = chain.request();
+
+                    String userAgent = "WorldRadioApp/" + getAppVersion();
+
+                    Request request = original.newBuilder()
+                            .header("User-Agent", userAgent)
+                            .build();
+
+                    return chain.proceed(request);
+                })
+                .build();
     }
 
     private void updateDnsList() {
@@ -69,6 +94,7 @@ public class radio {
             @Override
             protected void onPostExecute(String[] result) {
                 address = new ArrayList<>(Arrays.asList(result));
+                fullAddress = new ArrayList<>(Arrays.asList(result));
             }
         }.execute();
     }
@@ -82,18 +108,14 @@ public class radio {
     }
 
     public void fetchStations(RadioCallback<List<RadioStation>> callback, Filter filter, int offset, int limit) {
-        if (address == null || address.isEmpty()) {
-            Log.e("RadioAPI", "All addresses failed or list is empty");
-            callback.onFailure(new Exception("No working servers found"));
-            return;
-        }
+        if(getValidHostOrHandleError(callback) == null) return;
 
         callback.onLoading();
         Random r = new Random();
         int index = r.nextInt(address.size());
         String currentHost = normalizeUrl(address.get(index),"");
 
-        HttpUrl.Builder urlBuilder = okhttp3.HttpUrl.parse(currentHost + "/json/stations/search").newBuilder();
+        HttpUrl.Builder urlBuilder = HttpUrl.parse(currentHost + "/json/stations/search").newBuilder();
 
         urlBuilder.addQueryParameter("offset", String.valueOf(offset));
         urlBuilder.addQueryParameter("limit", String.valueOf(limit));
@@ -166,11 +188,7 @@ public class radio {
     }
 
     public void fetchStationsByUUID(RadioCallback<List<RadioStation>> callback, List<String> list) {
-        if (address == null || address.isEmpty()) {
-            Log.e("RadioAPI", "All addresses failed or list is empty");
-            callback.onFailure(new Exception("No working servers found"));
-            return;
-        }
+        if(getValidHostOrHandleError(callback) == null) return;
 
         if (list == null || list.isEmpty()) {
             callback.onSuccess(new ArrayList<>());
@@ -237,10 +255,7 @@ public class radio {
     }
 
     public void click(String uuid, RadioCallback<ClickModel> callback) {
-        if (address.isEmpty()) {
-            callback.onFailure(new Exception("No addresses available"));
-            return;
-        }
+        if(getValidHostOrHandleError(callback) == null) return;
 
         Random r = new Random();
         int index = r.nextInt(address.size());
@@ -279,10 +294,7 @@ public class radio {
     }
 
     public void getCountries(RadioCallback<List<CountryModel>> callback) {
-        if (address.isEmpty()) {
-            callback.onFailure(new Exception("No addresses available"));
-            return;
-        }
+        if(getValidHostOrHandleError(callback) == null) return;
 
         Random r = new Random();
         int index = r.nextInt(address.size());
@@ -322,10 +334,7 @@ public class radio {
     }
 
     public void getLang(RadioCallback<List<LangModel>> callback) {
-        if (address.isEmpty()) {
-            callback.onFailure(new Exception("No addresses available"));
-            return;
-        }
+        if(getValidHostOrHandleError(callback) == null) return;
 
         Random r = new Random();
         int index = r.nextInt(address.size());
@@ -365,10 +374,7 @@ public class radio {
     }
 
     public void getCodec(RadioCallback<List<CodecModel>> callback) {
-        if (address.isEmpty()) {
-            callback.onFailure(new Exception("No addresses available"));
-            return;
-        }
+        if(getValidHostOrHandleError(callback) == null) return;
 
         Random r = new Random();
         int index = r.nextInt(address.size());
@@ -408,10 +414,7 @@ public class radio {
     }
 
     public void getTags(RadioCallback<List<TagModel>> callback, String filter) {
-        if (address.isEmpty()) {
-            callback.onFailure(new Exception("No addresses available"));
-            return;
-        }
+        if(getValidHostOrHandleError(callback) == null) return;
 
         Random r = new Random();
         int index = r.nextInt(address.size());
@@ -451,10 +454,7 @@ public class radio {
     }
 
     public void vote(String uuid, RadioCallback<VoteModel> callback) {
-        if (address.isEmpty()) {
-            callback.onFailure(new Exception("No addresses available"));
-            return;
-        }
+        if(getValidHostOrHandleError(callback) == null) return;
 
         Random r = new Random();
         int index = r.nextInt(address.size());
@@ -492,10 +492,7 @@ public class radio {
     }
 
     public void getNames(RadioCallback<List<RadioStation>> callback, String filter) {
-        if (address.isEmpty()) {
-            callback.onFailure(new Exception("No addresses available"));
-            return;
-        }
+        if(getValidHostOrHandleError(callback) == null) return;
 
         Random r = new Random();
         int index = r.nextInt(address.size());
@@ -556,10 +553,7 @@ public class radio {
 
     public void getStationsByLocation(RadioCallback<List<RadioStation>> callback,
                                       double lat, double lon, double distance, int limit) {
-        if (address.isEmpty()) {
-            callback.onFailure(new Exception("No addresses available"));
-            return;
-        }
+        if(getValidHostOrHandleError(callback) == null) return;
 
         Random r = new Random();
         String currentHost = normalizeUrl(address.get(r.nextInt(address.size())), "");
@@ -620,5 +614,43 @@ public class radio {
                 }
             }
         });
+    }
+    @Nullable
+    private String getValidHostOrHandleError(RadioCallback<?> callback) {
+        if (address == null || address.isEmpty()) {
+            if (fullAddress == null || fullAddress.isEmpty()) {
+                callback.onFailure(new Exception("Не найден активный сервер"));
+                return null;
+            }
+            if(attempts > MAX_RETRY_ATTEMPTS) {
+                callback.onFailure(new Exception("Проверьте соединение с сетью"));
+                return null;
+            }
+            attempts++;
+            Log.d("RadioAPI", "Current address list is empty. Restoring from fullAddress...");
+            address = new CopyOnWriteArrayList<>(fullAddress);
+        }
+
+        try {
+            Random r = new Random();
+            return address.get(r.nextInt(address.size()));
+        } catch (Exception e) {
+            callback.onFailure(new Exception("Host selection failed"));
+            return null;
+        }
+    }
+    public String getAppVersion() {
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                return context.getPackageManager().getPackageInfo(
+                        context.getPackageName(),
+                        PackageManager.PackageInfoFlags.of(0)
+                ).versionName;
+            } else {
+                return context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
+            }
+        } catch (Exception e) {
+            return "1.0";
+        }
     }
 }

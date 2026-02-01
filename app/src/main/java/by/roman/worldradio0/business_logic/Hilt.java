@@ -2,6 +2,8 @@ package by.roman.worldradio0.business_logic;
 
 import android.app.Application;
 
+import androidx.appcompat.app.AppCompatDelegate;
+
 import java.io.File;
 
 import dagger.hilt.android.HiltAndroidApp;
@@ -18,7 +20,8 @@ public class Hilt extends Application {
 
         Configuration.getInstance().setOsmdroidBasePath(basePath);
         Configuration.getInstance().setOsmdroidTileCache(tileCache);
-        Configuration.getInstance().setUserAgentValue("@string/app_name");
+        Configuration.getInstance().setUserAgentValue(getPackageName());
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
     }
 }
 
