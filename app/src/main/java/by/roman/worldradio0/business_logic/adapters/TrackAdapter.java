@@ -3,10 +3,10 @@ package by.roman.worldradio0.business_logic.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
@@ -16,8 +16,7 @@ import by.roman.worldradio0.business_logic.data.models.FavoriteTrack;
 
 public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ViewHolder> {
     public interface OnTrackClickListener {
-        void onDeleteClick(int position);
-        void onBrowseClick(int position);
+        void onTrackLongClick(int position);
     }
     private final OnTrackClickListener listener;
     private List<FavoriteTrack> data;
@@ -47,6 +46,13 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ViewHolder> 
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         FavoriteTrack track = data.get(position);
         holder.bind(track);
+        holder.itemView.setOnLongClickListener(v -> {
+            int pos = holder.getBindingAdapterPosition();
+            if (pos != RecyclerView.NO_POSITION) {
+                listener.onTrackLongClick(pos);
+            }
+            return true;
+        });
     }
 
     @Override
@@ -56,28 +62,14 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ViewHolder> 
 
     class ViewHolder extends RecyclerView.ViewHolder {
         TextView trackName;
-        ImageView delButton;
-        ImageView browseButton;
+        CardView cardView;
         ViewHolder(View v) {
             super(v);
             trackName = v.findViewById(R.id.trackView);
-            delButton = v.findViewById(R.id.delButton_track);
-            browseButton = v.findViewById(R.id.browseButtonTrack);
+            cardView = v.findViewById(R.id.cardView);
         }
         void bind(FavoriteTrack track){
             trackName.setText(track.getTrack());
-            delButton.setOnClickListener(v -> {
-                int pos = getAdapterPosition();
-                if (pos != RecyclerView.NO_POSITION) {
-                    listener.onDeleteClick(pos);
-                }
-            });
-            browseButton.setOnClickListener(v -> {
-                int pos = getAdapterPosition();
-                if (pos != RecyclerView.NO_POSITION) {
-                    listener.onBrowseClick(pos);
-                }
-            });
         }
     }
 }

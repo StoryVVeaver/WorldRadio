@@ -7,6 +7,7 @@
     android:backgroundTint="@color/buttonBackgroundColor">
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:layout_marginStart="20dp"
@@ -24,7 +25,7 @@
                 android:id="@+id/trackView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
+                android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
                 android:ellipsize="marquee"
                 android:focusable="true"
@@ -33,34 +34,13 @@
                 android:scrollHorizontally="true"
                 android:singleLine="true"
                 android:textSize="18dp"
+
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/browseButtonTrack"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageView
-                android:id="@+id/delButton_track"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="10dp"
-                android:visibility="visible"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5"
-                app:srcCompat="@drawable/delete"
-                tools:ignore="ContentDescription" />
 
-            <ImageView
-                android:id="@+id/browseButtonTrack"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="10dp"
-                app:layout_constraintBottom_toBottomOf="@+id/delButton_track"
-                app:layout_constraintEnd_toStartOf="@+id/delButton_track"
-                app:layout_constraintTop_toTopOf="@+id/delButton_track"
-                app:srcCompat="@drawable/selected_globe_navigation_bar"
-                tools:ignore="ContentDescription" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>

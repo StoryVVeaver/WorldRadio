@@ -149,7 +149,6 @@ public class UserAPI {
             }
         });
     }
-
     public void fetchFilters(FilterCallback callback){
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
@@ -276,14 +275,13 @@ public class UserAPI {
         client.newCall(request).enqueue(new Callback(){
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response){
-                if (response.isSuccessful()) {
                     try (response){
                         assert response.body() != null;
                         String jsonResponse = response.body().string();
                         Log.d("UserAPI: enter", "Response: " + jsonResponse);
 
                         if (response.code() != 200) {
-                            callback.onFailure("code: " + response.code());
+                            callback.onFailure(response.code() + "");
                             Log.e("UserAPI: enter", "Response code: " + response.code());
                             return;
                         }
@@ -310,7 +308,7 @@ public class UserAPI {
                         callback.onFailure(e.getMessage());
                         throw new RuntimeException(e);
                     }
-                }
+
             }
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {

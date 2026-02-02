@@ -7,6 +7,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -117,8 +119,55 @@ public class RegistrationFragment extends Fragment {
             }
             password2Text.setSelection(password2Text.getText().length());
         });
+
         reg.setOnClickListener(v -> {
             reg.setEnabled(false);
+            hideKeyboard(requireActivity());
+            hideError();
+            String login = loginText.getText().toString();
+            String password1 = password1Text.getText().toString();
+            String password2 = password2Text.getText().toString();
+            boolean isValid = true;
+            String errorMessage = "";
+            boolean loginEmpty = login.isEmpty();
+            boolean pass1Empty = password1.isEmpty();
+            boolean pass2Empty = password2.isEmpty();
+            if (loginEmpty) {
+                error(loginText, loginCard);
+                isValid = false;
+            }
+            if (pass1Empty) {
+                error(password1Text, password1Card);
+                isValid = false;
+            }
+            if (pass2Empty) {
+                error(password2Text, password2Card);
+                isValid = false;
+            }
+            if (!isValid) {
+                if (loginEmpty && (pass1Empty || pass2Empty)) {
+                    errorMessage = getString(R.string.error_log_pass);
+                } else if (loginEmpty) {
+                    errorMessage = getString(R.string.err_log);
+                } else {
+                    errorMessage = getString(R.string.err_pass);
+                }
+            }
+            else if (!password1.equals(password2)) {
+                error(password1Text, password1Card);
+                error(password2Text, password2Card);
+                errorMessage = getString(R.string.err_pass_not_same);
+                isValid = false;
+            }
+            if (isValid) {
+                errorText.setVisibility(View.GONE);
+                hideError();
+                viewModel.enter(new UserRequest(login, password1));
+            } else {
+                reg.setEnabled(true);
+                errorText.setText(errorMessage);
+                errorText.setVisibility(View.VISIBLE);
+            }
             LocationUtil.requestLocationNetwork(requireActivity(), new LocationUtil.LocationCallback() {
                 @Override
                 public void onLocationReceived(double latitude, double longitude, String countryName, String countryCode) {
@@ -130,39 +179,7 @@ public class RegistrationFragment extends Fragment {
                     Log.e("AccountViewModel", error);
                 }
             });
-            hideKeyboard(requireActivity());
-            hideError();
-            String login = loginText.getText().toString();
-            String password1 = password1Text.getText().toString();
-            String password2 = password2Text.getText().toString();
-            if(password1.equals(password2)) {
-                if(!login.isEmpty()){
-                    if(!password1.isEmpty()) {
-                        startRegistration(login,password1);
-                    } else {
-                        error(password1Text,password1Card);
-                        error(password2Text,password2Card);
-                        reg.setEnabled(true);
-                        errorText.setVisibility(VISIBLE);
-                        errorText.setText("Empty passwords");
-                    }
-                } else {
-                    error(loginText,loginCard);
-                    reg.setEnabled(true);
-                    errorText.setVisibility(VISIBLE);
-                    errorText.setText("Empty login");
-                }
-            } else {
-                error(password1Text,password1Card);
-                error(password2Text,password2Card);
-                reg.setEnabled(true);
-                errorText.setVisibility(VISIBLE);
-                errorText.setText("Passwords don't match");
-            }
         });
-    }
-    private void startRegistration(String login, String password1){
-        viewModel.reg(new UserRequest(login, password1));
     }
     @SuppressLint("SetTextI18n")
     private void observeResult(){
@@ -177,18 +194,20 @@ public class RegistrationFragment extends Fragment {
                 case ERROR:
                     hideError();
                     errorText.setVisibility(VISIBLE);
-                    if(result.message.equals("Already exists")) {
+                    if(result.message.equals(getResources().getString(R.string.err_exist))) {
                         error(loginText,loginCard);
                         errorText.setText(result.message);
                     }
                     if(result.message.startsWith("failed to connect")){
-                        errorText.setText("Check your network connection");
+                        errorText.setText(getResources().getString(R.string.err_inet));
                     } else {
                         error(loginText,loginCard);
                         error(password1Text,password1Card);
                         error(password2Text,password2Card);
-                        errorText.setText("Something went wrong");
+                        errorText.setText("Что-то пошло не так...");
                     }
+                    hideLoading();
+                    reg.setEnabled(true);
                     hideLoading();
                     break;
             }
@@ -205,9 +224,24 @@ public class RegistrationFragment extends Fragment {
     }
 
     private void hideError(){
-        loginCard.setInnerGlowEnabled(false);
-        password1Card.setInnerGlowEnabled(false);
-        password2Card.setInnerGlowEnabled(false);
+        int defaultStrokeColor = ContextCompat.getColor(requireContext(), R.color.background);
+        int defaultShadowColor = ContextCompat.getColor(requireContext(), R.color.black);
+
+        InnerGlowMaterialCardView[] cards = {loginCard, password1Card, password2Card};
+
+        for (InnerGlowMaterialCardView card : cards) {
+            card.setInnerGlowEnabled(false);
+            card.setCardElevation(dpToPx(0));
+            card.setStrokeColor(Color.TRANSPARENT);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                card.setOutlineAmbientShadowColor(defaultShadowColor);
+                card.setOutlineSpotShadowColor(defaultShadowColor);
+            }
+        }
+
+        errorText.setText("");
+        errorText.setVisibility(View.GONE);
     }
     private void showLoading(){
         textReg.setVisibility(INVISIBLE);

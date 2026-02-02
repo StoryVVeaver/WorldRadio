@@ -1,5 +1,8 @@
 package by.roman.worldradio0.ui.fragments.main;
 
+import static android.view.View.GONE;
+import static android.view.View.INVISIBLE;
+
 import android.annotation.SuppressLint;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
@@ -19,6 +22,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -46,6 +50,7 @@ import by.roman.worldradio0.business_logic.view_models.HistoryViewModel;
 import by.roman.worldradio0.business_logic.view_models.MapViewModel;
 import by.roman.worldradio0.business_logic.view_models.PlayerViewModel;
 import by.roman.worldradio0.business_logic.view_models.SettingsViewModel;
+import by.roman.worldradio0.business_logic.view_models.StateViewModel;
 import by.roman.worldradio0.ui.elements.view.CenterSnapOverlay;
 import by.roman.worldradio0.ui.elements.view.GridClusterer;
 import dagger.hilt.android.AndroidEntryPoint;
@@ -58,6 +63,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
     private PlayerViewModel playerViewModel;
     private HistoryViewModel historyViewModel;
     private SettingsViewModel settingsViewModel;
+    private CardView cardView;
 
     private CenterSnapOverlay centerSnap;
     private GridClusterer clusterer;
@@ -99,12 +105,22 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
 
         snapOn.setOnClickListener(v -> {
             centerSnap.setSnapEnabled(!centerSnap.isSnapEnabled());
+            settings.setSnapEnabled(centerSnap.isSnapEnabled() ? 1 : 0);
+            settingsViewModel.setSettings(settings);
             updateSnapButtonUI();
         });
 
         GPS.setOnClickListener(v -> {
+            if(settings != null && settings.getSnapEnabled() == 0){
+                MapPoint point = centerSnap.getSnappedPoint();
+                if(point != null && point.getLongitude() != 0 && point.getLatitude() != 0){
+                    map.getController().setCenter((new GeoPoint(point.getLatitude(), point.getLongitude())));
+                    if (map.getZoomLevelDouble() < 14) mapController.setZoom(14.0);
+                }
+            } else {
             mapController.animateTo(new GeoPoint(lat, lon));
             if (map.getZoomLevelDouble() < 12) mapController.setZoom(12.0);
+            }
         });
         if(playerViewModel.getCurrentStation() == null){
             centerMap(playerViewModel.getCurrentStation());
@@ -116,6 +132,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         map = view.findViewById(R.id.map);
         snapOn = view.findViewById(R.id.snapButtonView);
         point = view.findViewById(R.id.center_point);
+        cardView = view.findViewById(R.id.cardViewgjh);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -194,6 +211,13 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         centerMap(station, 17);
     }
     private void observeData() {
+        playerViewModel.getShowPlayer().observe(getViewLifecycleOwner(), state -> {
+            if(state){
+                cardView.setVisibility(INVISIBLE);
+            } else {
+                cardView.setVisibility(GONE);
+            }
+        });
         viewModel.getListPoints().observe(getViewLifecycleOwner(), state -> {
             if (state.status == UiState.Status.SUCCESS && state.data != null) {
                 allPoints = state.data;
@@ -341,7 +365,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
     private void scheduleUpdateVisibleForCenterSnap() { clusterHandler.removeCallbacks(updateVisibleRunnable); clusterHandler.postDelayed(updateVisibleRunnable, 250); centerSnap.scheduleDelayedSnap(); }
 
     @Override
-    public void onResume() { super.onResume(); map.onResume(); loadStationsForVisibleRegion(); }
+    public void onResume() { super.onResume(); map.onResume(); }
     @Override
     public void onPause() { super.onPause(); map.onPause(); }
     @Override

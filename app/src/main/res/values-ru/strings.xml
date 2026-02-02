@@ -74,4 +74,12 @@
     <string name="audio">Аудио</string>
     <string name="vote_correct">Успешно проголосовали за станцию</string>
     <string name="vote_err">Вы слишком часто голосуете за одну и ту же станцию</string>
+    <string name="find_in_browser">Найти в браузере</string>
+    <string name="error_log_pass">Введите логин и пароль</string>
+    <string name="err_log">Введите логин</string>
+    <string name="err_pass">Введите пароль</string>
+    <string name="err_pass_not_same">Пароли не совпадают</string>
+    <string name="err_bad_data">"Введен неверный логин или пароль "</string>
+    <string name="err_inet">Проверьте интернет соединение</string>
+    <string name="err_exist">Пользователь уже существует</string>
 </resources>

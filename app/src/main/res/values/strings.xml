@@ -76,4 +76,12 @@
     <string name="crossfade" translatable="false">Crossfade</string>
     <string name="vote_correct">Successfully voted for the station</string>
     <string name="vote_err">You are voting for the same station too often</string>
+    <string name="find_in_browser">Find in browser</string>
+    <string name="error_log_pass">Enter your username and password</string>
+    <string name="err_log">Enter your username</string>
+    <string name="err_pass">Enter your password</string>
+    <string name="err_pass_not_same">Passwords don\'t match</string>
+    <string name="err_bad_data">Incorrect username or password entered</string>
+    <string name="err_inet">Check your internet connection</string>
+    <string name="err_exist">The user already exists</string>
 </resources>

@@ -7,6 +7,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -105,7 +106,32 @@ public class EntranceFragment extends Fragment {
             passwordText.setSelection(passwordText.getText().length());
         });
         enterButton.setOnClickListener(v -> {
+            hideError();
+            hideKeyboard(requireActivity());
+            login = loginText.getText().toString();
+            password = passwordText.getText().toString();
             enterButton.setEnabled(false);
+            if(!login.isEmpty() && !password.isEmpty()) {
+                viewModel.enter(new UserRequest(login, password));
+
+            } else if(login.isEmpty() && password.isEmpty()){
+                enterButton.setEnabled(true);
+                error(loginText,loginCard);
+                error(passwordText,passwordCard);
+                errorText.setVisibility(VISIBLE);
+                errorText.setText(getResources().getString(R.string.error_log_pass));
+
+            } else if(login.isEmpty()){
+                enterButton.setEnabled(true);
+                error(loginText, loginCard);
+                errorText.setVisibility(VISIBLE);
+                errorText.setText(getResources().getString(R.string.err_log));
+            } else {
+                enterButton.setEnabled(true);
+                error(passwordText, passwordCard);
+                errorText.setVisibility(VISIBLE);
+                errorText.setText(getResources().getString(R.string.err_pass));
+            }
             LocationUtil.requestLocationNetwork(requireActivity(), new LocationUtil.LocationCallback() {
                 @Override
                 public void onLocationReceived(double latitude, double longitude, String countryName, String countryCode) {
@@ -117,25 +143,6 @@ public class EntranceFragment extends Fragment {
                     Log.e("AccountViewModel", error);
                 }
             });
-            hideKeyboard(requireActivity());
-            hideError();
-            login = loginText.getText().toString();
-            password = passwordText.getText().toString();
-            if(!login.isEmpty()){
-                if(!password.isEmpty()) {
-                    viewModel.enter(new UserRequest(login,password));
-                } else {
-                    enterButton.setEnabled(true);
-                    error(passwordText,passwordCard);
-                    errorText.setVisibility(VISIBLE);
-                    errorText.setText("Empty password");
-                }
-            } else {
-                enterButton.setEnabled(true);
-                error(loginText,loginCard);
-                errorText.setVisibility(VISIBLE);
-                errorText.setText("Empty login");
-            }
         });
     }
     @SuppressLint("SetTextI18n")
@@ -151,17 +158,12 @@ public class EntranceFragment extends Fragment {
                 case ERROR:
                     hideError();
                     errorText.setVisibility(VISIBLE);
-                    if(result.message.equals("Invalid login data")){
-                        error(loginText,loginCard);
-                        error(passwordText,passwordCard);
-                        errorText.setText(result.message);
-                    }
                     if(result.message.startsWith("failed to connect")){
-                        errorText.setText("Check your network connection");
+                        errorText.setText(getResources().getString(R.string.err_inet));
                     } else {
                         error(loginText,loginCard);
                         error(passwordText,passwordCard);
-                        errorText.setText("Something went wrong");
+                        errorText.setText(getResources().getString(R.string.err_bad_data));
                     }
                     hideLoading();
                     enterButton.setEnabled(true);
@@ -180,8 +182,24 @@ public class EntranceFragment extends Fragment {
     }
 
     private void hideError(){
-        loginCard.setInnerGlowEnabled(false);
-        passwordCard.setInnerGlowEnabled(false);
+        int defaultStrokeColor = ContextCompat.getColor(requireContext(), R.color.background);
+        int defaultShadowColor = ContextCompat.getColor(requireContext(), R.color.black);
+
+        InnerGlowMaterialCardView[] cards = {loginCard, passwordCard};
+
+        for (InnerGlowMaterialCardView card : cards) {
+            card.setInnerGlowEnabled(false);
+            card.setCardElevation(dpToPx(0));
+            card.setStrokeColor(Color.TRANSPARENT);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                card.setOutlineAmbientShadowColor(defaultShadowColor);
+                card.setOutlineSpotShadowColor(defaultShadowColor);
+            }
+        }
+
+        errorText.setText("");
+        errorText.setVisibility(View.GONE);
     }
     private void showLoading(){
         textReg.setVisibility(INVISIBLE);

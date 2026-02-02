@@ -1,6 +1,7 @@
 package by.roman.worldradio0.ui.fragments.main;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +24,7 @@ import by.roman.worldradio0.R;
 import by.roman.worldradio0.business_logic.adapters.EndlessRecyclerViewScrollListener;
 import by.roman.worldradio0.business_logic.adapters.TrackAdapter;
 import by.roman.worldradio0.business_logic.view_models.FavoriteViewModel;
+import by.roman.worldradio0.ui.fragments.timer.AlarmFragment;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -52,21 +55,35 @@ public class FavoriteTracksFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerView_FavoriteTracks);
     }
 
+    private void showMenu(int position) {
+        String[] options = {getResources().getString(R.string.find_in_browser), getResources().getString(R.string.remove_favorite)};
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle(adapter.getTrack(position));
+        builder.setItems(options, (dialog, which) -> {
+            switch (which) {
+                case 0:
+                    searchInBrowser(requireContext(), adapter.getTrack(position));
+                    break;
+                case 1:
+                    viewModel.removeTrackFromFavorite(adapter.getTrack(position));
+                    break;
+            }
+        });
+        builder.setNegativeButton(getResources().getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
+
+        AlertDialog dialog = builder.create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setGravity(Gravity.CENTER);
+        }
+        dialog.show();
+    }
+
     private void initAll(){
         LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext());
         recyclerView.setLayoutManager(layoutManager);
 
-        adapter = new TrackAdapter(new java.util.ArrayList<>(), new TrackAdapter.OnTrackClickListener() {
-            @Override
-            public void onDeleteClick(int position) {
-                viewModel.removeTrackFromFavorite(adapter.getTrack(position));
-            }
-
-            @Override
-            public void onBrowseClick(int position) {
-                searchInBrowser(requireActivity(), adapter.getTrack(position));
-            }
-        });
+        adapter = new TrackAdapter(new java.util.ArrayList<>(), this::showMenu);
         recyclerView.setAdapter(adapter);
 
         viewModel = new ViewModelProvider(requireActivity()).get(FavoriteViewModel.class);
