@@ -137,6 +137,7 @@ public class FavoriteStationsFragment extends Fragment {
                     break;
                 case SUCCESS:
                     adapter.hideLoading();
+                    adapter.clear();
                     adapter.replaceAll(stations.data);
                     break;
                 case ERROR:

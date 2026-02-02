@@ -58,7 +58,6 @@ public class FilterFragment extends Fragment {
     private StateViewModel stateViewModel;
     private Filter filter;
     private Chip chipAlphabet, chipRating, chipBitrate;
-    private int currentSort = 0;
 
     private final Handler searchHandler = new Handler(Looper.getMainLooper());
     private Runnable searchRunnable;
@@ -78,6 +77,7 @@ public class FilterFragment extends Fragment {
         observeAndLoad();
         setupClickListeners();
         fillFields();
+
     }
 
     private void findAllId(View view){
@@ -125,14 +125,21 @@ public class FilterFragment extends Fragment {
     }
 
     private void handleChipSelection(int sortType) {
-        if (currentSort != sortType) {
-            currentSort = sortType;
-            chipAlphabet.setChecked(sortType == 1);
-            chipRating.setChecked(sortType == 2);
-            chipBitrate.setChecked(sortType == 3);
-            filter.setSort(currentSort);
-            viewModel.setFilters(filter);
+        if (filter.getSort() == sortType) {
+            switch (sortType) {
+                case 1: chipAlphabet.setChecked(true); break;
+                case 2: chipRating.setChecked(true); break;
+                case 3: chipBitrate.setChecked(true); break;
+            }
+            return;
         }
+
+        filter.setSort(sortType);
+        chipAlphabet.setChecked(sortType == 1);
+        chipRating.setChecked(sortType == 2);
+        chipBitrate.setChecked(sortType == 3);
+
+        viewModel.setFilters(filter);
     }
 
     private void resetAllFilters() {
@@ -245,8 +252,7 @@ public class FilterFragment extends Fragment {
         stateViewModel = new ViewModelProvider(requireActivity()).get(StateViewModel.class);
         filter = viewModel.getFilters();
 
-        currentSort = filter.getSort();
-        switch (currentSort) {
+        switch (filter.getSort()) {
             case 1: chipAlphabet.setChecked(true); break;
             case 2: chipRating.setChecked(true); break;
             case 3: chipBitrate.setChecked(true); break;
@@ -265,6 +271,7 @@ public class FilterFragment extends Fragment {
             if (filter.getCountry() != null) actvCountry.setText(LocationUtil.getCountryNameFromIso(filter.getCountry()));
             if (filter.getTag() != null) actvTags.setText(filter.getTag());
             if (filter.getName() != null) actvName.setText(filter.getName());
+            handleChipSelection(filter.getSort());
         } catch (Exception e) {
             Log.e("FilterFragment", "Error filling fields", e);
         }
@@ -276,7 +283,7 @@ public class FilterFragment extends Fragment {
                     requireActivity().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
             if (imm != null) {
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                view.clearFocus(); // Чтобы убрать курсор из поля ввода
+                view.clearFocus();
             }
         }
     }

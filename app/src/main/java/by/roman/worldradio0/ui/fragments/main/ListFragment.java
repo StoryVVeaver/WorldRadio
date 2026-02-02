@@ -68,11 +68,7 @@ public class ListFragment extends Fragment {
         observeAndLoad();
         setupScrollListener();
 
-        if (viewModel.getFilteredStations().getValue() == null ||
-                viewModel.getFilteredStations().getValue().data == null ||
-                viewModel.getFilteredStations().getValue().data.isEmpty()) {
-
-            viewModel.resetState();
+        if (viewModel.getFilteredStations().getValue() == null) {
             viewModel.loadStart();
         }
 
@@ -202,9 +198,12 @@ public class ListFragment extends Fragment {
 
         playerViewModel.getPlayPrevious().observe(getViewLifecycleOwner(), flag -> {
             if (flag != null && flag) {
+                playerViewModel.resetPlayPrevious();
                 String currentUuid = playerViewModel.getCurrentStation().getStationUuid();
                 int pos = adapter.findCurrentStation(currentUuid);
-                if(pos > 0){
+                Log.v("List", "now " + pos);
+                if (pos > 0) {
+                    Log.v("List", "play " + (pos - 1));
                     play(adapter.getStation(pos - 1));
                 }
             }
@@ -212,9 +211,12 @@ public class ListFragment extends Fragment {
 
         playerViewModel.getPlayNext().observe(getViewLifecycleOwner(), flag -> {
             if (flag != null && flag) {
+                playerViewModel.resetPlayNext();
                 String currentUuid = playerViewModel.getCurrentStation().getStationUuid();
                 int pos = adapter.findCurrentStation(currentUuid);
-                if(pos != -1 && pos < adapter.getItemCount() - 1){
+                Log.v("List", "now " + pos);
+                if (pos != -1 && pos < adapter.getItemCount() - 1) {
+                    Log.v("List", "play " + (pos + 1));
                     play(adapter.getStation(pos + 1));
                 }
             }

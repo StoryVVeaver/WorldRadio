@@ -16,7 +16,7 @@ public class Filter {
         this.country = null;
         this.tag = null;
         this.lang = null;
-        this.sort = 0;
+        this.sort = 1;
     }
 
     // Getters

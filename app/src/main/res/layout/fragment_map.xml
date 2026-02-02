@@ -189,7 +189,7 @@
             android:id="@id/cardViewgjh"
             android:layout_width="match_parent"
             android:layout_height="70dp"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent">
 
         </androidx.cardview.widget.CardView>

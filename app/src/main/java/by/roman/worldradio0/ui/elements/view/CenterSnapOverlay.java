@@ -27,7 +27,9 @@ public class CenterSnapOverlay extends Overlay {
     private static final long SNAP_INTERVAL_MS = 500;
 
     private final Handler snapHandler = new Handler(Looper.getMainLooper());
+    private final Handler lightHandler = new Handler(Looper.getMainLooper());
     private Runnable pendingSnap;
+    private Runnable pendinglight;
     public boolean isAnimating = false;
 
     public interface OnSnappedCallback {
@@ -137,7 +139,7 @@ public class CenterSnapOverlay extends Overlay {
         if (closer != null) {
             snapTo(closer, true, true);
         } else {
-            snapTo(snappedPoint, true, false);
+            snapTo(snappedPoint, true, true);
         }
     }
 
@@ -177,7 +179,7 @@ public class CenterSnapOverlay extends Overlay {
     }
 
     @SuppressLint("ResourceAsColor")
-    private void executeSnap(MapPoint target, boolean animate, boolean notify){
+    private void executeSnap(MapPoint target, boolean animate, boolean notify) {
         if (target == null) return;
 
         GeoPoint gp = new GeoPoint(target.getLatitude(), target.getLongitude());
@@ -188,11 +190,16 @@ public class CenterSnapOverlay extends Overlay {
         } else {
             map.getController().setCenter(gp);
         }
-
-        if (notify && callback != null) {
+        if(callback != null){
             callback.onSnapped(target);
-            point.setImageTintList(ColorStateList.valueOf(Color.parseColor("#B10E0E")));
         }
+        //pendinglight = () -> {
+            if (notify) {
+                callback.onSnapped(target);
+                point.setImageTintList(ColorStateList.valueOf(Color.parseColor("#B10E0E")));
+            }
+        //};
+        //lightHandler.postDelayed(pendinglight, 500);
     }
 
     @Override

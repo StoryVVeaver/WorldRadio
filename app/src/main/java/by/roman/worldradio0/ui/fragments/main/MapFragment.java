@@ -80,9 +80,11 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
     private Settings settings;
 
     private double lat, lon;
+    private boolean playing = false;
     private boolean isAnimating = false;
     private GeoPoint lastLoadCenter = new GeoPoint(0.0, 0.0);
     private double lastZoom = 0;
+    private GeoPoint userPoint;
     private boolean isManuallySelecting = false;
 
     @Override
@@ -111,15 +113,13 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         });
 
         GPS.setOnClickListener(v -> {
-            if(settings != null && settings.getSnapEnabled() == 0){
+            if(playing && settings != null && settings.getSnapEnabled() == 0 && centerSnap.getSnappedPoint() != null){
                 MapPoint point = centerSnap.getSnappedPoint();
-                if(point != null && point.getLongitude() != 0 && point.getLatitude() != 0){
-                    map.getController().setCenter((new GeoPoint(point.getLatitude(), point.getLongitude())));
-                    if (map.getZoomLevelDouble() < 14) mapController.setZoom(14.0);
-                }
+                map.getController().setCenter((new GeoPoint(point.getLatitude(), point.getLongitude())));
+                if (map.getZoomLevelDouble() < 14) mapController.setZoom(14.0);
             } else {
-            mapController.animateTo(new GeoPoint(lat, lon));
-            if (map.getZoomLevelDouble() < 12) mapController.setZoom(12.0);
+                mapController.animateTo(userPoint);
+                if (map.getZoomLevelDouble() < 12) mapController.setZoom(12.0);
             }
         });
         if(playerViewModel.getCurrentStation() == null){
@@ -144,6 +144,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
 
         clusterer = new GridClusterer(requireContext(), map);
         clusterer.setCellSizePx(80);
+        map.getController().setZoom(12);
 
         map.addMapListener(new MapListener() {
             @Override
@@ -214,8 +215,11 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         playerViewModel.getShowPlayer().observe(getViewLifecycleOwner(), state -> {
             if(state){
                 cardView.setVisibility(INVISIBLE);
+                playing = true;
             } else {
                 cardView.setVisibility(GONE);
+                playing = false;
+                centerSnap.clearSnapped();
             }
         });
         viewModel.getListPoints().observe(getViewLifecycleOwner(), state -> {
@@ -229,10 +233,6 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
 
         playerViewModel.getSnapNearestEvent().observe(getViewLifecycleOwner(), event -> snapToNearest());
         playerViewModel.getSnapPrevious().observe(getViewLifecycleOwner(), event -> snapToPrevious());
-
-        playerViewModel.getIsPlaying().observe(getViewLifecycleOwner(), isPlaying -> {
-            if (!isPlaying) centerSnap.clearSnapped();
-        });
 
         playerViewModel.getIsPlayingChanged().observe(getViewLifecycleOwner(), this::onPlayingStationChanged);
     }
@@ -315,10 +315,12 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
         LocationUtil.requestLocation(requireActivity(), new LocationUtil.LocationCallback() {
             @Override
             public void onLocationReceived(double latitude, double longitude, String country, String code) {
-                lat = latitude; lon = longitude;
-                mapController.animateTo(new GeoPoint(lat, lon));
-                ensureZoom();
-                loadStationsForVisibleRegion();
+                userPoint = new GeoPoint(latitude, longitude);
+                if(!playing){
+                    mapController.animateTo(userPoint);
+                    ensureZoom();
+                    loadStationsForVisibleRegion();
+                }
             }
             @Override
             public void onError(String error) { Log.e("MapFragment", error); }
@@ -333,13 +335,16 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
 
         GeoPoint mapCenter = (GeoPoint) map.getMapCenter();
         String currentUuid = playerViewModel.getCurrentStation() != null ? playerViewModel.getCurrentStation().getStationUuid() : "";
+        String previousUuid = historyViewModel.getLastHistory() != null ? historyViewModel.getLastHistory().getUuid() : "";
 
         for (MapPoint p : allPoints) {
             if (bbox.contains(p.getLatitude(), p.getLongitude()) && !p.getUuid().equals(currentUuid)) {
-                double dist = mapCenter.distanceToAsDouble(new GeoPoint(p.getLatitude(), p.getLongitude()));
-                if (dist < minSourceDist) {
-                    minSourceDist = dist;
-                    nearest = p;
+                if(!p.getUuid().equals(previousUuid)){
+                    double dist = mapCenter.distanceToAsDouble(new GeoPoint(p.getLatitude(), p.getLongitude()));
+                    if (dist < minSourceDist) {
+                        minSourceDist = dist;
+                        nearest = p;
+                    }
                 }
             }
         }
@@ -360,7 +365,7 @@ public class MapFragment extends Fragment implements MapEventsReceiver {
     }
 
     private void ensureZoom() { if (map.getZoomLevelDouble() < 12) mapController.setZoom(12.0); }
-    private boolean isValidLocation(double lt, double ln) { return lt != 0.0 && ln != 0.0; }
+    private boolean isValidLocation(double lt, double ln) { return lt != 0 && ln != 0; }
     private void scheduleCluster() { clusterHandler.removeCallbacks(clusterRunnable); clusterHandler.postDelayed(clusterRunnable, 275); }
     private void scheduleUpdateVisibleForCenterSnap() { clusterHandler.removeCallbacks(updateVisibleRunnable); clusterHandler.postDelayed(updateVisibleRunnable, 250); centerSnap.scheduleDelayedSnap(); }
 

@@ -242,7 +242,7 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             application.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED);
         } else {
-            application.registerReceiver(receiver, filter);
+            ContextCompat.registerReceiver(application, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED);
         }
 
         Intent requestIntent = new Intent(application, PlayerService.class);
@@ -279,6 +279,12 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
     public void playNext(){
         Log.v("PlayerViewModel","start next");
         playNext.postValue(true);
+    }
+    public void resetPlayNext() {
+        playNext.setValue(false);
+    }
+    public void resetPlayPrevious() {
+        playPrevious.setValue(false);
     }
     public void playPrevious(){
         playPrevious.postValue(true);
