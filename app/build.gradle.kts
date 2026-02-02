@@ -10,6 +10,7 @@ android {
     defaultConfig {
         applicationId = "by.roman.worldradio0"
         minSdk = 28
+        targetSdk = 35
         versionCode = 1
         versionName = "0.0"
 

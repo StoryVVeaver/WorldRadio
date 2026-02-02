@@ -162,7 +162,7 @@ public class RegistrationFragment extends Fragment {
             if (isValid) {
                 errorText.setVisibility(View.GONE);
                 hideError();
-                viewModel.enter(new UserRequest(login, password1));
+                viewModel.reg(new UserRequest(login, password1));
             } else {
                 reg.setEnabled(true);
                 errorText.setText(errorMessage);
