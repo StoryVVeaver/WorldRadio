@@ -1,13 +1,13 @@
 <resources>
     <string name="app_name" translatable="false">RadioManagerMonitoring</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="stations">Top stations</string>
-    <string name="dashboard">Dashboard</string>
-    <string name="countries">Countries</string>
-    <string name="save">Save filters</string>
-    <string name="dashboard_title">Dashboard</string>
-    <string name="total_users">Count users: %d</string>
-    <string name="active_stations">Active stations:  %d</string>
+    <string name="stations">Популярные</string>
+    <string name="dashboard">Статистика</string>
+    <string name="countries">Страны</string>
+    <string name="save">Сохранить фильтры</string>
+    <string name="dashboard_title">Панель Администратора</string>
+    <string name="total_users">Всего пользователей: %d</string>
+    <string name="active_stations">Активных станций: %d</string>
     <string name="default_error_message">Error while loading statistics</string>
 
 </resources>

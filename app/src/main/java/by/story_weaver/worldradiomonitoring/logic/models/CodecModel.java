@@ -2,19 +2,14 @@ package by.story_weaver.worldradiomonitoring.logic.models;
 
 import com.google.gson.annotations.SerializedName;
 
-public class StateModel {
+public class CodecModel {
     @SerializedName("name")
-    private String state;
-    @SerializedName("iso_639")
-    private String country;
+    private String name;
     @SerializedName("stationcount")
     private int stationcount;
 
-    public String getState(){
-        return state;
-    }
-    public String getCountry(){
-        return country;
+    public String getCodec(){
+        return name;
     }
     public int getCount(){
         return stationcount;

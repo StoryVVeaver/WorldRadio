@@ -17,11 +17,11 @@ public interface RadioApi {
     @GET("json/languages")
     Call<List<LangModel>> getLanguages();
 
-    @GET("json/states")
-    Call<List<StateModel>> getStates();
+    @GET("json/stations/broken")
+    Call<List<BrokeModel>> getBroken();
 
-    @GET("json/tags ")
-    Call<List<TagModel>> getTags();
+    @GET("json/codecs")
+    Call<List<CodecModel>> getCodecs();
 
     @GET("json/clicks?seconds=600")
     Call<List<ClickModel>> getClickHistory();

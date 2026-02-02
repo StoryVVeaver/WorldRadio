@@ -103,7 +103,7 @@ public class DashboardFragment extends Fragment {
         viewModel.loadCountUsers();
         viewModel.loadCountryCodes();
         viewModel.loadLanguages();
-        viewModel.loadStates();
+        viewModel.loadBroken();
         viewModel.loadTags();
         viewModel.loadStationFilter();
         viewModel.loadClicks();
@@ -164,7 +164,7 @@ public class DashboardFragment extends Fragment {
                     break;
             }
         });
-        viewModel.getState().observe(getViewLifecycleOwner(), state -> {
+        viewModel.getBroke().observe(getViewLifecycleOwner(), state -> {
             switch (state.status) {
                 case LOADING:
                     pbStates.setVisibility(View.VISIBLE);

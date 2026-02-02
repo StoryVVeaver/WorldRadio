@@ -27,8 +27,8 @@ public class ViewModel extends androidx.lifecycle.ViewModel {
     private final MutableLiveData<UiState<List<Station>>> station = new MutableLiveData<>();
     private final MutableLiveData<UiState<List<CodesModel>>> codes = new MutableLiveData<>();
     private final MutableLiveData<UiState<List<LangModel>>> lang = new MutableLiveData<>();
-    private final MutableLiveData<UiState<List<StateModel>>> state = new MutableLiveData<>();
-    private final MutableLiveData<UiState<List<TagModel>>> tag = new MutableLiveData<>();
+    private final MutableLiveData<UiState<List<BrokeModel>>> broke = new MutableLiveData<>();
+    private final MutableLiveData<UiState<List<CodecModel>>> tag = new MutableLiveData<>();
     private final MutableLiveData<UiState<List<ClickModel>>> click = new MutableLiveData<>();
 
     private final MutableLiveData<UiState<List<FilterStation>>> filter = new MutableLiveData<>();
@@ -53,10 +53,10 @@ public class ViewModel extends androidx.lifecycle.ViewModel {
     public LiveData<UiState<List<LangModel>>> getLang(){
         return lang;
     }
-    public LiveData<UiState<List<StateModel>>> getState(){
-        return state;
+    public LiveData<UiState<List<BrokeModel>>> getBroke(){
+        return broke;
     }
-    public LiveData<UiState<List<TagModel>>> getTag(){
+    public LiveData<UiState<List<CodecModel>>> getTag(){
         return tag;
     }
     public LiveData<UiState<List<ClickModel>>> getClick(){
@@ -128,29 +128,29 @@ public class ViewModel extends androidx.lifecycle.ViewModel {
             }
         });
     }
-    public void loadStates(){
-        state.postValue(UiState.loading());
-        radioApi.getStates().enqueue(new Callback<>() {
+    public void loadBroken(){
+        broke.postValue(UiState.loading());
+        radioApi.getBroken().enqueue(new Callback<>() {
             @Override
-            public void onResponse(@NonNull Call<List<StateModel>> call, @NonNull Response<List<StateModel>> response) {
+            public void onResponse(@NonNull Call<List<BrokeModel>> call, @NonNull Response<List<BrokeModel>> response) {
                 if(response.isSuccessful()){
-                    state.postValue(UiState.success(response.body()));
+                    broke.postValue(UiState.success(response.body()));
                 } else {
-                    state.postValue(UiState.error(response.code() + " "));
+                    broke.postValue(UiState.error(response.code() + " "));
                 }
             }
 
             @Override
-            public void onFailure(@NonNull Call<List<StateModel>> call, @NonNull Throwable t) {
-                state.postValue(UiState.error(t.getMessage()));
+            public void onFailure(@NonNull Call<List<BrokeModel>> call, @NonNull Throwable t) {
+                broke.postValue(UiState.error(t.getMessage()));
             }
         });
     }
     public void loadTags(){
         tag.postValue(UiState.loading());
-        radioApi.getTags().enqueue(new Callback<>() {
+        radioApi.getCodecs().enqueue(new Callback<>() {
             @Override
-            public void onResponse(@NonNull Call<List<TagModel>> call, @NonNull Response<List<TagModel>> response) {
+            public void onResponse(@NonNull Call<List<CodecModel>> call, @NonNull Response<List<CodecModel>> response) {
                 if(response.isSuccessful()){
                     tag.postValue(UiState.success(response.body()));
                 } else {
@@ -159,7 +159,7 @@ public class ViewModel extends androidx.lifecycle.ViewModel {
             }
 
             @Override
-            public void onFailure(@NonNull Call<List<TagModel>> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<List<CodecModel>> call, @NonNull Throwable t) {
                 tag.postValue(UiState.error(t.getMessage()));
             }
         });

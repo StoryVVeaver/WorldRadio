@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="hello_blank_fragment">пусто</string>
-    <string name="stations">Популярные станции</string>
-    <string name="dashboard">Инфо</string>
+    <string name="stations">Популярные</string>
+    <string name="dashboard">Статистика</string>
     <string name="countries">Страны</string>
     <string name="save">Сохранить фильтры</string>
     <string name="dashboard_title">Панель Администратора</string>

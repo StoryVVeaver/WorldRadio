@@ -1,6 +1,8 @@
 package by.story_weaver.worldradiomonitoring.logic.network;
 
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import okhttp3.HttpUrl;
@@ -24,6 +26,7 @@ public class DynamicBaseUrlInterceptor implements Interceptor {
         Request original = chain.request();
 
         String randomUrl = provider.getRandom();
+        Log.v("Interceptor",randomUrl);
         HttpUrl currentBase = HttpUrl.parse(randomUrl);
 
         if (currentBase == null) {

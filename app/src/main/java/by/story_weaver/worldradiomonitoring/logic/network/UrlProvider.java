@@ -29,7 +29,7 @@ public class UrlProvider {
             } catch (Exception e) {
                 synchronized (urls) {
                     urls.clear();
-                    urls.add("https://de1.api.radio-browser.info/");
+                    urls.add("https://fi1.api.radio-browser.info");
                     loaded = true;
                 }
             }
@@ -38,9 +38,9 @@ public class UrlProvider {
 
     public synchronized String getRandom() {
         if (!loaded || urls.isEmpty()) {
-            return "https://de1.api.radio-browser.info/";
+            return "https://de1.api.radio-browser.info";
         }
-        return urls.get(random.nextInt(urls.size()));
+        return "https://de1.api.radio-browser.info";
     }
 
     public synchronized void switchOnError() {
