@@ -172,13 +172,18 @@ public class UserAPI {
 
                         Gson gson = new GsonBuilder().create();
                         try {
-                            Type listType = new TypeToken<List<String>>() {}.getType();
-                            List<String> filters = gson.fromJson(jsonResponse, listType);
-                            if (filters != null) {
-                                callback.onSuccess(filters);
-                            } else {
-                                callback.onFailure(new Exception("Parsed list is null"));
+                            Type listType = new TypeToken<List<StationFilter>>() {}.getType();
+                            List<StationFilter> filters = gson.fromJson(jsonResponse, listType);
+                            List<String> resultCodes = new ArrayList<>();
+                            if (filters != null && !filters.isEmpty()) {
+                                for (StationFilter item : filters) {
+                                    if (item.getCode() != null) {
+                                        resultCodes.add(item.getCode());
+                                    }
+                                }
                             }
+
+                            callback.onSuccess(resultCodes);
 
                         } catch (Exception e) {
                             Log.e("UserAPI: filters", "JSON parsing error", e);

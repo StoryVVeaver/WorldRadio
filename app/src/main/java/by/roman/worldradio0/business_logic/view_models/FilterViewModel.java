@@ -48,6 +48,7 @@ public class FilterViewModel extends ViewModel {
     private int currentOffset = 0;
     private boolean isLastPage = false;
     private final int pageSize = 100;
+    private long lastRequestId = 0;
     private List<RadioStation> allStations = new ArrayList<>();
 
     public boolean getIsLastPage() {
@@ -95,13 +96,14 @@ public class FilterViewModel extends ViewModel {
 
     private void loadData(int offset) {
         if (!isActive.get()) return;
+        final long currentRequestId = ++lastRequestId;
         stations.postValue(UiState.loading());
         Filter filter = filterRepository.getFilters();
 
         dataFromRadio.getStations(new RadioCallback<>() {
             @Override
             public void onSuccess(List<RadioStation> list) {
-                if (!isActive.get()) return;
+                if (!isActive.get() || currentRequestId != lastRequestId) return;
 
                 if (list.isEmpty()) {
                     if (offset == 0) {
@@ -131,7 +133,7 @@ public class FilterViewModel extends ViewModel {
 
             @Override
             public void onFailure(Throwable t) {
-                if (isActive.get()) {
+                if (isActive.get() && currentRequestId == lastRequestId) {
                     stations.postValue(UiState.error("Ошибка сети: " + t.getMessage()));
                 }
             }

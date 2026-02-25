@@ -96,18 +96,38 @@ public class FilterFragment extends Fragment {
         TextInputLayout countryLayout = view.findViewById(R.id.filterCountry).findViewById(R.id.textInputLayout);
         actvCountry = (MaterialAutoCompleteTextView) countryLayout.getEditText();
         countryLayout.setHint(getResources().getString(R.string.country));
+        countryLayout.setEndIconOnClickListener(v -> {
+            actvCountry.setText("");
+            filter.setCountry(null);
+            viewModel.setFilters(filter);
+        });
 
         TextInputLayout tagsLayout = view.findViewById(R.id.filterTags).findViewById(R.id.textInputLayout);
         actvTags = (MaterialAutoCompleteTextView) tagsLayout.getEditText();
         tagsLayout.setHint(getResources().getString(R.string.tag));
+        tagsLayout.setEndIconOnClickListener(v -> {
+            actvTags.setText("");
+            filter.setTag(null);
+            viewModel.setFilters(filter);
+        });
 
         TextInputLayout langLayout = view.findViewById(R.id.filterLanguage).findViewById(R.id.textInputLayout);
         actvLang = (MaterialAutoCompleteTextView) langLayout.getEditText();
         langLayout.setHint(getResources().getString(R.string.lang));
+        langLayout.setEndIconOnClickListener(v -> {
+            actvLang.setText("");
+            filter.setLang(null);
+            viewModel.setFilters(filter);
+        });
 
         TextInputLayout nameLayout = view.findViewById(R.id.filterName).findViewById(R.id.textInputLayout);
         actvName = (MaterialAutoCompleteTextView) nameLayout.getEditText();
         nameLayout.setHint(getResources().getString(R.string.name));
+        nameLayout.setEndIconOnClickListener(v -> {
+            actvName.setText("");
+            filter.setName(null);
+            viewModel.setFilters(filter);
+        });
     }
 
     private void setupClickListeners() {
@@ -148,9 +168,6 @@ public class FilterFragment extends Fragment {
         actvTags.setText("");
         actvLang.setText("");
 
-        chipAlphabet.setChecked(false);
-        chipRating.setChecked(false);
-        chipBitrate.setChecked(false);
         filter.setCodec(null);
         filter.setName(null);
         filter.setTag(null);

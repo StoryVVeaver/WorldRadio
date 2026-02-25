@@ -65,7 +65,13 @@ public class FavoriteViewModel extends ViewModel implements FavoriteStationRepos
 
         List<String> allFavoriteUuids = radioRepository.getFavoriteStations();
 
-        if (allFavoriteUuids == null || currentStationCount >= allFavoriteUuids.size()) {
+        if (allFavoriteUuids == null || allFavoriteUuids.isEmpty()) {
+            allLoadedStation = true;
+            favoriteStations.postValue(UiState.success(new ArrayList<>()));
+            return;
+        }
+
+        if (currentStationCount >= allFavoriteUuids.size()) {
             allLoadedStation = true;
             return;
         }

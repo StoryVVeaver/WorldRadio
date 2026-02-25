@@ -21,8 +21,10 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -43,8 +45,12 @@ import okhttp3.ResponseBody;
 
 @Singleton
 public class radio {
-    private List<String> address = new ArrayList<>();
-    private List<String> fullAddress = new ArrayList<>();
+    private List<String> address = new CopyOnWriteArrayList<>(Arrays.asList(
+            "de1.api.radio-browser.info",
+            "de2.api.radio-browser.info",
+            "fi1.api.radio-browser.info"
+    ));
+    private List<String> fullAddress = new CopyOnWriteArrayList<>(address);
     private final OkHttpClient client;
     private static final int MAX_RETRY_ATTEMPTS = 3;
     private int attempts = 0;
@@ -76,25 +82,33 @@ public class radio {
         final AsyncTask<Void, Void, String[]> xxx = new AsyncTask<Void, Void, String[]>() {
             @Override
             protected String[] doInBackground(Void... params) {
-                Vector<String> listResult = new Vector<>();
+                Set<String> resultSet = new LinkedHashSet<>();
+
                 try {
                     InetAddress[] list = InetAddress.getAllByName("all.api.radio-browser.info");
                     for (InetAddress item : list) {
                         Log.v("radio", item.getCanonicalHostName());
-                        listResult.add(item.getCanonicalHostName());
+                        resultSet.add(item.getCanonicalHostName());
                     }
-                    listResult.add("de2.api.radio-browser.info");
-                    listResult.add("fi1.api.radio-browser.info");
                 } catch (UnknownHostException e) {
-                    e.printStackTrace();
+                    Log.e("radio", "DNS lookup failed, using fallbacks: " + e.getMessage());
                 }
-                return listResult.toArray(new String[0]);
+
+                resultSet.add("de1.api.radio-browser.info");
+                resultSet.add("nl1.api.radio-browser.info");
+                resultSet.add("fi1.api.radio-browser.info");
+
+                return resultSet.toArray(new String[0]);
             }
 
             @Override
             protected void onPostExecute(String[] result) {
-                address = new ArrayList<>(Arrays.asList(result));
-                fullAddress = new ArrayList<>(Arrays.asList(result));
+                if (result != null && result.length > 0) {
+                    fullAddress = new CopyOnWriteArrayList<>(Arrays.asList(result));
+                    if (address.isEmpty()) {
+                        address = new CopyOnWriteArrayList<>(Arrays.asList(result));
+                    }
+                }
             }
         }.execute();
     }
@@ -618,24 +632,26 @@ public class radio {
     @Nullable
     private String getValidHostOrHandleError(RadioCallback<?> callback) {
         if (address == null || address.isEmpty()) {
-            if (fullAddress == null || fullAddress.isEmpty()) {
-                callback.onFailure(new Exception("Не найден активный сервер"));
+            if (fullAddress != null && !fullAddress.isEmpty()) {
+                Log.d("RadioAPI", "Current address list is empty. Restoring from fullAddress...");
+                address = new CopyOnWriteArrayList<>(fullAddress);
+            } else {
+                if (attempts > MAX_RETRY_ATTEMPTS) {
+                    callback.onFailure(new Exception("Проверьте соединение с сетью"));
+                    return null;
+                }
+                updateDnsList();
+                attempts++;
+                callback.onFailure(new Exception("Сервер не найден. Выполняется поиск..."));
                 return null;
             }
-            if(attempts > MAX_RETRY_ATTEMPTS) {
-                callback.onFailure(new Exception("Проверьте соединение с сетью"));
-                return null;
-            }
-            attempts++;
-            Log.d("RadioAPI", "Current address list is empty. Restoring from fullAddress...");
-            address = new CopyOnWriteArrayList<>(fullAddress);
         }
 
         try {
             Random r = new Random();
             return address.get(r.nextInt(address.size()));
         } catch (Exception e) {
-            callback.onFailure(new Exception("Host selection failed"));
+            callback.onFailure(new Exception("Ошибка выбора адреса"));
             return null;
         }
     }

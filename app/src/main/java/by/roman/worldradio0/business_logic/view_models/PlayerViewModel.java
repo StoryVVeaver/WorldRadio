@@ -216,6 +216,7 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
             requestUuidFromService();
         } else {
             Log.v("PlayerViewModel", "нашлось в репе");
+            selectedCard.postValue(currentUUID);
             fetchStationFromApi(currentUUID);
         }
     }
@@ -230,6 +231,7 @@ public class PlayerViewModel extends ViewModel implements FavoriteStationReposit
                 if (stationFromService != null && stationFromService.getStationUuid() != null) {
                     Log.v("PlayerViewModel", "в сервисе нашли " + stationFromService.getStationUuid());
                     fetchStationFromApi(stationFromService.getStationUuid());
+                    selectedCard.postValue(stationFromService.getStationUuid());
                 } else {
                     station.postValue(UiState.error("No active station in service"));
                 }

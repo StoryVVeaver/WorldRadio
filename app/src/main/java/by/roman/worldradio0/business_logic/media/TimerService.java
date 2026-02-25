@@ -41,7 +41,7 @@ public class TimerService extends Service {
     public static final String EXTRA_TIME_FINISH = "EXTRA_TIME_FINISH";
 
     private static final String CHANNEL_ID = "timer_service_channel";
-    private static final int NOTIFICATION_ID = 1;
+    private static final int NOTIFICATION_ID = 2;
 
     private Handler handler;
     private Runnable stopRunnable;
