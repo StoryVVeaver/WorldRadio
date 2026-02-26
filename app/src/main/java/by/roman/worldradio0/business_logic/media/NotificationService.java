@@ -49,6 +49,8 @@ public class NotificationService extends Service {
     private final Context context;
     private static final int NOTIFICATION_ID = 1;
     private static final String CHANNEL_ID = "radio_channel";
+    private Bitmap currentBitmap = null;
+    private String lastUrl = "";
     private final NotificationManager notificationManager;
     private MediaSession mediaSession;
     private RadioStation radioStation;
@@ -101,21 +103,39 @@ public class NotificationService extends Service {
 
     private void rebuild() {
         if (radioStation == null || isStopped) return;
-        loadBitmapAndShow(radioStation.getFavicon());
+
+        if (currentBitmap != null) {
+            notificationManager.notify(NOTIFICATION_ID, buildNotification(currentBitmap));
+        } else {
+            loadBitmapAndShow(radioStation.getFavicon());
+        }
     }
 
     private void loadBitmapAndShow(String url) {
+        if (url == null || url.isEmpty()) {
+            currentBitmap = null;
+            lastUrl = "";
+            notificationManager.notify(NOTIFICATION_ID, buildNotification(null));
+            return;
+        }
 
-        Glide.with(context)
+        if (url.equals(lastUrl) && currentBitmap != null) {
+            notificationManager.notify(NOTIFICATION_ID, buildNotification(currentBitmap));
+            return;
+        }
+
+        lastUrl = url;
+
+        Glide.with(context.getApplicationContext())
                 .asBitmap()
                 .load(url)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .error(R.drawable.no_icon)
                 .into(new CustomTarget<Bitmap>() {
 
                     @Override
                     public void onResourceReady(@NonNull Bitmap bitmap, Transition<? super Bitmap> transition) {
                         if (isStopped || radioStation == null) return;
+                        currentBitmap = bitmap;
                         notificationManager.notify(NOTIFICATION_ID, buildNotification(bitmap));
                     }
 
